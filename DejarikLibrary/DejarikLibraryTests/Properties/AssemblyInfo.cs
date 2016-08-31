@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DejarikLibrary")]
+[assembly: AssemblyTitle("DejarikLibraryTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DejarikLibrary")]
+[assembly: AssemblyProduct("DejarikLibraryTests")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6c174547-c658-4617-bd92-2f8299e9e08e")]
+[assembly: Guid("82b2f64b-ec82-4324-a0c5-574e2e033614")]
 
 // Version information for an assembly consists of the following four values:
 //
