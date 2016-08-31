@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using Random = System.Random;
+﻿using Random = System.Random;
 
 namespace Assets.Scripts
 {
@@ -11,20 +10,8 @@ namespace Assets.Scripts
 		CounterPush
 	}
 
-	public class AttackCalculator : MonoBehaviour
+	public class AttackCalculator
 	{
-
-		// Use this for initialization
-		void Start()
-		{
-
-		}
-
-		// Update is called once per frame
-		void Update()
-		{
-
-		}
 
 		private readonly Random _random;
 

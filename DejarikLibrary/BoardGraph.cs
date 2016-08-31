@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace DejarikLibrary
 {
@@ -82,6 +81,8 @@ namespace DejarikLibrary
 	        return nodeMap;
 	    }
 
+
+        // Well, it certainly ain't pretty, but it's past my bed time - ianb 20160831
         private Dictionary<Tuple<int,int>,List<NodePath>> BuildMapForNode(List<SpaceNode> nodes, SpaceNode sourceNode)
 	    {
             List<SpaceNode> unvisitedNodes = new List<SpaceNode>();
@@ -99,17 +100,52 @@ namespace DejarikLibrary
 
             while (unvisitedNodes.Any())
             {
-                SpaceNode currentNode = sourceNode;
+                unvisitedNodes.Sort((x, y) => shortestDistanceToNode[x] - shortestDistanceToNode[y]);
+                SpaceNode currentNode = unvisitedNodes[0];
                 unvisitedNodes.Remove(currentNode);
 
-                foreach (SpaceNode adjacentNode in currentNode.AdjacentNodes)
+                foreach(SpaceNode adjacentNode in currentNode.AdjacentNodes)
                 {
-                    shortestDistanceToNode(currentNode);
+                    int currentPathDistance = shortestDistanceToNode[currentNode] + 1;
+                    if (currentPathDistance < shortestDistanceToNode[adjacentNode])
+                    {
+                        shortestDistanceToNode[adjacentNode] = currentPathDistance;
+                        previousNodeAlongShortestPath[adjacentNode] = currentNode;
+                    }
+                }
+            }
+
+
+            Dictionary<Tuple<int, int>, List<NodePath>> shortestPathMap = new Dictionary<Tuple<int, int>, List<NodePath>>();
+
+            foreach (SpaceNode node in nodes)
+            {
+                int distance = 0;
+                NodePath shortestPath = new NodePath();
+                shortestPath.DestinationNode = node;
+                SpaceNode currentPathNode = node;
+                while (previousNodeAlongShortestPath[currentPathNode] != null)
+                {
+                    distance++;
+                    shortestPath.PathToDestination.Insert(0, currentPathNode);
+                    currentPathNode = previousNodeAlongShortestPath[currentPathNode];
                 }
 
+                Tuple<int, int> currentTupleKey = new Tuple<int, int>(sourceNode.Id, distance);
+
+                if (!shortestPathMap.ContainsKey(currentTupleKey))
+                {
+                    shortestPathMap.Add(currentTupleKey, new List<NodePath>());
+                }
+
+                shortestPathMap[currentTupleKey].Add(shortestPath);
+
             }
-	    }
-}
+
+            return shortestPathMap;
+        }
+
+    }
 
 }
  
