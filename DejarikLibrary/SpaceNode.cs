@@ -7,7 +7,8 @@ namespace DejarikLibrary
     {
         public int Id { get; set; }
         public List<SpaceNode> AdjacentNodes { get; set; }
-//        public Transform Position { get; set; }
+        public double xPosition { get; set; }
+        public double yPosition { get; set; }
 
         public SpaceNode(int id)
         {
