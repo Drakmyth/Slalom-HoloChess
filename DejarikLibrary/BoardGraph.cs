@@ -83,28 +83,14 @@ namespace DejarikLibrary
 
         private void AddNodeCoordinates(SpaceNode node, int innerBoundingRadius, int outerBoundingRadius)
         {
-            //0,1,2,2,1,0,0,1....
-            int triangleFunctionResult = GetTriangleWaveValue(node.Id);
+            //75,45,15,-15....
+            double angle = Math.PI / 12 * (7 - 2 * (node.Id % 12));
 
-            //75,45,15,15,45,75....
-            double angle = GetRadianAngleFromOrigin(node.Id, triangleFunctionResult);
-
-            double x = Math.Cos(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2);
-            double y = Math.Sin(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2);
+            double x = Math.Cos(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
+            double y = Math.Sin(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
 
             node.xPosition = x;
             node.yPosition = y;
-        }
-
-        private int GetTriangleWaveValue(int index)
-        {
-            return (int)(2.5 - Math.Abs(((index - 0.5) % 6) - 3));
-        }
-
-        private double GetRadianAngleFromOrigin(int nodeId, int triangleFunctionResult)
-        {
-            double degrees = Math.Pow(-1,((nodeId-1) / 3)) * 15 * (5 - 2 * triangleFunctionResult);
-            return Math.PI / 180 * degrees;
         }
 
         private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<SpaceNode> nodes)
