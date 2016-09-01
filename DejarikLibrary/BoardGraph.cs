@@ -11,7 +11,7 @@ namespace DejarikLibrary
         public const int INNER_RING_BOUNDING_RADIUS = 6;
         public const int OUTER_RING_BOUNDING_RADIUS = 9;
 
-	    public List<SpaceNode> Nodes { get; set; }
+	    public List<Node> Nodes { get; set; }
 	    public Dictionary<Tuple<int, int>, List<NodePath>> NodeMap { get; set; }  
 
 	    public BoardGraph()
@@ -24,13 +24,13 @@ namespace DejarikLibrary
 
         }
 
-	    private List<SpaceNode> GenerateNodes()
+	    private List<Node> GenerateNodes()
 	    {
-            List<SpaceNode> nodes = new List<SpaceNode>();
+            List<Node> nodes = new List<Node>();
 
             for (int i = 0; i < 25; i++)
             {
-                nodes.Insert(i, new SpaceNode(i));
+                nodes.Insert(i, new Node(i));
                 //assign x and y coordinate for each node
             }
 
@@ -38,7 +38,7 @@ namespace DejarikLibrary
 
 	    }
 
-	    private void BuildGraph(List<SpaceNode> nodes)
+	    private void BuildGraph(List<Node> nodes)
 	    {
 
             nodes[0].xPosition = 0;
@@ -81,7 +81,7 @@ namespace DejarikLibrary
 
         }
 
-        private void AddNodeCoordinates(SpaceNode node, int innerBoundingRadius, int outerBoundingRadius)
+        private void AddNodeCoordinates(Node node, int innerBoundingRadius, int outerBoundingRadius)
         {
             //75,45,15,-15....
             double angle = Math.PI / 12 * (7 - 2 * (node.Id % 12));
@@ -93,11 +93,11 @@ namespace DejarikLibrary
             node.yPosition = y;
         }
 
-        private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<SpaceNode> nodes)
+        private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<Node> nodes)
 	    {
             Dictionary<Tuple<int, int>, List<NodePath>> nodeMap = new Dictionary<Tuple<int, int>, List<NodePath>>(); 
 
-            foreach (SpaceNode node in nodes)
+            foreach (Node node in nodes)
 	        {
 	            nodeMap = nodeMap.Concat(BuildMapForNode(nodes, node)).ToDictionary(x => x.Key, x => x.Value);
 	        }
@@ -107,13 +107,13 @@ namespace DejarikLibrary
 
 
         // Well, it certainly ain't pretty, but it's past my bed time - ianb 20160831
-        private Dictionary<Tuple<int,int>,List<NodePath>> BuildMapForNode(List<SpaceNode> nodes, SpaceNode sourceNode)
+        private Dictionary<Tuple<int,int>,List<NodePath>> BuildMapForNode(List<Node> nodes, Node sourceNode)
 	    {
-            List<SpaceNode> unvisitedNodes = new List<SpaceNode>();
-            Dictionary<SpaceNode, int> shortestDistanceToNode = new Dictionary<SpaceNode, int>();
-            Dictionary<SpaceNode, SpaceNode> previousNodeAlongShortestPath = new Dictionary<SpaceNode, SpaceNode>();
+            List<Node> unvisitedNodes = new List<Node>();
+            Dictionary<Node, int> shortestDistanceToNode = new Dictionary<Node, int>();
+            Dictionary<Node, Node> previousNodeAlongShortestPath = new Dictionary<Node, Node>();
 
-            foreach (SpaceNode node in nodes)
+            foreach (Node node in nodes)
             {
                 shortestDistanceToNode.Add(node, int.MaxValue);
                 previousNodeAlongShortestPath.Add(node, null);
@@ -125,10 +125,10 @@ namespace DejarikLibrary
             while (unvisitedNodes.Any())
             {
                 unvisitedNodes.Sort((x, y) => shortestDistanceToNode[x] - shortestDistanceToNode[y]);
-                SpaceNode currentNode = unvisitedNodes[0];
+                Node currentNode = unvisitedNodes[0];
                 unvisitedNodes.Remove(currentNode);
 
-                foreach(SpaceNode adjacentNode in currentNode.AdjacentNodes)
+                foreach(Node adjacentNode in currentNode.AdjacentNodes)
                 {
                     int currentPathDistance = shortestDistanceToNode[currentNode] + 1;
                     if (currentPathDistance < shortestDistanceToNode[adjacentNode])
@@ -142,12 +142,12 @@ namespace DejarikLibrary
 
             Dictionary<Tuple<int, int>, List<NodePath>> shortestPathMap = new Dictionary<Tuple<int, int>, List<NodePath>>();
 
-            foreach (SpaceNode node in nodes)
+            foreach (Node node in nodes)
             {
                 int distance = 0;
                 NodePath shortestPath = new NodePath();
                 shortestPath.DestinationNode = node;
-                SpaceNode currentPathNode = node;
+                Node currentPathNode = node;
                 while (previousNodeAlongShortestPath[currentPathNode] != null)
                 {
                     distance++;
