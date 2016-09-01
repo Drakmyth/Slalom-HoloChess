@@ -7,6 +7,10 @@ namespace DejarikLibrary
 	public class BoardGraph
 	{
 
+        public const int CENTER_SPACE_BOUNDING_RADIUS = 2;
+        public const int INNER_RING_BOUNDING_RADIUS = 6;
+        public const int OUTER_RING_BOUNDING_RADIUS = 9;
+
 	    public List<SpaceNode> Nodes { get; set; }
 	    public Dictionary<Tuple<int, int>, List<NodePath>> NodeMap { get; set; }  
 
@@ -36,6 +40,10 @@ namespace DejarikLibrary
 
 	    private void BuildGraph(List<SpaceNode> nodes)
 	    {
+
+            nodes[0].xPosition = 0;
+            nodes[0].yPosition = 0;
+           
             //inner spaces
             for (int i = 1; i < 13; i++)
             {
@@ -43,6 +51,8 @@ namespace DejarikLibrary
                 int ccwNode = (i + 10) % 12 + 1;
                 int cwNode = i % 12 + 1;
                 int outerNode = i + 12;
+
+                AddNodeCoordinates(nodes[i], CENTER_SPACE_BOUNDING_RADIUS, INNER_RING_BOUNDING_RADIUS);
 
                 //add inner circle to center node
                 nodes[0].AdjacentNodes.Add(nodes[i]);
@@ -61,6 +71,8 @@ namespace DejarikLibrary
                 int ccwNode = (i + 10) % 12 + 13;
                 int cwNode = i % 12 + 13;
 
+                AddNodeCoordinates(nodes[i], CENTER_SPACE_BOUNDING_RADIUS, INNER_RING_BOUNDING_RADIUS);
+
                 nodes[i].AdjacentNodes.Add(nodes[innerNode]);
                 nodes[i].AdjacentNodes.Add(nodes[ccwNode]);
                 nodes[i].AdjacentNodes.Add(nodes[cwNode]);
@@ -69,7 +81,33 @@ namespace DejarikLibrary
 
         }
 
-	    private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<SpaceNode> nodes)
+        private void AddNodeCoordinates(SpaceNode node, int innerBoundingRadius, int outerBoundingRadius)
+        {
+            //0,1,2,2,1,0,0,1....
+            int triangleFunctionResult = GetTriangleWaveValue(node.Id);
+
+            //75,45,15,15,45,75....
+            double angle = GetRadianAngleFromOrigin(node.Id, triangleFunctionResult);
+
+            double x = Math.Cos(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2);
+            double y = Math.Sin(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2);
+
+            node.xPosition = x;
+            node.yPosition = y;
+        }
+
+        private int GetTriangleWaveValue(int index)
+        {
+            return (int)(2.5 - Math.Abs(((index - 0.5) % 6) - 3));
+        }
+
+        private double GetRadianAngleFromOrigin(int nodeId, int triangleFunctionResult)
+        {
+            double degrees = Math.Pow(-1,((nodeId-1) / 3)) * 15 * (5 - 2 * triangleFunctionResult);
+            return Math.PI / 180 * degrees;
+        }
+
+        private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<SpaceNode> nodes)
 	    {
             Dictionary<Tuple<int, int>, List<NodePath>> nodeMap = new Dictionary<Tuple<int, int>, List<NodePath>>(); 
 
