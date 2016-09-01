@@ -4,21 +4,21 @@ namespace DejarikLibrary
 {
     public class NodePath
     {
-        public SpaceNode DestinationNode { get; set; }
-        public List<SpaceNode> PathToDestination { get; set; }
+        public Node DestinationNode { get; set; }
+        public List<Node> PathToDestination { get; set; }
 
         public NodePath()
         {
-            PathToDestination = new List<SpaceNode>();
+            PathToDestination = new List<Node>();
         }
 
-        public NodePath(SpaceNode destinationNode)
+        public NodePath(Node destinationNode)
         {
             DestinationNode = destinationNode;
-            PathToDestination = new List<SpaceNode> { destinationNode};
+            PathToDestination = new List<Node> { destinationNode};
         }
 
-        public NodePath(List<SpaceNode> nodePath, SpaceNode destinationNode)
+        public NodePath(List<Node> nodePath, Node destinationNode)
         {
             DestinationNode = destinationNode;
             PathToDestination = nodePath;
