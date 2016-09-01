@@ -7,8 +7,8 @@ namespace DejarikLibrary
     {
         public int Id { get; set; }
         public List<Node> AdjacentNodes { get; set; }
-        public double xPosition { get; set; }
-        public double yPosition { get; set; }
+        public double XPosition { get; set; }
+        public double YPosition { get; set; }
 
         public Node(int id)
         {
