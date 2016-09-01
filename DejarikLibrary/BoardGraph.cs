@@ -7,9 +7,9 @@ namespace DejarikLibrary
 	public class BoardGraph
 	{
 
-        public const int CENTER_SPACE_BOUNDING_RADIUS = 2;
-        public const int INNER_RING_BOUNDING_RADIUS = 6;
-        public const int OUTER_RING_BOUNDING_RADIUS = 9;
+        public const int CenterSpaceBoundingRadius = 2;
+        public const int InnerRingBoundingRadius = 6;
+        public const int OuterRingBoundingRadius = 9;
 
 	    public List<Node> Nodes { get; set; }
 	    public Dictionary<Tuple<int, int>, List<NodePath>> NodeMap { get; set; }  
@@ -41,8 +41,8 @@ namespace DejarikLibrary
 	    private void BuildGraph(List<Node> nodes)
 	    {
 
-            nodes[0].xPosition = 0;
-            nodes[0].yPosition = 0;
+            nodes[0].XPosition = 0;
+            nodes[0].YPosition = 0;
            
             //inner spaces
             for (int i = 1; i < 13; i++)
@@ -52,7 +52,7 @@ namespace DejarikLibrary
                 int cwNode = i % 12 + 1;
                 int outerNode = i + 12;
 
-                AddNodeCoordinates(nodes[i], CENTER_SPACE_BOUNDING_RADIUS, INNER_RING_BOUNDING_RADIUS);
+                AddNodeCoordinates(nodes[i], CenterSpaceBoundingRadius, InnerRingBoundingRadius);
 
                 //add inner circle to center node
                 nodes[0].AdjacentNodes.Add(nodes[i]);
@@ -71,7 +71,7 @@ namespace DejarikLibrary
                 int ccwNode = (i + 10) % 12 + 13;
                 int cwNode = i % 12 + 13;
 
-                AddNodeCoordinates(nodes[i], CENTER_SPACE_BOUNDING_RADIUS, INNER_RING_BOUNDING_RADIUS);
+                AddNodeCoordinates(nodes[i], CenterSpaceBoundingRadius, InnerRingBoundingRadius);
 
                 nodes[i].AdjacentNodes.Add(nodes[innerNode]);
                 nodes[i].AdjacentNodes.Add(nodes[ccwNode]);
@@ -89,8 +89,8 @@ namespace DejarikLibrary
             double x = Math.Cos(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
             double y = Math.Sin(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
 
-            node.xPosition = x;
-            node.yPosition = y;
+            node.XPosition = x;
+            node.YPosition = y;
         }
 
         private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<Node> nodes)
