@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{13597B34-947A-6FD9-CB73-F8131BE43699}") = "Dejarik", "Assembly-CSharp.csproj", "{EAAB867B-CC46-113D-8F92-1E51F3E1034A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EAAB867B-CC46-113D-8F92-1E51F3E1034A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAAB867B-CC46-113D-8F92-1E51F3E1034A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAAB867B-CC46-113D-8F92-1E51F3E1034A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAAB867B-CC46-113D-8F92-1E51F3E1034A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
