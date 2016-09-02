@@ -42,6 +42,15 @@
   <ItemGroup>
     <Compile Include="AttackCalculator.cs" />
     <Compile Include="BoardGraph.cs" />
+    <Compile Include="Monsters\IMonster.cs" />
+    <Compile Include="Monsters\Ghhhk.cs" />
+    <Compile Include="Monsters\Houjix.cs" />
+    <Compile Include="Monsters\Monnok.cs" />
+    <Compile Include="Monsters\Klorslug.cs" />
+    <Compile Include="Monsters\Molator.cs" />
+    <Compile Include="Monsters\Ngok.cs" />
+    <Compile Include="Monsters\Strider.cs" />
+    <Compile Include="Monsters\Savrip.cs" />
     <Compile Include="NodePath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Node.cs" />
