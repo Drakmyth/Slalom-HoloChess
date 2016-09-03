@@ -552,3 +552,6 @@ paket-files/
 .idea/
 *.sln.iml
 
+Assets/Libraries/DejarikLibrary.dll
+Assembly-CSharp.csproj
+Assets/Libraries/DejarikLibrary.dll.meta
