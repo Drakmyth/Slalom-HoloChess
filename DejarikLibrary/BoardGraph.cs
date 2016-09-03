@@ -7,9 +7,9 @@ namespace DejarikLibrary
 	public class BoardGraph
 	{
 
-        public const int CenterSpaceBoundingRadius = 2;
-        public const int InnerRingBoundingRadius = 6;
-        public const int OuterRingBoundingRadius = 9;
+        public const double CenterSpaceBoundingRadius = .1;
+        public const double InnerRingBoundingRadius = .3;
+        public const double OuterRingBoundingRadius = .45;
 
 	    public List<Node> Nodes { get; set; }
 	    public Dictionary<Tuple<int, int>, List<NodePath>> NodeMap { get; set; }  
@@ -71,7 +71,7 @@ namespace DejarikLibrary
                 int ccwNode = (i + 10) % 12 + 13;
                 int cwNode = i % 12 + 13;
 
-                AddNodeCoordinates(nodes[i], CenterSpaceBoundingRadius, InnerRingBoundingRadius);
+                AddNodeCoordinates(nodes[i], InnerRingBoundingRadius, OuterRingBoundingRadius);
 
                 nodes[i].AdjacentNodes.Add(nodes[innerNode]);
                 nodes[i].AdjacentNodes.Add(nodes[ccwNode]);
@@ -81,7 +81,7 @@ namespace DejarikLibrary
 
         }
 
-        private void AddNodeCoordinates(Node node, int innerBoundingRadius, int outerBoundingRadius)
+        private void AddNodeCoordinates(Node node, double innerBoundingRadius, double outerBoundingRadius)
         {
             //75,45,15,-15....
             double angle = Math.PI / 12 * (7 - 2 * (node.Id % 12));
