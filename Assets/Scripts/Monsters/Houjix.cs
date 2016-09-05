@@ -1,15 +1,25 @@
 ﻿using DejarikLibrary;
-using UnityEngine;
 
 namespace Assets.Scripts.Monsters
 {
-    public class Houjix : MonoBehaviour, IMonster
+    public class Houjix : Monster
     {
-        public int AttackRating => 4;
-        public int DefenseRating => 4;
-        public int MovementRating => 1;
+        public override int AttackRating
+        {
+            get { return 4; }
+        }
 
-        public Node CurrentNode { get; set; }
+        public override int DefenseRating
+        {
+            get { return 4; }
+        }
+
+        public override int MovementRating
+        {
+            get { return 1; }
+        }
+
+        public override Node CurrentNode { get; set; }
 
     }
 }
