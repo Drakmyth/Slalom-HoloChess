@@ -1,12 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{A68CF7E8-8098-9061-EF5B-398827369C0A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -46,31 +45,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\GameState.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Ghhhk.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Houjix.cs" />
-    <Compile Include="Assets\Scripts\Monsters\IMonster.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Klorslug.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Molator.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Monnok.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Ngok.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Savrip.cs" />
-    <Compile Include="Assets\Scripts\Monsters\Strider.cs" />
-    <Reference Include="UnityEngine.UI">
-      <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.HoloLens">
-      <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityHoloLens/Runtime/UnityEngine.HoloLens.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VR">
-      <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityVR/Runtime/UnityEngine.VR.dll</HintPath>
-    </Reference>
-    <Reference Include="DejarikLibrary">
-      <HintPath>C:/Projects/Dejarik/Slalom-HoloChess/Assets/Libraries/DejarikLibrary.dll</HintPath>
-    </Reference>
+     <Compile Include="Assets\Scripts\GameState.cs" />
+     <Compile Include="Assets\Scripts\MonsterTypes.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Ghhhk.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Houjix.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Klorslug.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Molator.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Monnok.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Monster.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Ngok.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Savrip.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Strider.cs" />
+ <Reference Include="UnityEngine.UI">
+ <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine.Networking">
+ <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine.HoloLens">
+ <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityHoloLens/Runtime/UnityEngine.HoloLens.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine.VR">
+ <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityVR/Runtime/UnityEngine.VR.dll</HintPath>
+ </Reference>
+ <Reference Include="DejarikLibrary">
+ <HintPath>C:/Projects/Dejarik/Slalom-HoloChess/Assets/Libraries/DejarikLibrary.dll</HintPath>
+ </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -80,4 +80,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  
 </Project>

@@ -1,6 +1,4 @@
-﻿using DejarikLibrary;
-
-namespace Assets.Scripts.Monsters
+﻿namespace Assets.Scripts.Monsters
 {
     public class Ghhhk : Monster
     {
@@ -18,8 +16,5 @@ namespace Assets.Scripts.Monsters
         {
             get { return 2; }
         }
-
-        public override Node CurrentNode { get; set; }
-
     }
 }
