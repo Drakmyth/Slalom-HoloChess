@@ -1,15 +1,25 @@
 ﻿using DejarikLibrary;
-using UnityEngine;
 
 namespace Assets.Scripts.Monsters
 {
-    public class Molator : MonoBehaviour, IMonster
+    public class Molator : Monster
     {
-        public int AttackRating => 8;
-        public int DefenseRating => 2;
-        public int MovementRating => 2;
+        public override int AttackRating
+        {
+            get { return 8; }
+        }
 
-        public Node CurrentNode { get; set; }
+        public override int DefenseRating
+        {
+            get { return 2; }
+        }
+
+        public override int MovementRating
+        {
+            get { return 2; }
+        }
+
+        public override Node CurrentNode { get; set; }
 
     }
 }

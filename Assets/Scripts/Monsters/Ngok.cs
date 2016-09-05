@@ -1,15 +1,25 @@
 ﻿using DejarikLibrary;
-using UnityEngine;
 
 namespace Assets.Scripts.Monsters
 {
-    public class Ngok : MonoBehaviour, IMonster
+    public class Ngok : Monster
     {
-        public int AttackRating => 3;
-        public int DefenseRating => 8;
-        public int MovementRating => 1;
+        public override int AttackRating
+        {
+            get { return 3; }
+        }
 
-        public Node CurrentNode { get; set; }
+        public override int DefenseRating
+        {
+            get { return 8; }
+        }
+
+        public override int MovementRating
+        {
+            get { return 1; }
+        }
+
+        public override Node CurrentNode { get; set; }
 
     }
 }

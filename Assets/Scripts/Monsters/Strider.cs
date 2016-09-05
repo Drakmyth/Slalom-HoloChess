@@ -1,15 +1,25 @@
 ﻿using DejarikLibrary;
-using UnityEngine;
 
 namespace Assets.Scripts.Monsters
 {
-    public class Strider : MonoBehaviour, IMonster
+    public class Strider : Monster
     {
-        public int AttackRating => 2;
-        public int DefenseRating => 7;
-        public int MovementRating => 3;
+        public override int AttackRating
+        {
+            get { return 2; }
+        }
 
-        public Node CurrentNode { get; set; }
+        public override int DefenseRating
+        {
+            get { return 7; }
+        }
+
+        public override int MovementRating
+        {
+            get { return 3; }
+        }
+
+        public override Node CurrentNode { get; set; }
 
     }
 }
