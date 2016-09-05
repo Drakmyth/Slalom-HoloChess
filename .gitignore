@@ -555,3 +555,5 @@ paket-files/
 Assets/Libraries/DejarikLibrary.dll
 Assembly-CSharp.csproj
 Assets/Libraries/DejarikLibrary.dll.meta
+UnityBuilds/*
+
