@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 using DejarikLibrary;
@@ -23,10 +24,17 @@ namespace Assets.Scripts
         public Monnok Monnok { get; set; }
 
         private readonly Random _random;
+        //0 is opponent turn, 1, 2 are current player actions
+        private int _actionNumber;
+        //TODO:not sure if or how this will be used yet
+        private bool _isHostPlayer = true;
 
         public GameState()
         {
             _random = new Random();
+
+            //TODO:needs to be set by whatever function determines who starts
+            _actionNumber = 0;
 
             GameGraph = new BoardGraph();
             InitializeMonsters();
@@ -48,13 +56,91 @@ namespace Assets.Scripts
 
         void Start()
         {
-            AssignMonstersToPlayers();
-            PlaceMonsters();
+            if (_isHostPlayer)
+            {
+                AssignMonstersToPlayers();
+                PlaceMonsters();
+            }
         }
 
         void Update()
         {
-            
+            if (_actionNumber < 1)
+            {
+                return;
+            }
+
+            //TODO:Get user input to select from available monsters
+            IMonster selectedMonster = Ghhhk;
+
+            //TODO:Get available nodes from Library for move or attack, possibly returning an action type as well?
+            Node actionNode = GameGraph.Nodes[0];
+
+            //TODO:Get user input to select from available actions
+
+            IMonster opponent = GetEnemyAtNode(actionNode);
+
+            if (opponent != null)
+            {
+                //TODO:Should this be a static class? Otherwise, this should really be initialized outside of the turn loop
+                //TODO:Battle animation!
+                AttackCalculator attackCalculator = new AttackCalculator();
+                var attackResult = attackCalculator.Calculate(selectedMonster.AttackRating, opponent.DefenseRating);
+
+                switch (attackResult)
+                {
+                    case AttackResult.Kill:
+                        //TODO:Kill animation!
+                        Player2Monsters.Remove(opponent);
+                        break;
+                    case AttackResult.CounterKill:
+                        //TODO:Kill animation!
+                        Player1Monsters.Remove(selectedMonster);
+                        break;
+                    case AttackResult.Push:
+                        //TODO:calculate availables spaces with movement 1 from opponent.CurrentNode
+                        //TODO:Get user input to select which node
+                        //TODO:Movement animation!
+                        Node pushTo = GameGraph.Nodes[opponent.CurrentNode.Id + 1];
+                        opponent.CurrentNode = pushTo;
+                        break;
+                    case AttackResult.CounterPush:
+                        //TODO:calculate availables spaces with movement 1 from actionNode/selectedMonster.CurrentNode
+                        //TODO:Get user input to select which node
+                        //TODO:Movement animation!
+                        Node counterPushTo = GameGraph.Nodes[actionNode.Id + 1];
+                        opponent.CurrentNode = counterPushTo;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            else
+            {
+                //TODO:Get animation path from GameGraph.NodeMap and move peice from space to space
+                //TODO:Movement animation!
+                selectedMonster.CurrentNode = actionNode;
+            }
+
+            if (_actionNumber >= 2)
+            {
+                _actionNumber = 0;
+                //TODO:launch other player's action pair
+            }
+            else
+            {
+                _actionNumber++;
+            }
+
+            //TODO:check for end of game
+
+        }
+
+        private IMonster GetEnemyAtNode(Node node)
+        {
+            List<IMonster> enemyMonsters = _isHostPlayer ? Player2Monsters : Player1Monsters;
+
+            return enemyMonsters.FirstOrDefault(monster => monster.CurrentNode == node);
         }
 
         private void PlaceMonsters()
