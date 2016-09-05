@@ -12,7 +12,7 @@ namespace DejarikLibrary
         public const double OuterRingBoundingRadius = .45;
 
 	    public List<Node> Nodes { get; set; }
-	    public Dictionary<Tuple<int, int>, List<NodePath>> NodeMap { get; set; }  
+	    public Dictionary<NodeMapKey, List<NodePath>> NodeMap { get; set; }  
 
 	    public BoardGraph()
 	    {
@@ -93,9 +93,9 @@ namespace DejarikLibrary
             node.YPosition = y;
         }
 
-        private Dictionary<Tuple<int, int>, List<NodePath>> BuildNodeMap(List<Node> nodes)
+        private Dictionary<NodeMapKey, List<NodePath>> BuildNodeMap(List<Node> nodes)
 	    {
-            Dictionary<Tuple<int, int>, List<NodePath>> nodeMap = new Dictionary<Tuple<int, int>, List<NodePath>>(); 
+            Dictionary<NodeMapKey, List<NodePath>> nodeMap = new Dictionary<NodeMapKey, List<NodePath>>(); 
 
             foreach (Node node in nodes)
 	        {
@@ -107,7 +107,7 @@ namespace DejarikLibrary
 
 
         // Well, it certainly ain't pretty, but it's past my bed time - ianb 20160831
-        private Dictionary<Tuple<int,int>,List<NodePath>> BuildMapForNode(List<Node> nodes, Node sourceNode)
+        private Dictionary<NodeMapKey,List<NodePath>> BuildMapForNode(List<Node> nodes, Node sourceNode)
 	    {
             List<Node> unvisitedNodes = new List<Node>();
             Dictionary<Node, int> shortestDistanceToNode = new Dictionary<Node, int>();
@@ -140,7 +140,7 @@ namespace DejarikLibrary
             }
 
 
-            Dictionary<Tuple<int, int>, List<NodePath>> shortestPathMap = new Dictionary<Tuple<int, int>, List<NodePath>>();
+            Dictionary<NodeMapKey, List<NodePath>> shortestPathMap = new Dictionary<NodeMapKey, List<NodePath>>();
 
             foreach (Node node in nodes)
             {
@@ -155,7 +155,7 @@ namespace DejarikLibrary
                     currentPathNode = previousNodeAlongShortestPath[currentPathNode];
                 }
 
-                Tuple<int, int> currentTupleKey = new Tuple<int, int>(sourceNode.Id, distance);
+                NodeMapKey currentTupleKey = new NodeMapKey(sourceNode.Id, distance);
 
                 if (!shortestPathMap.ContainsKey(currentTupleKey))
                 {
