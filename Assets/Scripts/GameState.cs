@@ -12,22 +12,18 @@ namespace Assets.Scripts
     public class GameState: MonoBehaviour
     {
         public BoardGraph GameGraph { get; set; }
-        public List<IMonster> Player1Monsters { get; set; }
-        public List<IMonster> Player2Monsters { get; set; } 
-        public Ghhhk Ghhhk { get; set; }
-        public Houjix Houjix { get; set; }
-        public Strider Strider { get; set; }
-        public Molator Molator { get; set; }
-        public Savrip Savrip { get; set; }
-        public Klorslug Klorslug { get; set; }
-        public Ngok Ngok { get; set; }
-        public Monnok Monnok { get; set; }
+        public List<Monster> Player1Monsters { get; set; }
+        public List<Monster> Player2Monsters { get; set; } 
+
 
         private readonly Random _random;
         //0 is opponent turn, 1, 2 are current player actions
         private int _actionNumber;
         //TODO:not sure if or how this will be used yet
         private bool _isHostPlayer = true;
+
+        public List<Monster> MonsterPrefabs;
+
 
         public GameState()
         {
@@ -37,30 +33,18 @@ namespace Assets.Scripts
             _actionNumber = 0;
 
             GameGraph = new BoardGraph();
-            InitializeMonsters();
-            Player1Monsters = new List<IMonster>();
-            Player2Monsters = new List<IMonster>();
+            Player1Monsters = new List<Monster>();
+            Player2Monsters = new List<Monster>();
         }
 
-        private void InitializeMonsters()
-        {
-            Ghhhk = new Ghhhk();
-            Houjix = new Houjix();
-            Strider = new Strider();
-            Molator = new Molator();
-            Savrip = new Savrip();
-            Klorslug = new Klorslug();
-            Ngok = new Ngok();
-            Monnok = new Monnok();
-        }
 
         void Start()
         {
             if (_isHostPlayer)
             {
                 AssignMonstersToPlayers();
-                PlaceMonsters();
             }
+
         }
 
         void Update()
@@ -71,14 +55,14 @@ namespace Assets.Scripts
             }
 
             //TODO:Get user input to select from available monsters
-            IMonster selectedMonster = Ghhhk;
+            Monster selectedMonster = MonsterPrefabs[MonsterTypes.Ghhhk];
 
             //TODO:Get available nodes from Library for move or attack, possibly returning an action type as well?
             Node actionNode = GameGraph.Nodes[0];
 
             //TODO:Get user input to select from available actions
 
-            IMonster opponent = GetEnemyAtNode(actionNode);
+            Monster opponent = GetEnemyAtNode(actionNode);
 
             if (opponent != null)
             {
@@ -136,14 +120,14 @@ namespace Assets.Scripts
 
         }
 
-        private IMonster GetEnemyAtNode(Node node)
+        private Monster GetEnemyAtNode(Node node)
         {
-            List<IMonster> enemyMonsters = _isHostPlayer ? Player2Monsters : Player1Monsters;
+            List<Monster> enemyMonsters = _isHostPlayer ? Player2Monsters : Player1Monsters;
 
             return enemyMonsters.FirstOrDefault(monster => monster.CurrentNode == node);
         }
 
-        private void PlaceMonsters()
+        private void AssignMonstersToPlayers()
         {
             List<Node> player1StartingNodes = new List<Node>
             {
@@ -161,58 +145,37 @@ namespace Assets.Scripts
                 GameGraph.Nodes[20]
             };
 
-            AssignMonstersToNodes(Player1Monsters, player1StartingNodes);
-            AssignMonstersToNodes(Player2Monsters, player2StartingNodes);
-        }
-
-        private void AssignMonstersToNodes(List<IMonster> monsters, List<Node> nodes)
-        {
-            int monsterIndex = 0;
-
-            while (nodes.Any())
-            {
-                int nodeId = _random.Next(0, nodes.Count - 1);
-
-                monsters[monsterIndex].CurrentNode = nodes[nodeId];
-
-                nodes.RemoveAt(nodeId);
-
-                monsterIndex++;
-            }
-        }
-
-        private void AssignMonstersToPlayers()
-        {
-
-            List<IMonster> availableMonsters = new List<IMonster>
-            {
-                Ghhhk,
-                Houjix,
-                Strider,
-                Molator,
-                Savrip,
-                Klorslug,
-                Ngok,
-                Monnok
-            };
-
+            List<Monster> availableMonsters = new List<Monster>(MonsterPrefabs);
             while (availableMonsters.Any())
             {
-                int monsterIndex = _random.Next(0, availableMonsters.Count - 1);
+                int monsterIndex = _random.Next(0, availableMonsters.Count);
                    
-                IMonster currentMonster = availableMonsters[monsterIndex];
+                Monster currentMonster = availableMonsters[monsterIndex];
+
+                GameObject monsterPrefab = MonsterPrefabs[MonsterPrefabs.IndexOf(currentMonster)].gameObject;
+
+                Quaternion monsterQuaternion;
 
                 if(availableMonsters.Count % 2 == 0)
                 {
+                    currentMonster.CurrentNode = player1StartingNodes[0];
+                    player1StartingNodes.RemoveAt(0);
                     Player1Monsters.Add(currentMonster);
+                    monsterQuaternion = monsterPrefab.transform.rotation;
                 } else
                 {
-                    Player2Monsters.Add(currentMonster);
+                    currentMonster.CurrentNode = player2StartingNodes[0];
+                    player2StartingNodes.RemoveAt(0);
+                    Player2Monsters.Add(currentMonster);                  
+                    monsterQuaternion = Quaternion.Euler(monsterPrefab.transform.rotation.eulerAngles.x, monsterPrefab.transform.rotation.eulerAngles.y + 180, monsterPrefab.transform.rotation.eulerAngles.z);
                 }
+
+                GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition), monsterQuaternion);
 
                 availableMonsters.RemoveAt(monsterIndex);
 
             }
+
         }
     }
 
