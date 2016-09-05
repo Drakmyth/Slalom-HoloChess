@@ -1,4 +1,5 @@
-﻿using DejarikLibrary;
+﻿using System;
+using DejarikLibrary;
 using UnityEngine;
 
 namespace Assets.Scripts.Monsters
@@ -9,7 +10,14 @@ namespace Assets.Scripts.Monsters
         public abstract int DefenseRating { get; }
         public abstract int MovementRating { get; }
 
-        public abstract Node CurrentNode { get; set; }
+        public Node CurrentNode { get; set; }
 
+        void Start()
+        {
+        }
+
+        void Update()
+        {
+        }
     }
 }
