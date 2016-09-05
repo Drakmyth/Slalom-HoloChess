@@ -6,7 +6,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{EAAB867B-CC46-113D-8F92-1E51F3E1034A}</ProjectGuid>
+    <ProjectGuid>{A68CF7E8-8098-9061-EF5B-398827369C0A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -45,13 +45,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\AttackCalculator.cs" />
-     <Compile Include="Assets\Scripts\BoardGraph.cs" />
      <Compile Include="Assets\Scripts\GameState.cs" />
-     <Compile Include="Assets\Scripts\IMonsterModel.cs" />
-     <Compile Include="Assets\Scripts\NodePath.cs" />
-     <Compile Include="Assets\Scripts\SpaceNode.cs" />
-     <Compile Include="Assets\Scripts\files.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Ghhhk.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Houjix.cs" />
+     <Compile Include="Assets\Scripts\Monsters\IMonster.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Klorslug.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Molator.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Monnok.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Ngok.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Savrip.cs" />
+     <Compile Include="Assets\Scripts\Monsters\Strider.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
@@ -63,6 +66,9 @@
  </Reference>
  <Reference Include="UnityEngine.VR">
  <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityVR/Runtime/UnityEngine.VR.dll</HintPath>
+ </Reference>
+ <Reference Include="DejarikLibrary">
+ <HintPath>C:/Projects/Dejarik/Slalom-HoloChess/Assets/Libraries/DejarikLibrary.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
