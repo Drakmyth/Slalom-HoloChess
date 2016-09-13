@@ -6,7 +6,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{A68CF7E8-8098-9061-EF5B-398827369C0A}</ProjectGuid>
+    <ProjectGuid>{EAAB867B-CC46-113D-8F92-1E51F3E1034A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -69,7 +69,7 @@
  <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityVR/Runtime/UnityEngine.VR.dll</HintPath>
  </Reference>
  <Reference Include="DejarikLibrary">
- <HintPath>C:/Projects/Dejarik/Slalom-HoloChess/Assets/Libraries/DejarikLibrary.dll</HintPath>
+ <HintPath>C:/Users/ianb/Documents/GitHub/Dejarik/Assets/Libraries/DejarikLibrary.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
