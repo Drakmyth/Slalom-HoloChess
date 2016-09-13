@@ -2,13 +2,13 @@
 {
     public class NodeMapKey
     {
-        private int _nodeId;
-        private int _movement;
+        public int NodeId;
+        public int Movement;
 
         public NodeMapKey(int nodeId, int movement)
         {
-            _nodeId = nodeId;
-            _movement = movement;
+            NodeId = nodeId;
+            Movement = movement;
         }
     }
 }

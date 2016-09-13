@@ -12,7 +12,7 @@
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -147,16 +147,16 @@
       <HintPath>$(SolutionDir)$(SolutionName)\Unprocessed\UnityEngine.HoloLens.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DejarikLibrary">
+      <HintPath>$(SolutionDir)$(SolutionName)\Unprocessed\DejarikLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.Networking">
       <HintPath>$(SolutionDir)$(SolutionName)\Unprocessed\UnityEngine.Networking.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.VR">
       <HintPath>$(SolutionDir)$(SolutionName)\Unprocessed\UnityEngine.VR.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="DejarikLibrary">
-      <HintPath>$(SolutionDir)$(SolutionName)\Unprocessed\DejarikLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
