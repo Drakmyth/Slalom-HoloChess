@@ -6,7 +6,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{EAAB867B-CC46-113D-8F92-1E51F3E1034A}</ProjectGuid>
+    <ProjectGuid>{F1DE6E1E-F6FA-0D90-ED79-FB37255DDD46}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -38,13 +38,14 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="UnityEngine">
-      <HintPath>C:\Program Files\Unity HoloLens 5.4.0f3-HTP\Editor\Data\PlaybackEngines\MetroSupport/Tools/UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files\Unity HoloLens\Editor\Data\PlaybackEngines\MetroSupport/Tools/UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor">
-      <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/Managed/UnityEditor.dll</HintPath>
+      <HintPath>C:/Program Files/Unity HoloLens/Editor/Data/Managed/UnityEditor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Models\SpatialMapping\SpatialMapping.cs" />
      <Compile Include="Assets\Scripts\GameState.cs" />
      <Compile Include="Assets\Scripts\MonsterTypes.cs" />
      <Compile Include="Assets\Scripts\Monsters\Ghhhk.cs" />
@@ -56,20 +57,21 @@
      <Compile Include="Assets\Scripts\Monsters\Ngok.cs" />
      <Compile Include="Assets\Scripts\Monsters\Savrip.cs" />
      <Compile Include="Assets\Scripts\Monsters\Strider.cs" />
+     <None Include="Assets\Resources\Wireframe.shader" />
  <Reference Include="UnityEngine.UI">
- <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+ <HintPath>C:/Program Files/Unity HoloLens/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Networking">
- <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
+ <HintPath>C:/Program Files/Unity HoloLens/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.HoloLens">
- <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityHoloLens/Runtime/UnityEngine.HoloLens.dll</HintPath>
+ <HintPath>C:/Program Files/Unity HoloLens/Editor/Data/UnityExtensions/Unity/UnityHoloLens/Runtime/UnityEngine.HoloLens.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.VR">
- <HintPath>C:/Program Files/Unity HoloLens 5.4.0f3-HTP/Editor/Data/UnityExtensions/Unity/UnityVR/Runtime/UnityEngine.VR.dll</HintPath>
+ <HintPath>C:/Program Files/Unity HoloLens/Editor/Data/UnityExtensions/Unity/UnityVR/Runtime/UnityEngine.VR.dll</HintPath>
  </Reference>
  <Reference Include="DejarikLibrary">
- <HintPath>C:/Users/ianb/Documents/GitHub/Dejarik/Assets/Libraries/DejarikLibrary.dll</HintPath>
+ <HintPath>C:/Users/ainsleyh/Documents/Halochess/Assets/Libraries/DejarikLibrary.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
