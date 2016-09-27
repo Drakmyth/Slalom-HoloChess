@@ -552,6 +552,7 @@ paket-files/
 .idea/
 *.sln.iml
 
-Assembly-CSharp.csproj
+/*.csproj
+/*.sln
 UnityBuilds/*
 
