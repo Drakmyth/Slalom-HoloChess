@@ -292,3 +292,8 @@ paket-files/
 /*.csproj
 /*.sln
 UnityBuilds/*
+
+!DejarikLibrary/[Bb]in
+DejarikLibrary/[Bb]in/*
+!DejarikLibrary/[Bb]in/[Dd]ebug
+!DejarikLibrary/[Bb]in/[Dd]ebug/*
