@@ -6,8 +6,10 @@ namespace DejarikLibrary
 {
 	public class MoveCalculator
 	{
-		public List<Node> FindMoves(Node start, int distance)
+		public IEnumerable<Node> FindMoves(Node start, int distance, IEnumerable<Node> occupiedNodes = null)
 		{
+			IEnumerable<Node> occupied = occupiedNodes ?? new List<Node>();
+
 			Dictionary<Node, int> distanceMap = new Dictionary<Node, int> { { start, 0 } };
 			Stack<Node> nodesToVisit = new Stack<Node>();
 			nodesToVisit.Push(start);
@@ -18,6 +20,8 @@ namespace DejarikLibrary
 
 				foreach (Node adjacentNode in currentNode.AdjacentNodes)
 				{
+					if (occupied.Contains(adjacentNode)) { continue; }
+
 					int newDistance = distanceMap[currentNode] + 1;
 					if (distanceMap.ContainsKey(adjacentNode))
 					{
@@ -45,5 +49,21 @@ namespace DejarikLibrary
 
 			return validMoves;
 		}
+
+		public IEnumerable<Node> FindAttackMoves(Node start, IEnumerable<Node> enemyOccupiedNodes)
+		{
+			List<Node> validAttacks = new List<Node>();
+			IEnumerable<Node> occupied = enemyOccupiedNodes.ToList();
+			foreach (Node adjacentNode in start.AdjacentNodes)
+			{
+				if (occupied.Contains(adjacentNode))
+				{
+					validAttacks.Add(adjacentNode);
+				}
+			}
+
+			return validAttacks;
+		}
+
 	}
 }
