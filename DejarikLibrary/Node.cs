@@ -2,7 +2,6 @@
 
 namespace DejarikLibrary
 {
-
     public class Node
     {
         public int Id { get; set; }

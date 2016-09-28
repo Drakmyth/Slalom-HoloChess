@@ -1,6 +1,6 @@
 ﻿using Random = System.Random;
 
-namespace Assets.Scripts
+namespace DejarikLibrary
 {
 	public enum AttackResult
 	{
@@ -12,7 +12,6 @@ namespace Assets.Scripts
 
 	public class AttackCalculator
 	{
-
 		private readonly Random _random;
 
 		public AttackCalculator()
