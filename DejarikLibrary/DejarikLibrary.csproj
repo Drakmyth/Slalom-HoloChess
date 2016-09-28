@@ -46,6 +46,7 @@
     <Compile Include="Monsters\Ngok.cs" />
     <Compile Include="Monsters\Strider.cs" />
     <Compile Include="Monsters\Savrip.cs" />
+    <Compile Include="MoveCalculator.cs" />
     <Compile Include="NodeMapKey.cs" />
     <Compile Include="NodePath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
