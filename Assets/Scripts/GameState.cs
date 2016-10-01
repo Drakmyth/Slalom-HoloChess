@@ -24,7 +24,7 @@ namespace Assets.Scripts
 
         public List<Monster> MonsterPrefabs;
 
-        public Dictionary<int, Node> SpacePrefabs;
+        public List<BoardSpace> SpacePrefabs;
 
         public GameState()
         {
@@ -44,6 +44,7 @@ namespace Assets.Scripts
             if (_isHostPlayer)
             {
                 AssignMonstersToPlayers();
+                DisplayBoardSpaces();
             }
 
         }
@@ -174,6 +175,20 @@ namespace Assets.Scripts
                 GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition), monsterQuaternion);
 
                 availableMonsters.RemoveAt(monsterIndex);
+
+            }
+
+        }
+
+        private void DisplayBoardSpaces()
+        {
+
+            for(int i = 0; i < SpacePrefabs.Count; i ++)
+            {
+                BoardSpace spacePrefab = SpacePrefabs[i];
+                float yAngleOffset = 30 * ((i - 1) % 12);
+                Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y - yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
+                Instantiate(spacePrefab, new Vector3(0, 0, 0), spaceQuaternion);
 
             }
 
