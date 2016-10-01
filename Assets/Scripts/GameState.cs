@@ -17,13 +17,14 @@ namespace Assets.Scripts
 
 
         private readonly Random _random;
-        //0 is opponent turn, 1, 2 are current player actions
+        //3, 4 are opponent actions, 1, 2 are player actions
         private int _actionNumber;
         //TODO:not sure if or how this will be used yet
         private bool _isHostPlayer = true;
 
         public List<Monster> MonsterPrefabs;
 
+        public Dictionary<int, Node> SpacePrefabs;
 
         public GameState()
         {
