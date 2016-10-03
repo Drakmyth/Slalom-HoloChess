@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
+using UnityObject = UnityEngine.Object;
 using Random = System.Random;
 
 namespace Assets.Scripts
@@ -12,6 +13,7 @@ namespace Assets.Scripts
     public class GameState: MonoBehaviour
     {
         public BoardGraph GameGraph { get; set; }
+        public Dictionary<int, BoardSpace> BoardSpaces { get; set; }
         public List<Monster> Player1Monsters { get; set; }
         public List<Monster> Player2Monsters { get; set; } 
 
@@ -34,6 +36,7 @@ namespace Assets.Scripts
             _actionNumber = 0;
 
             GameGraph = new BoardGraph();
+            BoardSpaces = new Dictionary<int, BoardSpace>();
             Player1Monsters = new List<Monster>();
             Player2Monsters = new List<Monster>();
         }
@@ -45,6 +48,11 @@ namespace Assets.Scripts
             {
                 AssignMonstersToPlayers();
                 DisplayBoardSpaces();
+
+//                MeshRenderer msh = BoardSpaces[0].GetComponent<MeshRenderer>();
+//                var mat = new Material(new Shader()) {color = Color.cyan};
+//                msh.material = mat;
+
             }
 
         }
@@ -188,7 +196,10 @@ namespace Assets.Scripts
                 BoardSpace spacePrefab = SpacePrefabs[i];
                 float yAngleOffset = 30 * ((i - 1) % 12);
                 Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y - yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
-                Instantiate(spacePrefab, new Vector3(0, 0, 0), spaceQuaternion);
+                if (!BoardSpaces.ContainsKey(i))
+                {
+                    BoardSpaces.Add(i, Instantiate(spacePrefab, new Vector3(0, 0, 0), spaceQuaternion) as BoardSpace);
+                }
 
             }
 
