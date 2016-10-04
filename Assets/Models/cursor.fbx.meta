@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 1178952f16937a14a94d237d9e1cae98
-timeCreated: 1475477156
+guid: f2bb3a39441a4f94ca62bff4978af3ce
+timeCreated: 1475563704
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,7 +9,7 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: Torus
+    4300000: Circle.004
   materials:
     importMaterials: 1
     materialName: 0

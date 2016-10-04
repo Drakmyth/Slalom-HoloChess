@@ -1,5 +1,4 @@
-﻿using System;
-using DejarikLibrary;
+﻿using DejarikLibrary;
 using UnityEngine;
 
 namespace Assets.Scripts.Monsters
