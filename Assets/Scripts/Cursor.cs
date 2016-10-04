@@ -32,10 +32,10 @@ namespace Assets.Scripts
                 meshRenderer.enabled = true;
 
                 // Move thecursor to the point where the raycast hit.
-                this.transform.position = hitInfo.point;
+                this.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + .01f, hitInfo.point.z);
 
                 // Rotate the cursor to hug the surface of the hologram.
-                this.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+                this.transform.rotation = Quaternion.FromToRotation(Vector3.back, hitInfo.normal);
             }
             else
             {

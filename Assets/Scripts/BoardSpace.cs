@@ -11,4 +11,10 @@ public class BoardSpace : MonoBehaviour {
 	void Update () {
 	
 	}
+
+    void OnSelect()
+    {
+        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        meshRenderer.material.color = Color.cyan;
+    }
 }
