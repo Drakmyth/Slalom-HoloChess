@@ -203,7 +203,7 @@ namespace Assets.Scripts
                 Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y - yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
                 if (!BoardSpaces.ContainsKey(i))
                 {
-                    BoardSpaces.Add(i, Instantiate(spacePrefab, new Vector3(0, 0, 0), spaceQuaternion) as BoardSpace);
+                    BoardSpaces.Add(i, Instantiate(spacePrefab, new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y, spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace);
                 }
 
             }
