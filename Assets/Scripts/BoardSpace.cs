@@ -88,4 +88,9 @@ public class BoardSpace : MonoBehaviour {
 
         meshRenderer.material.color = OriginalColor;
     }
+
+    void OnSelected(GameObject gameStateObject)
+    {
+        gameStateObject.SendMessage("OnSpaceSelected", NodeId);
+    }
 }

@@ -119,13 +119,13 @@ namespace Assets.Scripts
                             enemyOccupiedNodes).Select(a => a.Id);
 
                         //Update board highlighting
-                        foreach (BoardSpace space in SpacePrefabs)
+                        foreach (BoardSpace space in BoardSpaces.Values)
                         {
                             space.SendMessage("OnAttackAvailable", availableAttackActionNodeIds);
                             space.SendMessage("OnMoveAvailable", availableMoveActionNodeIds);
                         }
 
-                        _subActionNumber = 3;
+                        _subActionNumber = 4;
                     }
                 }
 
@@ -170,7 +170,7 @@ namespace Assets.Scripts
 
             if (_actionNumber == 4 && _subActionNumber == 0)
             {
-                foreach (BoardSpace space in SpacePrefabs)
+                foreach (BoardSpace space in BoardSpaces.Values)
                 {
                     space.SendMessage("OnClearHighlighting");
                 }
@@ -178,7 +178,7 @@ namespace Assets.Scripts
             }
             else if (_subActionNumber == 0)
             {
-                foreach (BoardSpace space in SpacePrefabs)
+                foreach (BoardSpace space in BoardSpaces.Values)
                 {
                     space.SendMessage("OnClearHighlighting");
                 }
@@ -339,17 +339,8 @@ namespace Assets.Scripts
             return;
         }
 
-        void OnSpaceSelected(GameObject selectedSpace)
+        void OnSpaceSelected(int nodeId)
         {
-
-            BoardSpace selectedPrefab = SpacePrefabs.SingleOrDefault(s => s.gameObject.GetInstanceID() == selectedSpace.GetInstanceID());
-
-            if (selectedPrefab == null)
-            {
-                return;
-            }
-
-            int nodeId = selectedPrefab.NodeId;
 
             Node selectedNode = GameGraph.Nodes[nodeId];
 
@@ -357,14 +348,14 @@ namespace Assets.Scripts
             {
                 if (_subActionNumber == 2)
                 {
-                    SelectedMonster = MonsterPrefabs.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
+                    SelectedMonster = Player1Monsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
                     if (SelectedMonster != null)
                     {
-                        foreach (BoardSpace space in SpacePrefabs)
+                        foreach (BoardSpace space in BoardSpaces.Values)
                         {
                             space.SendMessage("OnMonsterSelected", nodeId);
                         }
-
+                        _subActionNumber = 3;
                     }
 
                 }
