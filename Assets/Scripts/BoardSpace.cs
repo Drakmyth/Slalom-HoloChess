@@ -72,7 +72,7 @@ public class BoardSpace : MonoBehaviour {
 
         if (nodeId == NodeId)
         {
-            meshRenderer.material.color = new Color(meshRenderer.material.color.r, meshRenderer.material.color.b, meshRenderer.material.color.g, 200f);
+            meshRenderer.material.color = new Color(meshRenderer.material.color.r, meshRenderer.material.color.b, meshRenderer.material.color.g, .8f);
         }
         else
         {
