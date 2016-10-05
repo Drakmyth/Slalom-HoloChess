@@ -44,15 +44,11 @@ namespace Assets.Scripts
 
         void Start()
         {
+            DisplayBoardSpaces();
+
             if (_isHostPlayer)
             {
                 AssignMonstersToPlayers();
-                DisplayBoardSpaces();
-
-//                MeshRenderer msh = BoardSpaces[0].GetComponent<MeshRenderer>();
-//                var mat = new Material(new Shader()) {color = Color.cyan};
-//                msh.material = mat;
-
             }
 
         }
@@ -64,69 +60,78 @@ namespace Assets.Scripts
                 return;
             }
 
-            //TODO:Get user input to select from available monsters
-            Monster selectedMonster = MonsterPrefabs[MonsterTypes.Ghhhk];
-
-            //TODO:Get available nodes from Library for move or attack, possibly returning an action type as well?
-            Node actionNode = GameGraph.Nodes[0];
-
-            //TODO:Get user input to select from available actions
-
-            Monster opponent = GetEnemyAtNode(actionNode);
-
-            if (opponent != null)
+            if (_actionNumber == 1 || _actionNumber == 2)
             {
-                //TODO:Should this be a static class? Otherwise, this should really be initialized outside of the turn loop
-                //TODO:Battle animation!
-                AttackCalculator attackCalculator = new AttackCalculator();
-                var attackResult = attackCalculator.Calculate(selectedMonster.AttackRating, opponent.DefenseRating);
+                //TODO:Get user input to select from available monsters
+                Monster selectedMonster = MonsterPrefabs[MonsterTypes.Ghhhk];
 
-                switch (attackResult)
+                //TODO:Get available nodes from Library for move or attack, possibly returning an action type as well?
+                Node actionNode = GameGraph.Nodes[0];
+
+                //TODO:Get user input to select from available actions
+
+                Monster opponent = GetEnemyAtNode(actionNode);
+
+                if (opponent != null)
                 {
-                    case AttackResult.Kill:
-                        //TODO:Kill animation!
-                        Player2Monsters.Remove(opponent);
-                        break;
-                    case AttackResult.CounterKill:
-                        //TODO:Kill animation!
-                        Player1Monsters.Remove(selectedMonster);
-                        break;
-                    case AttackResult.Push:
-                        //TODO:calculate availables spaces with movement 1 from opponent.CurrentNode
-                        //TODO:Get user input to select which node
-                        //TODO:Movement animation!
-                        Node pushTo = GameGraph.Nodes[opponent.CurrentNode.Id + 1];
-                        opponent.CurrentNode = pushTo;
-                        break;
-                    case AttackResult.CounterPush:
-                        //TODO:calculate availables spaces with movement 1 from actionNode/selectedMonster.CurrentNode
-                        //TODO:Get user input to select which node
-                        //TODO:Movement animation!
-                        Node counterPushTo = GameGraph.Nodes[actionNode.Id + 1];
-                        opponent.CurrentNode = counterPushTo;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    //TODO:Should this be a static class? Otherwise, this should really be initialized outside of the turn loop
+                    //TODO:Battle animation!
+                    AttackCalculator attackCalculator = new AttackCalculator();
+                    var attackResult = attackCalculator.Calculate(selectedMonster.AttackRating, opponent.DefenseRating);
+
+                    switch (attackResult)
+                    {
+                        case AttackResult.Kill:
+                            //TODO:Kill animation!
+                            Player2Monsters.Remove(opponent);
+                            break;
+                        case AttackResult.CounterKill:
+                            //TODO:Kill animation!
+                            Player1Monsters.Remove(selectedMonster);
+                            break;
+                        case AttackResult.Push:
+                            //TODO:calculate availables spaces with movement 1 from opponent.CurrentNode
+                            //TODO:Get user input to select which node
+                            //TODO:Movement animation!
+                            Node pushTo = GameGraph.Nodes[opponent.CurrentNode.Id + 1];
+                            opponent.CurrentNode = pushTo;
+                            break;
+                        case AttackResult.CounterPush:
+                            //TODO:calculate availables spaces with movement 1 from actionNode/selectedMonster.CurrentNode
+                            //TODO:Get user input to select which node
+                            //TODO:Movement animation!
+                            Node counterPushTo = GameGraph.Nodes[actionNode.Id + 1];
+                            opponent.CurrentNode = counterPushTo;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                else
+                {
+                    //TODO:Get animation path from GameGraph.NodeMap and move peice from space to space
+                    //TODO:Movement animation!
+                    selectedMonster.CurrentNode = actionNode;
                 }
             }
-            else
+
+
+            if (Player1Monsters.Count == 0)
             {
-                //TODO:Get animation path from GameGraph.NodeMap and move peice from space to space
-                //TODO:Movement animation!
-                selectedMonster.CurrentNode = actionNode;
+                EndGameWin();
+            } else if (Player2Monsters.Count == 0)
+            {
+                EndGameLose();
             }
 
-            if (_actionNumber >= 2)
+            if (_actionNumber == 4)
             {
                 _actionNumber = 0;
-                //TODO:launch other player's action pair
             }
             else
             {
                 _actionNumber++;
             }
-
-            //TODO:check for end of game
 
         }
 
@@ -204,6 +209,17 @@ namespace Assets.Scripts
             }
 
         }
+
+        private void EndGameWin()
+        {
+            return;
+        }
+
+        private void EndGameLose()
+        {
+            return;
+        }
+
     }
 
 }
