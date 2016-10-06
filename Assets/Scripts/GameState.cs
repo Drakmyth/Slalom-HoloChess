@@ -14,7 +14,7 @@ namespace Assets.Scripts
     {
         public BoardGraph GameGraph { get; set; }
         public AttackCalculator AttackCalculator { get; set; }
-        public MoveCalculator MoveCalcoulator { get; set; }
+        public MoveCalculator MoveCalculator { get; set; }
         public Dictionary<int, BoardSpace> BoardSpaces { get; set; }
         public List<Monster> Player1Monsters { get; set; }
         public List<Monster> Player2Monsters { get; set; } 
@@ -59,7 +59,7 @@ namespace Assets.Scripts
             Player1Monsters = new List<Monster>();
             Player2Monsters = new List<Monster>();
             AttackCalculator = new AttackCalculator();
-            MoveCalcoulator = new MoveCalculator();
+            MoveCalculator = new MoveCalculator();
 
             AvailablePushDestinations = new List<Node>();
         }
@@ -112,10 +112,10 @@ namespace Assets.Scripts
                         IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
                         IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
-                        IEnumerable<int> availableMoveActionNodeIds = MoveCalcoulator.FindMoves(SelectedMonster.CurrentNode,
+                        IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
                             SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.Id);
 
-                        IEnumerable<int> availableAttackActionNodeIds = MoveCalcoulator.FindAttackMoves(SelectedMonster.CurrentNode,
+                        IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                             enemyOccupiedNodes).Select(a => a.Id);
 
                         //Update board highlighting
@@ -215,10 +215,10 @@ namespace Assets.Scripts
                     IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
                     IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
-                    IEnumerable<Node> availableMoveActions = MoveCalcoulator.FindMoves(SelectedMonster.CurrentNode,
+                    IEnumerable<Node> availableMoveActions = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
                         SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes));
 
-                    IEnumerable<Node> availableAttackActions = MoveCalcoulator.FindAttackMoves(SelectedMonster.CurrentNode,
+                    IEnumerable<Node> availableAttackActions = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                         enemyOccupiedNodes);
 
                     if (friendlyOccupiedNodes.Contains(selectedNode))
@@ -246,6 +246,10 @@ namespace Assets.Scripts
 
             if (_actionNumber == 3 || _actionNumber == 4)
             {
+                //TODO get rid of this, it's for debugging only
+                _actionNumber = 1;
+                _subActionNumber = 1;
+
                 if (_subActionNumber == 7)
                 {
                     //if result from opponent exists, push SelectedMonster
@@ -361,10 +365,12 @@ namespace Assets.Scripts
                     if (isHostAttacker)
                     {
                         Player2Monsters.Remove(defender);
+                        Destroy(defender.gameObject);
                     }
                     else
                     {
                         Player1Monsters.Remove(defender);
+                        Destroy(defender.gameObject);
                     }
                     _subActionNumber = 0;
                     break;
@@ -372,26 +378,28 @@ namespace Assets.Scripts
                     //TODO:Kill animation!
                     MonsterPrefabs.Remove(attacker);
                     if (isHostAttacker)
-                    {
+                    {                        
                         Player1Monsters.Remove(attacker);
+                        Destroy(attacker.gameObject);
                     }
                     else
                     {
                         Player2Monsters.Remove(attacker);
+                        Destroy(attacker.gameObject);
                     }
                     _subActionNumber = 0;
                     break;
                 case AttackResult.Push:
                     //TODO:Movement animation!
-                    AvailablePushDestinations = MoveCalcoulator.FindMoves(defender.CurrentNode, 1,
+                    AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes));
-                    _subActionNumber = 6;                
+                    //_subActionNumber = 6;                
                     break;
                 case AttackResult.CounterPush:
                     //TODO:Get user input to select which node
                     //TODO:Movement animation!
 
-                    _subActionNumber = 7;
+                    //_subActionNumber = 7;
                     //send network message with available push nodes
 
                     break;
