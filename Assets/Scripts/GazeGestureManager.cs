@@ -24,7 +24,7 @@ namespace Assets.Scripts
                 // Send an OnSelect message to the focused object and its ancestors.
                 if (FocusedObject != null)
                 {
-                    FocusedObject.SendMessageUpwards("OnSelect");
+                    FocusedObject.SendMessage("OnSelected", gameObject);
                 }
             };
             recognizer.StartCapturingGestures();
