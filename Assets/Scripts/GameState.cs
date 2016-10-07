@@ -78,6 +78,7 @@ namespace Assets.Scripts
 
         void Update()
         {
+
             if (_actionNumber < 1)
             {
                 //This should be unreachable
@@ -99,7 +100,7 @@ namespace Assets.Scripts
                     _subActionNumber = 2;
                 }
 
-                if (_subActionNumber == 2)
+                if (_subActionNumber == 2 && SelectedMonster == null)
                 {
                     //Wait for user to select from available monsters
                     return;
@@ -176,8 +177,21 @@ namespace Assets.Scripts
                 }
                 _actionNumber = 1;
                 _subActionNumber = 1;
+
+                SelectedMonster = null;
             }
-            else if (_subActionNumber == 0)
+            else if (_actionNumber == 3 && _subActionNumber == 0)
+            {
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    space.SendMessage("OnClearHighlighting");
+                }
+                _actionNumber ++;
+                _subActionNumber = 1;
+
+                SelectedMonster = null;
+            }
+            else if(_actionNumber == 2 && _subActionNumber == 0)
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
@@ -185,7 +199,34 @@ namespace Assets.Scripts
                 }
                 _actionNumber++;
                 _subActionNumber = 1;
+
+                SelectedMonster = null;
             }
+            else if (_actionNumber == 1 && _subActionNumber == 0)
+            {
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    Node selectedNode = null;
+
+                    if (SelectedMonster != null)
+                    {
+                        selectedNode = SelectedMonster.CurrentNode;
+                        _subActionNumber = 3;
+                        IEnumerable<BoardSpace> availableSpaces =
+                            BoardSpaces.Values.Where(s => Player1Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
+                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                    }
+                    else
+                    {
+                        _subActionNumber = 1;
+                    }
+
+                    space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
+                }
+                _actionNumber++;
+
+            }
+
 
         }
 
@@ -227,7 +268,13 @@ namespace Assets.Scripts
                     {
                         SelectedMonster = Player1Monsters.Single(m => m.CurrentNode.Id == nodeId);
                         SelectedActionNode = null;
-                        _subActionNumber = 2;
+
+                        foreach (BoardSpace space in BoardSpaces.Values)
+                        {
+                            space.SendMessage("OnMonsterSelected", nodeId);
+                        }
+
+                        _subActionNumber = 3;
                     }
                     else if (availableAttackActions.Union(availableMoveActions).Contains(selectedNode))
                     {
@@ -306,7 +353,7 @@ namespace Assets.Scripts
                     monsterQuaternion = Quaternion.Euler(monsterPrefab.transform.rotation.eulerAngles.x, monsterPrefab.transform.rotation.eulerAngles.y + 180, monsterPrefab.transform.rotation.eulerAngles.z); 
                     Monster monsterInstance =
                         Instantiate(monsterPrefab,
-                            new Vector3(-currentMonster.CurrentNode.XPosition, 0, -currentMonster.CurrentNode.YPosition),
+                            new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
                             monsterQuaternion) as Monster;
                     monsterInstance.CurrentNode = currentMonster.CurrentNode;
                     Player1Monsters.Add(monsterInstance);
@@ -319,7 +366,7 @@ namespace Assets.Scripts
                     monsterQuaternion = monsterPrefab.transform.rotation;
                     Monster monsterInstance = 
                         Instantiate(monsterPrefab,
-                            new Vector3(-currentMonster.CurrentNode.XPosition, 0, -currentMonster.CurrentNode.YPosition),
+                            new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
                             monsterQuaternion) as Monster;
                     monsterInstance.CurrentNode = currentMonster.CurrentNode;
                     Player2Monsters.Add(monsterInstance);
@@ -418,8 +465,8 @@ namespace Assets.Scripts
             selectedMonster.CurrentNode = destination;
 
             //TODO:Movement animation! Use this instead for now...
-            selectedMonster.transform.position = new Vector3(-destination.XPosition, 0,
-                -destination.YPosition);
+            selectedMonster.transform.position = new Vector3(destination.XPosition, 0,
+                destination.YPosition);
 
 
             _subActionNumber = 0;

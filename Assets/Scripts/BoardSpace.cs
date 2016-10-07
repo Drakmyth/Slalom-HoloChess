@@ -86,13 +86,35 @@ public class BoardSpace : MonoBehaviour {
         }
     }
 
-
     void OnClearHighlighting()
+    {
+        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+
+        meshRenderer.material.color = OriginalColor;
+
+        SelectionIndicatorInstance.SetActive(false);
+
+    }
+
+    void OnClearHighlightingWithSelection(Node selectedNode)
     {
 
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        meshRenderer.material.color = OriginalColor;
+        if (meshRenderer.material.color != Color.blue)
+        {
+            meshRenderer.material.color = OriginalColor;
+        }
+
+        if (selectedNode != null && selectedNode.Equals(Node))
+        {
+            SelectionIndicatorInstance.SetActive(true);
+        }
+        else
+        {
+            SelectionIndicatorInstance.SetActive(false);
+        }
+
     }
 
     void OnSelected(GameObject gameStateObject)
