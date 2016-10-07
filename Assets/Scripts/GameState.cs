@@ -113,7 +113,7 @@ namespace Assets.Scripts
                         IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
                         IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
-                            SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.Id);
+                            SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.DestinationNode.Id);
 
                         IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                             enemyOccupiedNodes).Select(a => a.Id);
@@ -215,10 +215,12 @@ namespace Assets.Scripts
                     IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
                     IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
-                    IEnumerable<Node> availableMoveActions = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
+                    IEnumerable<NodePath> movementPaths = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
                         SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes));
 
-                    IEnumerable<Node> availableAttackActions = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
+                    IEnumerable<Node> availableMoveActions = movementPaths.Select(p => p.DestinationNode);
+
+                    IEnumerable <Node> availableAttackActions = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                         enemyOccupiedNodes);
 
                     if (friendlyOccupiedNodes.Contains(selectedNode))
@@ -392,7 +394,7 @@ namespace Assets.Scripts
                 case AttackResult.Push:
                     //TODO:Movement animation!
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
-                        friendlyOccupiedNodes.Union(enemyOccupiedNodes));
+                        friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
                     //_subActionNumber = 6;                
                     break;
                 case AttackResult.CounterPush:

@@ -23,7 +23,7 @@ namespace DejarikLibraryTests
             occupiedNodes.Add(boardGraph.Nodes[23]);
             occupiedNodes.Add(boardGraph.Nodes[24]);
 
-            IEnumerable<Node> actual;
+            IEnumerable<NodePath> actual;
 
             actual = moveCalculator.FindMoves(boardGraph.Nodes[13], 3, occupiedNodes);
             actual = moveCalculator.FindMoves(boardGraph.Nodes[14], 3, occupiedNodes);

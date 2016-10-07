@@ -100,5 +100,34 @@ namespace DejarikLibraryTests
 
         }
 
+        [TestMethod]
+        public void BoardGraph_NodeMapExcludesSpecifiedNodesInCalculation()
+        {
+            List<Node> excludedNodes = new List<Node> {new Node(0)};
+            BoardGraph graph = new BoardGraph(excludedNodes);
+
+            List<NodePath> actual = graph.NodeMap[new NodeMapKey(14, 3)];
+            //17,23,12,4
+            Assert.AreEqual(actual.Count, 4);
+            Assert.IsTrue(actual.Select(n => n.DestinationNode.Id).Contains(17));
+            Assert.IsTrue(actual.Select(n => n.DestinationNode.Id).Contains(23));
+            Assert.IsTrue(actual.Select(n => n.DestinationNode.Id).Contains(12));
+            Assert.IsTrue(actual.Select(n => n.DestinationNode.Id).Contains(4));
+
+        }
+
+        [TestMethod]
+        public void BoardGraph_NodeSurroundedByOccupiedNodesHasNoMovements()
+        {
+            List<Node> excludedNodes = new List<Node> { new Node(13), new Node(0), new Node(2), new Node(12) };
+
+            BoardGraph graph = new BoardGraph(excludedNodes);
+
+            List<NodeMapKey> actualKeys = graph.NodeMap.Keys.Where(k => k.NodeId == 1).ToList();
+
+            Assert.AreEqual(actualKeys.Count, 1);
+            Assert.AreEqual(actualKeys[0].NodeId, 1);
+
+        }
     }
 }

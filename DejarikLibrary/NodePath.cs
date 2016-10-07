@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace DejarikLibrary
 {
@@ -22,6 +23,11 @@ namespace DejarikLibrary
         {
             DestinationNode = destinationNode;
             PathToDestination = nodePath;
+        }
+
+        public override string ToString()
+        {
+            return PathToDestination.Aggregate("", (current, node) => current + (">" + node.Id));
         }
     }
 }
