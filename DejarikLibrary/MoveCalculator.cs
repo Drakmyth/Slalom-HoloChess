@@ -1,56 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace DejarikLibrary
 {
 	public class MoveCalculator
 	{
-		public IEnumerable<Node> FindMoves(Node start, int distance, IEnumerable<Node> occupiedNodes = null)
-		{
-			IEnumerable<Node> occupied = occupiedNodes ?? new List<Node>();
+	    public IEnumerable<NodePath> FindMoves(Node start, int distance, IEnumerable<Node> occupiedNodes = null)
+	    {
+	        if (occupiedNodes == null)
+	        {
+	            occupiedNodes = new List<Node>();
+	        }
 
-			Dictionary<Node, int> distanceMap = new Dictionary<Node, int> { { start, 0 } };
-			Stack<Node> nodesToVisit = new Stack<Node>();
-			nodesToVisit.Push(start);
+	        BoardGraph boardGraph = new BoardGraph(occupiedNodes.ToList());
 
-			do
-			{
-				Node currentNode = nodesToVisit.Pop();
+	        NodeMapKey nodeMapKey = new NodeMapKey(start.Id, distance);
 
-				foreach (Node adjacentNode in currentNode.AdjacentNodes)
-				{
-					if (occupied.Contains(adjacentNode)) { continue; }
+	        List<NodePath> nodePaths = new List<NodePath>();
 
-					int newDistance = distanceMap[currentNode] + 1;
-					if (distanceMap.ContainsKey(adjacentNode))
-					{
-						int oldDistance = distanceMap[adjacentNode];
-						distanceMap[adjacentNode] = Math.Min(oldDistance, newDistance);
-						continue;
-					}
+	        if (boardGraph.NodeMap.ContainsKey(nodeMapKey))
+	        {
+	            nodePaths = boardGraph.NodeMap[new NodeMapKey(start.Id, distance)];
+	        }
 
-					distanceMap[adjacentNode] = newDistance;
-					nodesToVisit.Push(adjacentNode);
-				}
-			}
-			while (nodesToVisit.Any());
+	        return nodePaths;
 
-			List<Node> validMoves = new List<Node>();
-			foreach (Node node in distanceMap.Keys)
-			{
-				int nodeDistance = distanceMap[node];
+        }
 
-				if (nodeDistance == distance)
-				{
-					validMoves.Add(node);
-				}
-			}
 
-			return validMoves;
-		}
-
-		public IEnumerable<Node> FindAttackMoves(Node start, IEnumerable<Node> enemyOccupiedNodes)
+	    public IEnumerable<Node> FindAttackMoves(Node start, IEnumerable<Node> enemyOccupiedNodes)
 		{
 			List<Node> validAttacks = new List<Node>();
 			IEnumerable<Node> occupied = enemyOccupiedNodes.ToList();
