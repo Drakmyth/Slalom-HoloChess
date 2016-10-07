@@ -14,5 +14,20 @@ namespace DejarikLibrary
             Id = id;
             AdjacentNodes = new List<Node>();
         }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Node);
+        }
+
+        public bool Equals(Node x)
+        {
+            return x != null && x.Id == Id;
+        }
     }
 }

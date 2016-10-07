@@ -15,12 +15,26 @@ namespace DejarikLibrary
 
 		public BoardGraph()
 		{
-			Nodes = GenerateNodes();
+            List<Node> excludedNodes = new List<Node>();
+
+            Nodes = GenerateNodes();
+
+            BuildGraph(Nodes);
+
+            NodeMap = BuildNodeMap(Nodes, excludedNodes);
+
+        }
+
+        public BoardGraph(List<Node> excludedNodes)
+	    {
+
+            Nodes = GenerateNodes();
 
 			BuildGraph(Nodes);
 
-			NodeMap = BuildNodeMap(Nodes);
-		}
+			NodeMap = BuildNodeMap(Nodes, excludedNodes);
+	        
+	    }
 
 		private List<Node> GenerateNodes()
 		{
@@ -86,13 +100,18 @@ namespace DejarikLibrary
 			node.YPosition = (float)y;
 		}
 
-		private Dictionary<NodeMapKey, List<NodePath>> BuildNodeMap(List<Node> nodes)
+		private Dictionary<NodeMapKey, List<NodePath>> BuildNodeMap(List<Node> nodes, List<Node> excludedNodes)
 		{
 			Dictionary<NodeMapKey, List<NodePath>> nodeMap = new Dictionary<NodeMapKey, List<NodePath>>();
 
-			foreach (Node node in nodes)
+		    foreach (Node node in nodes)
+		    {
+		        node.AdjacentNodes.RemoveAll(n => excludedNodes.Select(e => e.Id).Contains(n.Id));
+		    }
+
+		    foreach (Node node in nodes)
 			{
-				nodeMap = nodeMap.Concat(BuildMapForNode(nodes, node)).ToDictionary(x => x.Key, x => x.Value);
+				nodeMap = nodeMap.Concat(BuildMapForNode(nodes.Where(n => !excludedNodes.Select(e => e.Id).Contains(n.Id)).ToList(), node)).ToDictionary(x => x.Key, x => x.Value);
 			}
 
 			return nodeMap;
@@ -106,14 +125,19 @@ namespace DejarikLibrary
 			Dictionary<Node, int> shortestDistanceToNode = new Dictionary<Node, int>();
 			Dictionary<Node, Node> previousNodeAlongShortestPath = new Dictionary<Node, Node>();
 
-			foreach (Node node in nodes)
+		    if (!nodes.Contains(sourceNode))
+		    {
+                shortestDistanceToNode.Add(sourceNode, 0);
+                previousNodeAlongShortestPath.Add(sourceNode, null);
+                unvisitedNodes.Add(sourceNode);
+            }
+
+            foreach (Node node in nodes)
 			{
 				shortestDistanceToNode.Add(node, int.MaxValue);
 				previousNodeAlongShortestPath.Add(node, null);
 				unvisitedNodes.Add(node);
 			}
-
-			shortestDistanceToNode[sourceNode] = 0;
 
 			while (unvisitedNodes.Any())
 			{
@@ -124,13 +148,13 @@ namespace DejarikLibrary
 				foreach (Node adjacentNode in currentNode.AdjacentNodes)
 				{
 					int currentPathDistance = shortestDistanceToNode[currentNode] + 1;
-					if (currentPathDistance < shortestDistanceToNode[adjacentNode])
+					if (currentPathDistance < shortestDistanceToNode[adjacentNode] && currentPathDistance > 0)
 					{
 						shortestDistanceToNode[adjacentNode] = currentPathDistance;
 						previousNodeAlongShortestPath[adjacentNode] = currentNode;
 					}
-				}
-			}
+                }
+            }
 
 			Dictionary<NodeMapKey, List<NodePath>> shortestPathMap = new Dictionary<NodeMapKey, List<NodePath>>();
 
@@ -149,7 +173,7 @@ namespace DejarikLibrary
 
 				NodeMapKey currentTupleKey = new NodeMapKey(sourceNode.Id, distance);
 
-				if (!shortestPathMap.ContainsKey(currentTupleKey))
+				if (!shortestPathMap.Keys.Any(k => k.Equals(currentTupleKey)))
 				{
 					shortestPathMap.Add(currentTupleKey, new List<NodePath>());
 				}
