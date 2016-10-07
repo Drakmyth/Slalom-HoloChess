@@ -89,11 +89,11 @@ namespace Assets.Scripts
                 if (_subActionNumber == 1)
                 {
                     IEnumerable<BoardSpace> availableSpaces =
-                        BoardSpaces.Values.Where(s => Player1Monsters.Select(m => m.CurrentNode.Id).Contains(s.NodeId)).ToList();
+                        BoardSpaces.Values.Where(s => Player1Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
 
                     foreach (BoardSpace space in availableSpaces)
                     {
-                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.NodeId));
+                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
                     }
 
                     _subActionNumber = 2;
@@ -346,7 +346,8 @@ namespace Assets.Scripts
                         Instantiate(spacePrefab,
                             new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y -.005f,
                                 spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace;
-                    space.NodeId = i;
+                    space.Node = GameGraph.Nodes[i];
+
                     BoardSpaces.Add(i, space);
                 }
             }
