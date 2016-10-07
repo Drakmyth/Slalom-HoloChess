@@ -1,18 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using DejarikLibrary;
 using UnityEngine;
 
 public class BoardSpace : MonoBehaviour {
 
-    public int NodeId { get; set; }
+    public Node Node { get; set; }
+    public GameObject SelectionIndicatorPrefab;
+    private GameObject SelectionIndicatorInstance;
     private Color OriginalColor { get; set; }
-    private float OriginalColorAlpha { get; set; }
 
 	// Use this for initialization
 	void Start () {
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 	    OriginalColor = meshRenderer.material.color;
-	    OriginalColorAlpha = OriginalColor.a;
+        Quaternion selectionIndicatorQuaternion = Quaternion.Euler(SelectionIndicatorPrefab.transform.rotation.eulerAngles.x, SelectionIndicatorPrefab.transform.rotation.eulerAngles.y, SelectionIndicatorPrefab.transform.rotation.eulerAngles.z);
+        SelectionIndicatorInstance = Instantiate(SelectionIndicatorPrefab,
+	        new Vector3(Node.XPosition, SelectionIndicatorPrefab.transform.position.y, Node.YPosition), selectionIndicatorQuaternion) as GameObject;
+        SelectionIndicatorInstance.SetActive(false);
+
 	}
 	
 	// Update is called once per frame
@@ -25,9 +31,9 @@ public class BoardSpace : MonoBehaviour {
 
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        if (availableNodeIds.Contains(NodeId))
+        if (availableNodeIds.Contains(Node.Id))
         {
-            meshRenderer.material.color = Color.cyan;
+            meshRenderer.material.color = Color.blue;
         }
         else
         {
@@ -40,11 +46,11 @@ public class BoardSpace : MonoBehaviour {
 
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        if (availableNodeIds.Contains(NodeId))
+        if (availableNodeIds.Contains(Node.Id))
         {
             meshRenderer.material.color = Color.red;
         }
-        else
+        else if (meshRenderer.material.color == Color.red)
         {
             meshRenderer.material.color = OriginalColor;
         }
@@ -55,11 +61,11 @@ public class BoardSpace : MonoBehaviour {
 
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        if (availableNodeIds.Contains(NodeId))
+        if (availableNodeIds.Contains(Node.Id))
         {
             meshRenderer.material.color = Color.green;
         }
-        else
+        else if (meshRenderer.material.color == Color.green)
         {
             meshRenderer.material.color = OriginalColor;
         }
@@ -70,27 +76,49 @@ public class BoardSpace : MonoBehaviour {
 
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        if (nodeId == NodeId)
+        if (nodeId == Node.Id)
         {
-            meshRenderer.material.color = new Color(meshRenderer.material.color.r, meshRenderer.material.color.b, meshRenderer.material.color.g, .8f);
+            SelectionIndicatorInstance.SetActive(true);
         }
         else
         {
-            meshRenderer.material.color = new Color(meshRenderer.material.color.r, meshRenderer.material.color.b, meshRenderer.material.color.g, OriginalColorAlpha);
+            SelectionIndicatorInstance.SetActive(false);
         }
     }
 
-
     void OnClearHighlighting()
+    {
+        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+
+        meshRenderer.material.color = OriginalColor;
+
+        SelectionIndicatorInstance.SetActive(false);
+
+    }
+
+    void OnClearHighlightingWithSelection(Node selectedNode)
     {
 
         var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
-        meshRenderer.material.color = OriginalColor;
+        if (meshRenderer.material.color != Color.blue)
+        {
+            meshRenderer.material.color = OriginalColor;
+        }
+
+        if (selectedNode != null && selectedNode.Equals(Node))
+        {
+            SelectionIndicatorInstance.SetActive(true);
+        }
+        else
+        {
+            SelectionIndicatorInstance.SetActive(false);
+        }
+
     }
 
     void OnSelected(GameObject gameStateObject)
     {
-        gameStateObject.SendMessage("OnSpaceSelected", NodeId);
+        gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
     }
 }
