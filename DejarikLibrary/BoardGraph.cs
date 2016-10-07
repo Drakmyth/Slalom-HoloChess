@@ -96,8 +96,8 @@ namespace DejarikLibrary
 			double x = Math.Cos(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
 			double y = Math.Sin(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
 
-			node.XPosition = (float)x;
-			node.YPosition = (float)y;
+			node.XPosition = -(float)x;
+			node.YPosition = -(float)y;
 		}
 
 		private Dictionary<NodeMapKey, List<NodePath>> BuildNodeMap(List<Node> nodes, List<Node> excludedNodes)
