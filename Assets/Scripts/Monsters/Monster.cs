@@ -13,7 +13,7 @@ namespace Assets.Scripts.Monsters
 
         private bool _isAlive;
 
-        private const float BaseFrameMovement = .01f;
+        private const float BaseFrameMovement = .002f;
 
         private GameObject _battleSmokeInstance;
 
