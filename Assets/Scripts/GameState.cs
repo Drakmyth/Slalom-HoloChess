@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
@@ -34,7 +33,6 @@ namespace Assets.Scripts
         //7 : Listen for CounterPush result (await opponent input)
         private int _subActionNumber;
 
-        //TODO:not sure if or how this will be used yet
         private bool _isHostPlayer = true;
 
         private Monster SelectedMonster { get; set; }
@@ -45,6 +43,7 @@ namespace Assets.Scripts
 
         public List<Monster> MonsterPrefabs;
         public List<BoardSpace> SpacePrefabs;
+        public GameObject BattleSmoke;
 
         public GameState()
         {
@@ -146,7 +145,6 @@ namespace Assets.Scripts
 
                         if (opponent != null)
                         {
-                            //TODO:Battle animation!
                             ProcessAttackAction(SelectedMonster, opponent, true);
                         }
                         else
@@ -403,6 +401,9 @@ namespace Assets.Scripts
 
         private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)
         {
+            Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition)/2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
+            GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, Quaternion.identity) as GameObject;
+
             var attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
             IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
             IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
@@ -410,18 +411,17 @@ namespace Assets.Scripts
             switch (attackResult)
             {
                 case AttackResult.Kill:
-                    //TODO:Kill animation!
                     MonsterPrefabs.Remove(defender);
                     if (isHostAttacker)
                     {
                         Player2Monsters.Remove(defender);
-                        Destroy(defender.gameObject);
+//                        Destroy(defender.gameObject);
                     }
                     else
                     {
                         Player1Monsters.Remove(defender);
-                        Destroy(defender.gameObject);
                     }
+                    defender.SendMessage("OnLoseBattle", battleSmokeInstance);
                     _subActionNumber = 0;
                     break;
                 case AttackResult.CounterKill:
@@ -430,24 +430,30 @@ namespace Assets.Scripts
                     if (isHostAttacker)
                     {                        
                         Player1Monsters.Remove(attacker);
-                        Destroy(attacker.gameObject);
+//                        Destroy(attacker.gameObject);
                     }
                     else
                     {
                         Player2Monsters.Remove(attacker);
-                        Destroy(attacker.gameObject);
                     }
+                    attacker.SendMessage("OnLoseBattle", battleSmokeInstance);
                     _subActionNumber = 0;
                     break;
                 case AttackResult.Push:
                     //TODO:Movement animation!
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
+                    //TODO: wait until push action is complete
+                    Destroy(battleSmokeInstance);
+
                     //_subActionNumber = 6;                
                     break;
                 case AttackResult.CounterPush:
                     //TODO:Get user input to select which node
                     //TODO:Movement animation!
+
+                    //TODO: wait until push action is complete
+                    Destroy(battleSmokeInstance);
 
                     //_subActionNumber = 7;
                     //send network message with available push nodes
