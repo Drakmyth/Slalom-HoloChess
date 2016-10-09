@@ -11,12 +11,42 @@ namespace Assets.Scripts.Monsters
 
         public Node CurrentNode { get; set; }
 
+        private bool _isAlive;
+
+        private const float BaseFrameMovement = .01f;
+
+        private GameObject _battleSmokeInstance;
+
         void Start()
         {
+            _isAlive = true;
         }
 
         void Update()
         {
+            if (!_isAlive)
+            {
+                if (gameObject.transform.position.y < -.1)
+                {
+                    if (_battleSmokeInstance != null)
+                    {
+                        Destroy(_battleSmokeInstance);
+                    }
+
+                    Destroy(gameObject);
+                }
+
+                Vector3 updatedPosition = new Vector3(transform.position.x, transform.position.y - BaseFrameMovement, transform.position.z);
+
+                transform.position = updatedPosition;
+            }
+
+        }
+
+        void OnLoseBattle(GameObject battleSmokeInstance)
+        {
+            _battleSmokeInstance = battleSmokeInstance;
+            _isAlive = false;
         }
     }
 }
