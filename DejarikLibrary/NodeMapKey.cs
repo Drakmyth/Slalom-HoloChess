@@ -4,8 +4,8 @@ namespace DejarikLibrary
 {
     public class NodeMapKey : IEquatable<NodeMapKey>
     {
-        public int NodeId;
-        public int Movement;
+        public readonly int NodeId;
+        public readonly int Movement;
 
         public NodeMapKey(int nodeId, int movement)
         {

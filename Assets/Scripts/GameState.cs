@@ -251,6 +251,12 @@ namespace Assets.Scripts
 
                 if (_subActionNumber == 4)
                 {
+                    if (SelectedMonster == null)
+                    {
+                        _subActionNumber --;
+                        return;
+                    }
+
                     IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
                     IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
@@ -353,9 +359,11 @@ namespace Assets.Scripts
                         Instantiate(monsterPrefab,
                             new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
                             monsterQuaternion) as Monster;
-                    monsterInstance.CurrentNode = currentMonster.CurrentNode;
-                    Player1Monsters.Add(monsterInstance);
-
+                    if (monsterInstance != null)
+                    {
+                        monsterInstance.CurrentNode = currentMonster.CurrentNode;
+                        Player1Monsters.Add(monsterInstance);
+                    }
                 }
                 else
                 {
@@ -366,8 +374,11 @@ namespace Assets.Scripts
                         Instantiate(monsterPrefab,
                             new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
                             monsterQuaternion) as Monster;
-                    monsterInstance.CurrentNode = currentMonster.CurrentNode;
-                    Player2Monsters.Add(monsterInstance);
+                    if (monsterInstance != null)
+                    {
+                        monsterInstance.CurrentNode = currentMonster.CurrentNode;
+                        Player2Monsters.Add(monsterInstance);
+                    }
                 }
 
 
@@ -391,9 +402,12 @@ namespace Assets.Scripts
                         Instantiate(spacePrefab,
                             new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y -.005f,
                                 spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace;
-                    space.Node = GameGraph.Nodes[i];
+                    if (space != null)
+                    {
+                        space.Node = GameGraph.Nodes[i];
 
-                    BoardSpaces.Add(i, space);
+                        BoardSpaces.Add(i, space);
+                    }
                 }
             }
 
@@ -404,7 +418,7 @@ namespace Assets.Scripts
             Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition)/2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
             GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, Quaternion.identity) as GameObject;
 
-            var attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
+            AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
             IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
             IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
@@ -415,7 +429,6 @@ namespace Assets.Scripts
                     if (isHostAttacker)
                     {
                         Player2Monsters.Remove(defender);
-//                        Destroy(defender.gameObject);
                     }
                     else
                     {
@@ -425,12 +438,10 @@ namespace Assets.Scripts
                     _subActionNumber = 0;
                     break;
                 case AttackResult.CounterKill:
-                    //TODO:Kill animation!
                     MonsterPrefabs.Remove(attacker);
                     if (isHostAttacker)
                     {                        
                         Player1Monsters.Remove(attacker);
-//                        Destroy(attacker.gameObject);
                     }
                     else
                     {

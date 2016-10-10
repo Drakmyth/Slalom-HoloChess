@@ -3,122 +3,108 @@ using System.Linq;
 using DejarikLibrary;
 using UnityEngine;
 
-public class BoardSpace : MonoBehaviour {
-
-    public Node Node { get; set; }
-    public GameObject SelectionIndicatorPrefab;
-    private GameObject SelectionIndicatorInstance;
-    private Color OriginalColor { get; set; }
-
-	// Use this for initialization
-	void Start () {
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-	    OriginalColor = meshRenderer.material.color;
-        Quaternion selectionIndicatorQuaternion = Quaternion.Euler(SelectionIndicatorPrefab.transform.rotation.eulerAngles.x, SelectionIndicatorPrefab.transform.rotation.eulerAngles.y, SelectionIndicatorPrefab.transform.rotation.eulerAngles.z);
-        SelectionIndicatorInstance = Instantiate(SelectionIndicatorPrefab,
-	        new Vector3(Node.XPosition, SelectionIndicatorPrefab.transform.position.y, Node.YPosition), selectionIndicatorQuaternion) as GameObject;
-        SelectionIndicatorInstance.SetActive(false);
-
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-    void OnAvailableMonsters(IEnumerable<int> availableNodeIds)
+namespace Assets.Scripts
+{
+    public class BoardSpace : MonoBehaviour
     {
+        public Node Node { get; set; }
+        public GameObject SelectionIndicatorPrefab;
+        private GameObject _selectionIndicatorInstance;
+        private Color OriginalColor { get; set; }
 
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-        if (availableNodeIds.Contains(Node.Id))
+        // Use this for initialization
+        void Start()
         {
-            meshRenderer.material.color = Color.blue;
+            var meshRenderer = gameObject.GetComponent<MeshRenderer>();
+            OriginalColor = meshRenderer.material.color;
+            Quaternion selectionIndicatorQuaternion =
+                Quaternion.Euler(SelectionIndicatorPrefab.transform.rotation.eulerAngles.x,
+                    SelectionIndicatorPrefab.transform.rotation.eulerAngles.y,
+                    SelectionIndicatorPrefab.transform.rotation.eulerAngles.z);
+            _selectionIndicatorInstance = Instantiate(SelectionIndicatorPrefab,
+                new Vector3(Node.XPosition, SelectionIndicatorPrefab.transform.position.y, Node.YPosition),
+                selectionIndicatorQuaternion) as GameObject;
+            _selectionIndicatorInstance.SetActive(false);
         }
-        else
+
+        // Update is called once per frame
+        void Update()
         {
+        }
+
+        void OnAvailableMonsters(IEnumerable<int> availableNodeIds)
+        {
+            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+
+            meshRenderer.material.color = availableNodeIds.Contains(Node.Id) ? Color.blue : OriginalColor;
+        }
+
+        void OnAvailableAttacks(IEnumerable<int> availableNodeIds)
+        {
+            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+
+            if (availableNodeIds.Contains(Node.Id))
+            {
+                meshRenderer.material.color = Color.red;
+            }
+            else if (meshRenderer.material.color == Color.red)
+            {
+                meshRenderer.material.color = OriginalColor;
+            }
+        }
+
+        void OnAvailableMoves(IEnumerable<int> availableNodeIds)
+        {
+            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+
+            if (availableNodeIds.Contains(Node.Id))
+            {
+                meshRenderer.material.color = Color.green;
+            }
+            else if (meshRenderer.material.color == Color.green)
+            {
+                meshRenderer.material.color = OriginalColor;
+            }
+        }
+
+        void OnMonsterSelected(int nodeId)
+        {
+            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+
+            _selectionIndicatorInstance.SetActive(nodeId == Node.Id);
+        }
+
+        void OnClearHighlighting()
+        {
+            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+
             meshRenderer.material.color = OriginalColor;
+
+            _selectionIndicatorInstance.SetActive(false);
         }
-    }
 
-    void OnAvailableAttacks(IEnumerable<int> availableNodeIds)
-    {
-
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-        if (availableNodeIds.Contains(Node.Id))
+        void OnClearHighlightingWithSelection(Node selectedNode)
         {
-            meshRenderer.material.color = Color.red;
+            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+
+            if (meshRenderer.material.color != Color.blue)
+            {
+                meshRenderer.material.color = OriginalColor;
+            }
+
+            if (selectedNode != null && selectedNode.Equals(Node))
+            {
+                _selectionIndicatorInstance.SetActive(true);
+            }
+            else
+            {
+                _selectionIndicatorInstance.SetActive(false);
+            }
         }
-        else if (meshRenderer.material.color == Color.red)
+
+        void OnSelected(GameObject gameStateObject)
         {
-            meshRenderer.material.color = OriginalColor;
+            gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
         }
-    }
-
-    void OnAvailableMoves(IEnumerable<int> availableNodeIds)
-    {
-
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-        if (availableNodeIds.Contains(Node.Id))
-        {
-            meshRenderer.material.color = Color.green;
-        }
-        else if (meshRenderer.material.color == Color.green)
-        {
-            meshRenderer.material.color = OriginalColor;
-        }
-    }
-
-    void OnMonsterSelected(int nodeId)
-    {
-
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-        if (nodeId == Node.Id)
-        {
-            SelectionIndicatorInstance.SetActive(true);
-        }
-        else
-        {
-            SelectionIndicatorInstance.SetActive(false);
-        }
-    }
-
-    void OnClearHighlighting()
-    {
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-        meshRenderer.material.color = OriginalColor;
-
-        SelectionIndicatorInstance.SetActive(false);
-
-    }
-
-    void OnClearHighlightingWithSelection(Node selectedNode)
-    {
-
-        var meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-        if (meshRenderer.material.color != Color.blue)
-        {
-            meshRenderer.material.color = OriginalColor;
-        }
-
-        if (selectedNode != null && selectedNode.Equals(Node))
-        {
-            SelectionIndicatorInstance.SetActive(true);
-        }
-        else
-        {
-            SelectionIndicatorInstance.SetActive(false);
-        }
-
-    }
-
-    void OnSelected(GameObject gameStateObject)
-    {
-        gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
     }
 }

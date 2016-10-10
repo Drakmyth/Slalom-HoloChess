@@ -4,7 +4,7 @@ namespace DejarikLibrary
 {
     public class Node
     {
-        public int Id { get; set; }
+        public int Id { get; }
         public List<Node> AdjacentNodes { get; set; }
         public float XPosition { get; set; }
         public float YPosition { get; set; }
@@ -23,6 +23,11 @@ namespace DejarikLibrary
         public override bool Equals(object obj)
         {
             return Equals(obj as Node);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id;
         }
 
         public bool Equals(Node x)
