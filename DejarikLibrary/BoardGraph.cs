@@ -36,7 +36,7 @@ namespace DejarikLibrary
 	        
 	    }
 
-		private List<Node> GenerateNodes()
+		private static List<Node> GenerateNodes()
 		{
 			List<Node> nodes = new List<Node>();
 
@@ -49,7 +49,7 @@ namespace DejarikLibrary
 			return nodes;
 		}
 
-		private void BuildGraph(List<Node> nodes)
+		private void BuildGraph(IList<Node> nodes)
 		{
 			nodes[0].XPosition = 0;
 			nodes[0].YPosition = 0;
@@ -57,7 +57,7 @@ namespace DejarikLibrary
 			//inner spaces
 			for (int i = 1; i < 13; i++)
 			{
-				int innerNode = 0;
+				const int innerNode = 0;
 				int ccwNode = (i + 10) % 12 + 1;
 				int cwNode = i % 12 + 1;
 				int outerNode = i + 12;
@@ -88,7 +88,7 @@ namespace DejarikLibrary
 			}
 		}
 
-		private void AddNodeCoordinates(Node node, double innerBoundingRadius, double outerBoundingRadius)
+		private static void AddNodeCoordinates(Node node, double innerBoundingRadius, double outerBoundingRadius)
 		{
 			//75,45,15,-15....
 			double angle = Math.PI / 12 * (7 - 2 * (node.Id % 12));
@@ -161,9 +161,12 @@ namespace DejarikLibrary
 			foreach (Node node in nodes)
 			{
 				int distance = 0;
-				NodePath shortestPath = new NodePath();
-				shortestPath.DestinationNode = node;
-				Node currentPathNode = node;
+			    NodePath shortestPath = new NodePath
+			    {
+			        DestinationNode = node
+			    };
+
+                Node currentPathNode = node;
 				while (previousNodeAlongShortestPath[currentPathNode] != null)
 				{
 					distance++;
