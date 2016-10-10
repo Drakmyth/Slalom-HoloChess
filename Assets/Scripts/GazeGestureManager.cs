@@ -10,7 +10,7 @@ namespace Assets.Scripts
         // Represents the hologram that is currently being gazed at.
         public GameObject FocusedObject { get; private set; }
 
-        GestureRecognizer recognizer;
+        GestureRecognizer _recognizer;
 
         // Use this for initialization
         void Start()
@@ -18,8 +18,8 @@ namespace Assets.Scripts
             Instance = this;
 
             // Set up a GestureRecognizer to detect Select gestures.
-            recognizer = new GestureRecognizer();
-            recognizer.TappedEvent += (source, tapCount, ray) =>
+            _recognizer = new GestureRecognizer();
+            _recognizer.TappedEvent += (source, tapCount, ray) =>
             {
                 // Send an OnSelect message to the focused object and its ancestors.
                 if (FocusedObject != null)
@@ -27,7 +27,7 @@ namespace Assets.Scripts
                     FocusedObject.SendMessage("OnSelected", gameObject);
                 }
             };
-            recognizer.StartCapturingGestures();
+            _recognizer.StartCapturingGestures();
         }
 
         // Update is called once per frame
@@ -38,27 +38,18 @@ namespace Assets.Scripts
 
             // Do a raycast into the world based on the user's
             // head position and orientation.
-            var headPosition = Camera.main.transform.position;
-            var gazeDirection = Camera.main.transform.forward;
+            Vector3 headPosition = Camera.main.transform.position;
+            Vector3 gazeDirection = Camera.main.transform.forward;
 
             RaycastHit hitInfo;
-            if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
-            {
-                // If the raycast hit a hologram, use that as the focused object.
-                FocusedObject = hitInfo.collider.gameObject;
-            }
-            else
-            {
-                // If the raycast did not hit a hologram, clear the focused object.
-                FocusedObject = null;
-            }
+            FocusedObject = Physics.Raycast(headPosition, gazeDirection, out hitInfo) ? hitInfo.collider.gameObject : null;
 
             // If the focused object changed this frame,
             // start detecting fresh gestures again.
             if (FocusedObject != oldFocusObject)
             {
-                recognizer.CancelGestures();
-                recognizer.StartCapturingGestures();
+                _recognizer.CancelGestures();
+                _recognizer.StartCapturingGestures();
             }
         }
     }

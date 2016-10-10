@@ -4,13 +4,13 @@ namespace Assets.Scripts
 {
     public class Cursor : MonoBehaviour {
 
-        private MeshRenderer meshRenderer;
+        private MeshRenderer _meshRenderer;
 
         // Use this for initialization
         void Start()
         {
             // Grab the mesh renderer that's on the same object as this script.
-            meshRenderer = this.gameObject.GetComponentInChildren<MeshRenderer>();
+            _meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
         }
 
         // Update is called once per frame
@@ -18,8 +18,8 @@ namespace Assets.Scripts
         {
             // Do a raycast into the world based on the user's
             // head position and orientation.
-            var headPosition = Camera.main.transform.position;
-            var gazeDirection = Camera.main.transform.forward;
+            Vector3 headPosition = Camera.main.transform.position;
+            Vector3 gazeDirection = Camera.main.transform.forward;
 
             RaycastHit hitInfo;
 
@@ -29,7 +29,7 @@ namespace Assets.Scripts
             {
                 // If the raycast hit a hologram...
                 // Display the cursor mesh.
-                meshRenderer.enabled = true;
+                _meshRenderer.enabled = true;
 
                 // Move thecursor to the point where the raycast hit.
                 this.transform.position = new Vector3(hitInfo.point.x, hitInfo.point.y + .01f, hitInfo.point.z);
@@ -40,7 +40,7 @@ namespace Assets.Scripts
             else
             {
                 // If the raycast did not hit a hologram, hide the cursor mesh.
-                meshRenderer.enabled = false;
+                _meshRenderer.enabled = false;
             }
         }
     }

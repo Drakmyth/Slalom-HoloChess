@@ -30,17 +30,9 @@ namespace DejarikLibrary
 
 	    public IEnumerable<Node> FindAttackMoves(Node start, IEnumerable<Node> enemyOccupiedNodes)
 		{
-			List<Node> validAttacks = new List<Node>();
-			IEnumerable<Node> occupied = enemyOccupiedNodes.ToList();
-			foreach (Node adjacentNode in start.AdjacentNodes)
-			{
-				if (occupied.Contains(adjacentNode))
-				{
-					validAttacks.Add(adjacentNode);
-				}
-			}
+	        IEnumerable<Node> occupied = enemyOccupiedNodes.ToList();
 
-			return validAttacks;
+	        return start.AdjacentNodes.Where(adjacentNode => occupied.Contains(adjacentNode)).ToList();
 		}
 
 	}
