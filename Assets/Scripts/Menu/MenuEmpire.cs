@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.Menu
 {
     public class MenuEmpire : MonoBehaviour
     {
@@ -23,9 +23,12 @@ namespace Assets.Scripts
         // Update is called once per frame
         void Update()
         {
-            if (Math.Abs(_currentAlpha) < .01)
+            if (isActiveAndEnabled && Math.Abs(_currentAlpha) < .01)
             {
-                SendMessageUpwards("OnEmpireFaded");
+                gameObject.SetActive(false);
+                GameObject.Find("MenuTitle").SendMessage("OnEmpireFaded");
+                GameObject.Find("MenuTitleAurebesh").SendMessage("OnEmpireFaded");
+
             }
 
             Material material = gameObject.GetComponent<MeshRenderer>().material;
