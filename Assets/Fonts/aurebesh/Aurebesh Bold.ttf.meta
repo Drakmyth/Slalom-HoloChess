@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 7fd06993e02263b42b133dfd160f6a4d
+timeCreated: 1476169625
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Aurebesh
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 11233edbbf600f747a2ba771c5fcd964, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
