@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
+using UnityEngine.SceneManagement;
 using Random = System.Random;
 
 namespace Assets.Scripts
@@ -63,9 +64,10 @@ namespace Assets.Scripts
             AvailablePushDestinations = new List<Node>();
         }
 
-
         void Start()
         {
+            SceneManager.UnloadScene("startup");
+
             DisplayBoardSpaces();
 
             if (_isHostPlayer)
@@ -491,12 +493,12 @@ namespace Assets.Scripts
 
         private void EndGameWin()
         {
-            return;
+            SceneManager.LoadScene("startup");
         }
 
         private void EndGameLose()
         {
-            return;
+            SceneManager.LoadScene("startup");
         }
 
     }
