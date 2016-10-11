@@ -37,7 +37,8 @@ namespace Assets.Scripts
         private bool _isEasyAI = true;
         private bool _isAnimationRunning = false;
         private Monster SelectedMonster { get; set; }
-        private Node SelectedActionNode { get; set; }
+        private Node SelectedAttackNode { get; set; }
+        private NodePath SelectedMovementPath { get; set; }
 
         //TODO: we can probably do better than this
         private IEnumerable<Node> AvailablePushDestinations { get; set; }
@@ -143,24 +144,23 @@ namespace Assets.Scripts
 
                 if (_subActionNumber == 5)
                 {
-
-                    if (SelectedActionNode != null && SelectedMonster != null)
+                    if (SelectedMonster == null)
                     {
-
-                        Monster opponent = GetEnemyAtNode(SelectedActionNode);
-
-                        if (opponent != null)
-                        {
-                            ProcessAttackAction(SelectedMonster, opponent, true);
-                        }
-                        else
-                        {
-                            ProcessMoveAction(SelectedMonster, SelectedActionNode);
-
-                        }
-
+                        _subActionNumber = 2;
+                        return;
                     }
 
+                    if (SelectedAttackNode != null)
+                    {
+
+                        Monster opponent = GetEnemyAtNode(SelectedAttackNode);
+
+                        ProcessAttackAction(SelectedMonster, opponent, true);
+                    }
+                    else if (SelectedMovementPath != null)
+                    {
+                        ProcessMoveAction(SelectedMonster, SelectedMovementPath);
+                    }
                 }
             }
 
@@ -264,7 +264,7 @@ namespace Assets.Scripts
                 {
                     if (SelectedMonster == null)
                     {
-                        _subActionNumber --;
+                        _subActionNumber  = 2;
                         return;
                     }
 
@@ -282,7 +282,7 @@ namespace Assets.Scripts
                     if (friendlyOccupiedNodes.Contains(selectedNode))
                     {
                         SelectedMonster = Player1Monsters.Single(m => m.CurrentNode.Id == nodeId);
-                        SelectedActionNode = null;
+                        SelectedAttackNode = null;
 
                         foreach (BoardSpace space in BoardSpaces.Values)
                         {
@@ -291,9 +291,16 @@ namespace Assets.Scripts
 
                         _subActionNumber = 3;
                     }
-                    else if (availableAttackActions.Union(availableMoveActions).Contains(selectedNode))
+                    else if (availableAttackActions.Contains(selectedNode))
                     {
-                        SelectedActionNode = selectedNode;
+                        SelectedAttackNode = selectedNode;
+                        SelectedMovementPath = null;
+                        _subActionNumber = 5;
+                    }
+                    else if (availableMoveActions.Contains(selectedNode))
+                    {
+                        SelectedMovementPath = movementPaths.Single(m => m.DestinationNode.Equals(selectedNode));
+                        SelectedAttackNode = null;
                         _subActionNumber = 5;
                     }
 
@@ -301,7 +308,13 @@ namespace Assets.Scripts
 
                 if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
                 {
-                    Player2Monsters.Single(m => m.CurrentNode.Id == SelectedActionNode.Id).CurrentNode = selectedNode;
+                    Monster pushedMonster = Player2Monsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+                    List<Node> pathToDestination = new List<Node> {selectedNode};
+                    NodePath movementPath = new NodePath(pathToDestination, selectedNode);
+                    pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
+
+                    pushedMonster.CurrentNode = selectedNode;
+
                     _subActionNumber = 0;
 
                 }
@@ -346,7 +359,7 @@ namespace Assets.Scripts
                     if (friendlyOccupiedNodes.Contains(selectedNode))
                     {
                         SelectedMonster = Player2Monsters.Single(m => m.CurrentNode.Id == nodeId);
-                        SelectedActionNode = null;
+                        SelectedAttackNode = null;
 
                         foreach (BoardSpace space in BoardSpaces.Values)
                         {
@@ -357,7 +370,7 @@ namespace Assets.Scripts
                     }
                     else if (availableAttackActions.Union(availableMoveActions).Contains(selectedNode))
                     {
-                        SelectedActionNode = selectedNode;
+                        SelectedAttackNode = selectedNode;
                         _subActionNumber = 5;
                     }
 
@@ -365,7 +378,7 @@ namespace Assets.Scripts
 
                 if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
                 {
-                    Player2Monsters.Single(m => m.CurrentNode.Id == SelectedActionNode.Id).CurrentNode = selectedNode;
+                    Player2Monsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id).CurrentNode = selectedNode;
                     _subActionNumber = 0;
 
                 }
@@ -546,15 +559,11 @@ namespace Assets.Scripts
 
         }
 
-        private void ProcessMoveAction(Monster selectedMonster, Node destination)
+        private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
-            //TODO:Get animation path from GameGraph.NodeMap and move peice from space to space
-            selectedMonster.CurrentNode = destination;
+            selectedMonster.CurrentNode = path.DestinationNode;
 
-            //TODO:Movement animation! Use this instead for now...
-            selectedMonster.transform.position = new Vector3(destination.XPosition, 0,
-                destination.YPosition);
-
+            selectedMonster.SendMessage("OnBeginMoveAnimation", path);
 
             _subActionNumber = 0;
         }
@@ -639,10 +648,10 @@ namespace Assets.Scripts
             if (_subActionNumber == 5)
             {
 
-                if (SelectedActionNode != null && SelectedMonster != null)
+                if (SelectedAttackNode != null && SelectedMonster != null)
                 {
 
-                    Monster opponent = GetEnemyAtNode(SelectedActionNode);
+                    Monster opponent = GetEnemyAtNode(SelectedAttackNode);
 
                     if (opponent != null)
                     {
@@ -650,7 +659,7 @@ namespace Assets.Scripts
                     }
                     else
                     {
-                        ProcessMoveAction(SelectedMonster, SelectedActionNode);
+                        ProcessMoveAction(SelectedMonster, SelectedAttackNode);
 
                     }
 
