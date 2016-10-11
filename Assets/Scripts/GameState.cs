@@ -35,7 +35,7 @@ namespace Assets.Scripts
 
         private bool _isHostPlayer = true;
         private bool _isEasyAI = true;
-
+        private bool _isAnimationRunning = false;
         private Monster SelectedMonster { get; set; }
         private Node SelectedActionNode { get; set; }
 
@@ -82,6 +82,11 @@ namespace Assets.Scripts
             if (_actionNumber < 1)
             {
                 //This should be unreachable
+                return;
+            }
+
+            if (_isAnimationRunning)
+            {
                 return;
             }
 
@@ -374,6 +379,10 @@ namespace Assets.Scripts
 
         }
 
+        void OnAmimationComplete()
+        {
+            _isAnimationRunning = false;
+        }
 
         private Monster GetEnemyAtNode(Node node)
         {
