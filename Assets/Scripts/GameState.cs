@@ -417,8 +417,9 @@ namespace Assets.Scripts
 
         private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)
         {
+            Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
             Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition)/2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
-            GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, Quaternion.identity) as GameObject;
+            GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, battleSmokeQuaternion) as GameObject;
 
             AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
             IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
