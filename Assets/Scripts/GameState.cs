@@ -100,16 +100,25 @@ namespace Assets.Scripts
                     break;
                 case 2:
                     //Wait for user to select from available actions
-                    return;
+                    AwaitSubActionTwoSelection();
+                    break;
                 case 3:
                     SubActionThree();
                     break;
                 case 4:
                     //Wait for user to select from available actions
-                    return;
+                    AwaitSubActionFourSelection();
+                    break;
                 case 5:
                     SubActionFive();
                     break;
+                case 6:
+                    AwaitSubActionSixSelection();
+                    break;
+                case 7:
+                    AwaitSubActionSevenSelection();
+                    break;
+
             }
 
             if (Player1Monsters.Count == 0)
@@ -210,7 +219,11 @@ namespace Assets.Scripts
                 if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
                 {
                     SubActionSix(selectedNode, true);
+                }
 
+                if (_subActionNumber == 7 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
+                {
+                    SubActionSeven(selectedNode, false);
                 }
 
             }
@@ -230,6 +243,11 @@ namespace Assets.Scripts
                 if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
                 {
                     SubActionSix(selectedNode, false);
+                }
+
+                if (_subActionNumber == 7 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
+                {
+                    SubActionSeven(selectedNode, true);
                 }
 
             }
@@ -370,6 +388,8 @@ namespace Assets.Scripts
                 case AttackResult.CounterPush:
                     //TODO:Get user input to select which node
                     //TODO:Movement animation!
+                    AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
+                        friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
                     //TODO: wait until push action is complete
                     Destroy(battleSmokeInstance);
@@ -429,6 +449,20 @@ namespace Assets.Scripts
             _subActionNumber = 2;
         }
 
+        private void AwaitSubActionTwoSelection()
+        {
+            if (_actionNumber == 3 || _actionNumber == 4)
+            {
+                IEnumerable<BoardSpace> availableSpaces =
+                    BoardSpaces.Values.Where(s => Player2Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
+                //TODO: bake this into gonk droid et al
+                BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
+
+                OnSpaceSelected(aiChoice.Node.Id);
+            }
+
+        }
+
         private void SubActionTwo(int nodeId, bool isHostPlayer)
         {
             SelectedMonster = isHostPlayer ? Player1Monsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId) : Player2Monsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
@@ -478,6 +512,38 @@ namespace Assets.Scripts
                 _subActionNumber = 4;
             }
 
+        }
+
+        private void AwaitSubActionFourSelection()
+        {
+            if (_actionNumber == 3 || _actionNumber == 4)
+            {
+                IEnumerable<Node> friendlyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
+                IEnumerable<Node> enemyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
+
+                IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
+                    SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.DestinationNode.Id);
+
+                IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
+                    enemyOccupiedNodes).Select(a => a.Id);
+                //TODO: bake this into gonk droid et al
+                int aiActionNodeId;
+                if (availableAttackActionNodeIds.Any())
+                {
+                    aiActionNodeId = availableAttackActionNodeIds.ElementAt(_random.Next(availableAttackActionNodeIds.Count()));
+                }
+                else if (availableMoveActionNodeIds.Any())
+                {
+                    aiActionNodeId = availableMoveActionNodeIds.ElementAt(_random.Next(availableMoveActionNodeIds.Count()));
+                }
+                else
+                {
+                    return;
+                }
+
+                OnSpaceSelected(aiActionNodeId);
+
+            }
         }
 
         private void SubActionFour(Node selectedNode, bool isHostPlayer)
@@ -538,6 +604,8 @@ namespace Assets.Scripts
 
         private void SubActionFive()
         {
+            bool isHostPlayer = _actionNumber == 1 || _actionNumber == 2;
+
             if (SelectedMonster == null)
             {
                 _subActionNumber = 2;
@@ -546,10 +614,9 @@ namespace Assets.Scripts
 
             if (SelectedAttackNode != null)
             {
+                Monster opponent = GetEnemyAtNode(SelectedAttackNode, isHostPlayer);
 
-                Monster opponent = GetEnemyAtNode(SelectedAttackNode, true);
-
-                ProcessAttackAction(SelectedMonster, opponent, true);
+                ProcessAttackAction(SelectedMonster, opponent, isHostPlayer);
             }
             else if (SelectedMovementPath != null)
             {
@@ -557,6 +624,29 @@ namespace Assets.Scripts
             }
 
         }
+
+        private void AwaitSubActionSixSelection()
+        {
+            if (_actionNumber == 3 || _actionNumber == 4)
+            {               
+                //TODO: bake this into gonk droid et al
+                Node aiActionNode;
+                if (AvailablePushDestinations.Any())
+                {
+                    aiActionNode = AvailablePushDestinations.ElementAt(_random.Next(AvailablePushDestinations.Count()));
+                }
+                else
+                {
+                    _subActionNumber = 0;
+                    return;
+                }
+
+                OnSpaceSelected(aiActionNode.Id);
+
+            }
+        }
+
+
 
         private void SubActionSix(Node selectedNode, bool isHostPlayer)
         {
@@ -573,18 +663,56 @@ namespace Assets.Scripts
 
         }
 
-        private void SubActionSeven()
+
+        private void AwaitSubActionSevenSelection()
         {
+            if (_actionNumber == 1 || _actionNumber == 2)
+            {
+
+                //TODO: bake this into gonk droid et al
+                Node aiActionNode;
+                if (AvailablePushDestinations.Any())
+                {
+                    aiActionNode = AvailablePushDestinations.ElementAt(_random.Next(AvailablePushDestinations.Count()));
+                }
+                else
+                {
+                    _subActionNumber = 0;
+                    return;
+                }
+
+                OnSpaceSelected(aiActionNode.Id);
+
+            }
+        }
+
+
+
+        private void SubActionSeven(Node selectedNode, bool isHostPlayer)
+        {
+            Monster pushedMonster = isHostPlayer ? Player2Monsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id) : Player1Monsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
+
+            List<Node> pathToDestination = new List<Node> { selectedNode };
+            NodePath movementPath = new NodePath(pathToDestination, selectedNode);
+            _isAnimationRunning = true;
+            pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
+
+            pushedMonster.CurrentNode = selectedNode;
+
+            _subActionNumber = 0;
 
         }
 
+
         private void EndGameWin()
         {
+            //TODO: intermediate scene/object to indicate result before booting to main menu
             SceneManager.LoadScene("startup");
         }
 
         private void EndGameLose()
         {
+            //TODO: intermediate scene/object to indicate result before booting to main menu
             SceneManager.LoadScene("startup");
         }
 
