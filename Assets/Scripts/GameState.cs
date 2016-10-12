@@ -153,7 +153,7 @@ namespace Assets.Scripts
                     if (SelectedAttackNode != null)
                     {
 
-                        Monster opponent = GetEnemyAtNode(SelectedAttackNode);
+                        Monster opponent = GetEnemyAtNode(SelectedAttackNode, true);
 
                         ProcessAttackAction(SelectedMonster, opponent, true);
                     }
@@ -188,6 +188,9 @@ namespace Assets.Scripts
                 _subActionNumber = 1;
                 _isHostPlayer = true;
                 SelectedMonster = null;
+                SelectedAttackNode = null;
+                SelectedMovementPath = null;
+
             }
             else if (_actionNumber == 3 && _subActionNumber == 0)
             {
@@ -199,6 +202,8 @@ namespace Assets.Scripts
                 _subActionNumber = 1;
                
                 SelectedMonster = null;
+                SelectedAttackNode = null;
+                SelectedMovementPath = null;
             }
             else if(_actionNumber == 2 && _subActionNumber == 0)
             {
@@ -210,6 +215,8 @@ namespace Assets.Scripts
                 _subActionNumber = 1;
                 _isHostPlayer = false;
                 SelectedMonster = null;
+                SelectedAttackNode = null;
+                SelectedMovementPath = null;
             }
             else if (_actionNumber == 1 && _subActionNumber == 0)
             {
@@ -232,6 +239,10 @@ namespace Assets.Scripts
 
                     space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
                 }
+
+                SelectedAttackNode = null;
+                SelectedMovementPath = null;
+
                 _actionNumber++;
 
             }
@@ -311,6 +322,7 @@ namespace Assets.Scripts
                     Monster pushedMonster = Player2Monsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
                     List<Node> pathToDestination = new List<Node> {selectedNode};
                     NodePath movementPath = new NodePath(pathToDestination, selectedNode);
+                    _isAnimationRunning = true;
                     pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
 
                     pushedMonster.CurrentNode = selectedNode;
@@ -368,9 +380,15 @@ namespace Assets.Scripts
 
                         _subActionNumber = 3;
                     }
-                    else if (availableAttackActions.Union(availableMoveActions).Contains(selectedNode))
+                    else if (availableAttackActions.Contains(selectedNode))
                     {
                         SelectedAttackNode = selectedNode;
+                        SelectedMovementPath = null;
+                        _subActionNumber = 5;
+                    } else if (availableMoveActions.Contains(selectedNode))
+                    {
+                        SelectedMovementPath = movementPaths.Single(m => m.DestinationNode.Equals(selectedNode));
+                        SelectedAttackNode = null;
                         _subActionNumber = 5;
                     }
 
@@ -392,16 +410,16 @@ namespace Assets.Scripts
 
         }
 
-        void OnAmimationComplete()
+        void OnAnimationComplete()
         {
             _isAnimationRunning = false;
         }
 
-        private Monster GetEnemyAtNode(Node node)
+        private Monster GetEnemyAtNode(Node node, bool isHostPlayer)
         {
-            List<Monster> enemyMonsters = _isHostPlayer ? Player2Monsters : Player1Monsters;
+            List<Monster> enemyMonsters = isHostPlayer ? Player2Monsters : Player1Monsters;
 
-            return enemyMonsters.FirstOrDefault(monster => monster.CurrentNode == node);
+            return enemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(node));
         }
 
         private void AssignMonstersToPlayers()
@@ -517,6 +535,7 @@ namespace Assets.Scripts
                     {
                         Player1Monsters.Remove(defender);
                     }
+                    _isAnimationRunning = true;
                     defender.SendMessage("OnLoseBattle", battleSmokeInstance);
                     _subActionNumber = 0;
                     break;
@@ -530,6 +549,7 @@ namespace Assets.Scripts
                     {
                         Player2Monsters.Remove(attacker);
                     }
+                    _isAnimationRunning = true;
                     attacker.SendMessage("OnLoseBattle", battleSmokeInstance);
                     _subActionNumber = 0;
                     break;
@@ -561,7 +581,9 @@ namespace Assets.Scripts
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
-            selectedMonster.CurrentNode = path.DestinationNode;
+            selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
+
+            _isAnimationRunning = true;
 
             selectedMonster.SendMessage("OnBeginMoveAnimation", path);
 
@@ -647,24 +669,22 @@ namespace Assets.Scripts
 
             if (_subActionNumber == 5)
             {
-
-                if (SelectedAttackNode != null && SelectedMonster != null)
+                if (SelectedMonster == null)
                 {
-
-                    Monster opponent = GetEnemyAtNode(SelectedAttackNode);
-
-                    if (opponent != null)
-                    {
-                        ProcessAttackAction(SelectedMonster, opponent, true);
-                    }
-                    else
-                    {
-                        ProcessMoveAction(SelectedMonster, SelectedAttackNode);
-
-                    }
-
+                    _subActionNumber = 2;
+                    return;
                 }
 
+                if (SelectedAttackNode != null)
+                {
+                    Monster opponent = GetEnemyAtNode(SelectedAttackNode, false);
+
+                    ProcessAttackAction(SelectedMonster, opponent, false);
+                }
+                else if (SelectedMovementPath != null)
+                {
+                    ProcessMoveAction(SelectedMonster, SelectedMovementPath);
+                }
             }
         }
 
