@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: ab785d095d2c96746998d82cb00ce05a
+timeCreated: 1476169625
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Aurebesh Condensed
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 9d35e61088ae8c941ad3c09b26d62512, type: 3}
+  - {fileID: 12800000, guid: 563b2819f9b0da54fb7d6ed6ee180419, type: 3}
+  - {fileID: 12800000, guid: 9372691b27507e2429837614bc71f30d, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
