@@ -11,10 +11,12 @@ namespace Assets.Scripts
         public GameObject SelectionIndicatorPrefab;
         private GameObject _selectionIndicatorInstance;
         private Color OriginalColor { get; set; }
+        private Color SelectionYellow { get; set; }
 
         // Use this for initialization
         void Start()
         {
+            SelectionYellow = new Color(1f, .89f, 0f, 1f);
             var meshRenderer = gameObject.GetComponent<MeshRenderer>();
             OriginalColor = meshRenderer.material.color;
             Quaternion selectionIndicatorQuaternion =
@@ -36,7 +38,7 @@ namespace Assets.Scripts
         {
             MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
 
-            meshRenderer.material.color = availableNodeIds.Contains(Node.Id) ? Color.blue : OriginalColor;
+            meshRenderer.material.color = availableNodeIds.Contains(Node.Id) ? SelectionYellow : OriginalColor;
         }
 
         void OnAvailableAttacks(IEnumerable<int> availableNodeIds)
@@ -87,7 +89,7 @@ namespace Assets.Scripts
         {
             MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
 
-            if (meshRenderer.material.color != Color.blue)
+            if (meshRenderer.material.color != SelectionYellow)
             {
                 meshRenderer.material.color = OriginalColor;
             }
