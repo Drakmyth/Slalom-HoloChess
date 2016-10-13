@@ -68,7 +68,10 @@ namespace Assets.Scripts
 
         void Start()
         {
-            SceneManager.UnloadScene("startup");
+            if (SceneManager.GetSceneByName("startup").isLoaded)
+            {
+                SceneManager.UnloadScene("startup");
+            }
 
             DisplayBoardSpaces();
 
@@ -306,6 +309,7 @@ namespace Assets.Scripts
                             monsterQuaternion) as Monster;
                     if (monsterInstance != null)
                     {
+                        monsterInstance.BelongsToHost = true;
                         monsterInstance.CurrentNode = currentMonster.CurrentNode;
                         Player1Monsters.Add(monsterInstance);
                     }
@@ -321,6 +325,7 @@ namespace Assets.Scripts
                             monsterQuaternion) as Monster;
                     if (monsterInstance != null)
                     {
+                        monsterInstance.BelongsToHost = false;
                         monsterInstance.CurrentNode = currentMonster.CurrentNode;
                         Player2Monsters.Add(monsterInstance);
                     }

@@ -12,23 +12,26 @@ namespace Assets.Scripts.Monsters
 
         public Node CurrentNode { get; set; }
 
+        //TODO: remove this work-around for rotation
+        public bool BelongsToHost { get; set; }
+
         private List<Node> MovementNodes { get; set; }
 
-        private float _remainingX;
-
-        private float _remainingZ;
-
         private bool _isAlive;
+
+
+        private float _movementDelta;
+        private float _rotationDelta;
 
         private float _initialXRotation;
         private float _initialYRotation;
         private float _initialZRotation;
 
-        private const float HorizontalMovementPerSecond = .2f;
+        private const float HorizontalMovementRate = 1f;
 
         private const float VerticalMovementPerSecond = .05f;
 
-        private const float RotationPerSecond = 180;
+        private const float RotationRate = .1f;
 
         private GameObject _battleSmokeInstance;
 
@@ -37,8 +40,8 @@ namespace Assets.Scripts.Monsters
             _initialXRotation = transform.rotation.eulerAngles.x;
             _initialYRotation = transform.rotation.eulerAngles.y;
             _initialZRotation = transform.rotation.eulerAngles.z;
-            _remainingX = 0;
-            _remainingZ = 0;
+            _movementDelta = 0;
+            _rotationDelta = 0;
             MovementNodes = new List<Node>();
             _isAlive = true;
         }
@@ -47,17 +50,26 @@ namespace Assets.Scripts.Monsters
         {
             if (MovementNodes.Count > 0)
             {
-                float delta = Time.deltaTime * HorizontalMovementPerSecond;
 
-                float zDelta = _remainingZ / Mathf.Abs(_remainingX) * delta;
-                float xDelta = _remainingX / Mathf.Abs(_remainingZ) * delta;
+                _movementDelta += Time.deltaTime * HorizontalMovementRate;
+                _rotationDelta += RotationRate;
 
-                if (Mathf.Abs(zDelta) >= Mathf.Abs(_remainingZ) || Mathf.Abs(xDelta) >= Mathf.Abs(_remainingX))
+                if (_movementDelta >= 1)
                 {
-                    _remainingZ = 0;
-                    _remainingX = 0;
+                    _movementDelta = 1;
+                }
 
-                    transform.position = new Vector3(MovementNodes[0].XPosition, transform.position.y, MovementNodes[0].YPosition);
+                Vector3 newPosition = Vector3.Lerp(transform.position, new Vector3(MovementNodes[0].XPosition, transform.position.y,
+                MovementNodes[0].YPosition), _movementDelta);
+
+                Vector3 deltaVector = newPosition - transform.position;
+
+                transform.position = newPosition;
+
+                if (_movementDelta >= 1)
+                {
+                    _movementDelta = 0;
+                    _rotationDelta = 0;
 
                     MovementNodes.RemoveAt(0);
 
@@ -65,27 +77,23 @@ namespace Assets.Scripts.Monsters
                     {
                         GameObject.Find("GameState").SendMessage("OnAnimationComplete");
                     }
-                    else
-                    {
-                        _remainingZ = MovementNodes[0].YPosition - transform.position.z;
-                        _remainingX = MovementNodes[0].XPosition - transform.position.x;
-                    }
 
                 }
-                else
+                else if (_rotationDelta < 1)
                 {
-                    _remainingZ -= zDelta;
-                    _remainingX -= xDelta;
-
-                    Vector3 deltaVector = new Vector3(xDelta, 0, zDelta);
-
-                    transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z) + deltaVector;
 
                     Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                    lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation, lookRotation.eulerAngles.z + _initialZRotation);
+                    float yAdjustment = 0f;
 
-                    transform.rotation = Quaternion.Lerp(transform.rotation, lookRotation, Time.deltaTime * RotationPerSecond);
+                    if (!BelongsToHost)
+                    {
+                        yAdjustment = 180f;
+                    }
+
+                    lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
+
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, _rotationDelta);
 
                 }
             }
@@ -120,8 +128,7 @@ namespace Assets.Scripts.Monsters
         void OnBeginMoveAnimation(NodePath currentPath)
         {
             MovementNodes = currentPath.PathToDestination;
-            _remainingZ = MovementNodes[0].YPosition - transform.position.z;
-            _remainingX = MovementNodes[0].XPosition - transform.position.x;
+            _movementDelta = 0;
         }
 
         public override bool Equals(object o)
