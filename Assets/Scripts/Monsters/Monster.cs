@@ -17,8 +17,11 @@ namespace Assets.Scripts.Monsters
 
         private List<Node> MovementNodes { get; set; }
 
+        private Node CombatTarget { get; set; }
+
         private bool _isAlive;
 
+        private bool _isInCombat;
 
         private float _movementDelta;
         private float _rotationDelta;
@@ -97,6 +100,31 @@ namespace Assets.Scripts.Monsters
 
                 }
             }
+            else if (_isInCombat)
+            {
+                _rotationDelta += RotationRate;
+
+                Vector3 deltaVector = new Vector3(CombatTarget.XPosition, 0, CombatTarget.YPosition) - new Vector3(CurrentNode.XPosition, 0, CurrentNode.YPosition);
+
+                Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
+
+                float yAdjustment = 0f;
+
+                if (!BelongsToHost)
+                {
+                    yAdjustment = 180f;
+                }
+
+                lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
+
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, _rotationDelta);
+
+                if (_rotationDelta >= 1)
+                {
+                    _isInCombat = false;
+                }
+
+            }
             else if (!_isAlive)
             {
                 if (gameObject.transform.position.y < -.2)
@@ -117,6 +145,12 @@ namespace Assets.Scripts.Monsters
                 transform.position = updatedPosition;
             }
 
+        }
+
+        void OnBeginBattle(Node combatTarget)
+        {
+            CombatTarget = combatTarget;
+            _isInCombat = true;
         }
 
         void OnLoseBattle(GameObject battleSmokeInstance)
