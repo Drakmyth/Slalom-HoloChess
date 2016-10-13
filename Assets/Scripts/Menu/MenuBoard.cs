@@ -16,7 +16,7 @@ namespace Assets.Scripts.Menu
         void Update()
         {
 
-            if (_rotationSpeed > -.1 && Mathf.Abs(transform.eulerAngles.x % 30) < .01)
+            if (_rotationSpeed > -.1 && (Mathf.Abs(transform.eulerAngles.x % 30) - 30) < .05)
             {
                 return;
             }
