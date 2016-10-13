@@ -456,9 +456,13 @@ namespace Assets.Scripts
                 IEnumerable<BoardSpace> availableSpaces =
                     BoardSpaces.Values.Where(s => Player2Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
                 //TODO: bake this into gonk droid et al
-                BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
+                if (availableSpaces.Any())
+                {
+                    BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
 
-                OnSpaceSelected(aiChoice.Node.Id);
+                    OnSpaceSelected(aiChoice.Node.Id);
+
+                }
             }
 
         }
