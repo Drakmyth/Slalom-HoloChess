@@ -68,7 +68,10 @@ namespace Assets.Scripts
 
         void Start()
         {
-            SceneManager.UnloadScene("startup");
+            if (SceneManager.GetSceneByName("startup").isLoaded)
+            {
+                SceneManager.UnloadScene("startup");
+            }
 
             DisplayBoardSpaces();
 
@@ -306,6 +309,7 @@ namespace Assets.Scripts
                             monsterQuaternion) as Monster;
                     if (monsterInstance != null)
                     {
+                        monsterInstance.BelongsToHost = true;
                         monsterInstance.CurrentNode = currentMonster.CurrentNode;
                         Player1Monsters.Add(monsterInstance);
                     }
@@ -321,6 +325,7 @@ namespace Assets.Scripts
                             monsterQuaternion) as Monster;
                     if (monsterInstance != null)
                     {
+                        monsterInstance.BelongsToHost = false;
                         monsterInstance.CurrentNode = currentMonster.CurrentNode;
                         Player2Monsters.Add(monsterInstance);
                     }
@@ -367,6 +372,10 @@ namespace Assets.Scripts
             AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
             IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
             IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
+
+            attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
+            defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
+
 
             switch (attackResult)
             {
@@ -464,9 +473,13 @@ namespace Assets.Scripts
                 IEnumerable<BoardSpace> availableSpaces =
                     BoardSpaces.Values.Where(s => Player2Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
                 //TODO: bake this into gonk droid et al
-                BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
+                if (availableSpaces.Any())
+                {
+                    BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
 
-                OnSpaceSelected(aiChoice.Node.Id);
+                    OnSpaceSelected(aiChoice.Node.Id);
+
+                }
             }
 
         }
