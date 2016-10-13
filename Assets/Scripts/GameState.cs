@@ -373,6 +373,10 @@ namespace Assets.Scripts
             IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
             IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
 
+            attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
+            defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
+
+
             switch (attackResult)
             {
                 case AttackResult.Kill:
