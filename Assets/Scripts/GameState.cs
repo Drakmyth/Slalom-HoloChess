@@ -19,7 +19,6 @@ namespace Assets.Scripts
         public List<Monster> Player1Monsters { get; set; }
         public List<Monster> Player2Monsters { get; set; } 
 
-
         private readonly Random _random;
         //3, 4 are opponent actions, 1, 2 are player actions
         private int _actionNumber;
@@ -371,13 +370,15 @@ namespace Assets.Scripts
             switch (attackResult)
             {
                 case AttackResult.Kill:
+                    GameObject.Find("Kill").SendMessage("OnActivate", battleSmokePosition);
                     ProcessKill(defender, !isHostAttacker, battleSmokeInstance);
                     break;
                 case AttackResult.CounterKill:
+                    GameObject.Find("CounterKill").SendMessage("OnActivate", battleSmokePosition);
                     ProcessKill(attacker, isHostAttacker, battleSmokeInstance);
                     break;
                 case AttackResult.Push:
-                    //TODO:Movement animation!
+                    GameObject.Find("Push").SendMessage("OnActivate", battleSmokePosition);
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
                     //TODO: wait until push action is complete
@@ -386,8 +387,8 @@ namespace Assets.Scripts
                     _subActionNumber = 6;                
                     break;
                 case AttackResult.CounterPush:
-                    //TODO:Get user input to select which node
-                    //TODO:Movement animation!
+                    GameObject.Find("CounterPush").SendMessage("OnActivate", battleSmokePosition);
+
                     AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
