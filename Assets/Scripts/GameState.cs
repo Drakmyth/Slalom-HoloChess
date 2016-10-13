@@ -375,21 +375,29 @@ namespace Assets.Scripts
                     break;
                 case AttackResult.CounterKill:
                     ProcessKill(attacker, isHostAttacker, battleSmokeInstance);
+                    SelectedMonster = null;
                     break;
                 case AttackResult.Push:
-                    //TODO:Movement animation!
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
-                    //TODO: wait until push action is complete
+
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    }
+
                     Destroy(battleSmokeInstance);
 
                     _subActionNumber = 6;                
                     break;
                 case AttackResult.CounterPush:
-                    //TODO:Get user input to select which node
-                    //TODO:Movement animation!
                     AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
+
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    }
 
                     //TODO: wait until push action is complete
                     Destroy(battleSmokeInstance);
