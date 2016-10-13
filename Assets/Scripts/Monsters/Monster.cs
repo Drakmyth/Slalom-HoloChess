@@ -20,15 +20,23 @@ namespace Assets.Scripts.Monsters
 
         private bool _isAlive;
 
+        private float _initialXRotation;
+        private float _initialYRotation;
+        private float _initialZRotation;
 
         private const float HorizontalMovementPerSecond = .2f;
 
         private const float VerticalMovementPerSecond = .05f;
 
+        private const float RotationPerSecond = 180;
+
         private GameObject _battleSmokeInstance;
 
         void Start()
         {
+            _initialXRotation = transform.rotation.eulerAngles.x;
+            _initialYRotation = transform.rotation.eulerAngles.y;
+            _initialZRotation = transform.rotation.eulerAngles.z;
             _remainingX = 0;
             _remainingZ = 0;
             MovementNodes = new List<Node>();
@@ -69,7 +77,15 @@ namespace Assets.Scripts.Monsters
                     _remainingZ -= zDelta;
                     _remainingX -= xDelta;
 
-                    transform.position = new Vector3(transform.position.x + xDelta, transform.position.y, transform.position.z + zDelta);
+                    Vector3 deltaVector = new Vector3(xDelta, 0, zDelta);
+
+                    transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z) + deltaVector;
+
+                    Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
+
+                    lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation, lookRotation.eulerAngles.z + _initialZRotation);
+
+                    transform.rotation = Quaternion.Lerp(transform.rotation, lookRotation, Time.deltaTime * RotationPerSecond);
 
                 }
             }
