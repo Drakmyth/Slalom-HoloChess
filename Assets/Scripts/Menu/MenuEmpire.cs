@@ -14,9 +14,8 @@ namespace Assets.Scripts.Menu
         // Use this for initialization
         void Start()
         {
-            Material material = gameObject.GetComponent<MeshRenderer>().material;
             _currentAlpha = 1f;
-            _rotationSpeed = -.002f;
+            _rotationSpeed = -.004f;
             _deltaAlpha = 0.002f;
         }
 
