@@ -7,13 +7,15 @@ public class AttackResultText : MonoBehaviour {
 	void Start () {
 	
 	}
-	
-	// Update is called once per frame
-	void Update () {
-        var mainCamera = GameObject.Find("Main Camera");
+
+    // Update is called once per frame
+    void Update()
+    {
+        GameObject mainCamera = GameObject.Find("Main Camera");
         Vector3 relativePos = mainCamera.transform.position - transform.position;
-	    transform.rotation = Quaternion.LookRotation(relativePos);
-	}
+        Quaternion lookRotation = Quaternion.LookRotation(relativePos);
+        transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
+    }
 
     void displayResult()
     {
