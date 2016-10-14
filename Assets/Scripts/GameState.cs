@@ -774,13 +774,13 @@ namespace Assets.Scripts
         private void EndGameWin()
         {
             //TODO: intermediate scene/object to indicate result before booting to main menu
-            SceneManager.LoadScene("startup");
+            SceneManager.LoadScene("wingame");
         }
 
         private void EndGameLose()
         {
             //TODO: intermediate scene/object to indicate result before booting to main menu
-            SceneManager.LoadScene("startup");
+            SceneManager.LoadScene("losegame");
         }
 
     }
