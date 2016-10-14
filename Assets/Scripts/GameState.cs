@@ -19,7 +19,6 @@ namespace Assets.Scripts
         public List<Monster> Player1Monsters { get; set; }
         public List<Monster> Player2Monsters { get; set; } 
 
-
         private readonly Random _random;
         //3, 4 are opponent actions, 1, 2 are player actions
         private int _actionNumber;
@@ -47,6 +46,12 @@ namespace Assets.Scripts
         public List<Monster> MonsterPrefabs;
         public List<BoardSpace> SpacePrefabs;
         public GameObject BattleSmoke;
+        //TODO: consolidate these
+        public GameObject PushResultTextPrefab;
+        public GameObject KillResultTextPrefab;
+        public GameObject CounterPushResultTextPrefab;
+        public GameObject CounterKillResultTextPrefab;
+
 
         public GameState()
         {
@@ -96,6 +101,16 @@ namespace Assets.Scripts
                 return;
             }
 
+            if (Player1Monsters.Count == 0)
+            {
+                EndGameWin();
+            }
+            else if (Player2Monsters.Count == 0)
+            {
+                EndGameLose();
+            }
+
+
             switch (_subActionNumber)
             {
                 case 1:
@@ -122,14 +137,6 @@ namespace Assets.Scripts
                     AwaitSubActionSevenSelection();
                     break;
 
-            }
-
-            if (Player1Monsters.Count == 0)
-            {
-                EndGameWin();
-            } else if (Player2Monsters.Count == 0)
-            {
-                EndGameLose();
             }
 
             if (_actionNumber == 4 && _subActionNumber == 0)
@@ -380,15 +387,44 @@ namespace Assets.Scripts
             switch (attackResult)
             {
                 case AttackResult.Kill:
+                    AttackResultText attackKillResultText = Instantiate(KillResultTextPrefab, battleSmokePosition,
+                        battleSmokeQuaternion) as AttackResultText;
+
+                    if (attackKillResultText != null)
+                    {
+                        attackKillResultText.SendMessage("OnActivate", battleSmokePosition);
+                    }
+
                     ProcessKill(defender, !isHostAttacker, battleSmokeInstance);
                     break;
                 case AttackResult.CounterKill:
+                    AttackResultText attackCounterKillResultText = Instantiate(CounterKillResultTextPrefab, battleSmokePosition,
+                        battleSmokeQuaternion) as AttackResultText;
+
+
+                    if (attackCounterKillResultText != null)
+                    {
+                    attackCounterKillResultText.LerpDestination = attackCounterKillResultText.transform.position + Vector3.up;
+                        attackCounterKillResultText.SendMessage("OnActivate", battleSmokePosition);
+                    }
+
                     ProcessKill(attacker, isHostAttacker, battleSmokeInstance);
                     SelectedMonster = null;
                     break;
                 case AttackResult.Push:
+
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
+
+                    AttackResultText attackPushResultText = Instantiate(PushResultTextPrefab, battleSmokePosition,
+                        battleSmokeQuaternion) as AttackResultText;
+
+
+                    if (attackPushResultText != null)
+                    {
+                        attackPushResultText.LerpDestination = attackPushResultText.transform.position + Vector3.up;
+                        attackPushResultText.SendMessage("OnActivate", battleSmokePosition);
+                    }
 
                     foreach (BoardSpace space in BoardSpaces.Values)
                     {
@@ -400,6 +436,16 @@ namespace Assets.Scripts
                     _subActionNumber = 6;                
                     break;
                 case AttackResult.CounterPush:
+
+                    AttackResultText attackCounterPushResultText = Instantiate(CounterPushResultTextPrefab, battleSmokePosition,
+                        battleSmokeQuaternion) as AttackResultText;
+
+                    if (attackCounterPushResultText != null)
+                    {
+                        attackCounterPushResultText.LerpDestination = attackCounterPushResultText.transform.position + Vector3.up;
+                        attackCounterPushResultText.SendMessage("OnActivate", battleSmokePosition);
+                    }
+
                     AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
