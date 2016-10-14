@@ -605,6 +605,7 @@ namespace Assets.Scripts
                 }
                 else
                 {
+                    _subActionNumber = 2;
                     return;
                 }
 

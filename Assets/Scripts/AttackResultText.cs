@@ -44,7 +44,7 @@ namespace Assets.Scripts
             GameObject mainCamera = GameObject.Find("Main Camera");
             Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
-            transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x + 90, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
+            transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
 
         }
 
