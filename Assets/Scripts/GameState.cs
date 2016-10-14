@@ -433,7 +433,13 @@ namespace Assets.Scripts
 
                     Destroy(battleSmokeInstance);
 
-                    _subActionNumber = 6;                
+                    _subActionNumber = 6;
+
+                    if (!AvailablePushDestinations.Any())
+                    {
+                        _subActionNumber = 0;
+                    }
+
                     break;
                 case AttackResult.CounterPush:
 
@@ -459,6 +465,12 @@ namespace Assets.Scripts
 
                     _subActionNumber = 7;
                     //send network message with available push nodes
+
+                    if (!AvailablePushDestinations.Any())
+                    {
+                        _subActionNumber = 0;
+                    }
+
 
                     break;
                 default:
