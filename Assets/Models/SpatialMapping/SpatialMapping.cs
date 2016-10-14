@@ -79,14 +79,14 @@ namespace Assets.Models.SpatialMapping
         // Use this for initialization
         void Start()
         {
-            spatialMappingRenderer = gameObject.GetComponent<SpatialMappingRenderer>();
-            spatialMappingRenderer.surfaceParent = this.gameObject;
-            spatialMappingCollider = gameObject.GetComponent<SpatialMappingCollider>();
-            spatialMappingCollider.surfaceParent = this.gameObject;
-            spatialMappingCollider.layer = physicsLayer;
-            PhysicsRaycastMask = 1 << physicsLayer;
-            DrawVisualMeshes = drawVisualMeshes;
-            MappingEnabled = mappingEnabled;
+//            spatialMappingRenderer = gameObject.GetComponent<SpatialMappingRenderer>();
+//            spatialMappingRenderer.surfaceParent = this.gameObject;
+//            spatialMappingCollider = gameObject.GetComponent<SpatialMappingCollider>();
+//            spatialMappingCollider.surfaceParent = this.gameObject;
+//            spatialMappingCollider.layer = physicsLayer;
+//            PhysicsRaycastMask = 1 << physicsLayer;
+//            DrawVisualMeshes = drawVisualMeshes;
+//            MappingEnabled = mappingEnabled;
         }
     }
 }
