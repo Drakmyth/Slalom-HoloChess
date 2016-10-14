@@ -103,11 +103,11 @@ namespace Assets.Scripts
 
             if (Player1Monsters.Count == 0)
             {
-                EndGameWin();
+                EndGameLose();
             }
             else if (Player2Monsters.Count == 0)
             {
-                EndGameLose();
+                EndGameWin();
             }
 
 
