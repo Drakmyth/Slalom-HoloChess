@@ -195,6 +195,7 @@ namespace Assets.Scripts
                     }
                     else
                     {
+                        space.SendMessage("OnClearHighlighting");
                         _subActionNumber = 1;
                     }
 
