@@ -33,7 +33,7 @@ namespace Assets.Scripts.Menu
             // play the start up sounds
             var audio = GetComponent<AudioSource>();
             audio.clip = startAudioClip;
-            audio.PlayDelayed(5);
+            audio.PlayDelayed(0);
         }
     }
 }
