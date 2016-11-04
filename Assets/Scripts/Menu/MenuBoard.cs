@@ -7,13 +7,12 @@ namespace Assets.Scripts.Menu
         private float _rotationSpeed;
         // the audio clip on start up
         public AudioClip startAudioClip;
-        public bool _isPlayingSound;
 
         // Use this for initialization
         void Start()
         {
             _rotationSpeed = -60;
-            _isPlayingSound = false;           
+            PlaySound();
         }
 
         // Update is called once per frame
@@ -27,11 +26,6 @@ namespace Assets.Scripts.Menu
 
             transform.Rotate(Vector3.down, _rotationSpeed);
             _rotationSpeed = _rotationSpeed * .991f;
-
-            if (!_isPlayingSound)
-            {
-                PlaySound();
-            }
         }
 
         void PlaySound()
@@ -39,9 +33,7 @@ namespace Assets.Scripts.Menu
             // play the start up sounds
             var audio = GetComponent<AudioSource>();
             audio.clip = startAudioClip;
-            audio.PlayDelayed(9);
-
-            _isPlayingSound = true;
+            audio.PlayDelayed(5);
         }
     }
 }
