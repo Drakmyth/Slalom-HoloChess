@@ -384,6 +384,8 @@ namespace Assets.Scripts
             attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
             defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
 
+            attacker.PlaySound(0);
+            defender.PlaySound(0);
 
             switch (attackResult)
             {

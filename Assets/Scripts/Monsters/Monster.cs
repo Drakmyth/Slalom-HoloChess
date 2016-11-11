@@ -38,6 +38,9 @@ namespace Assets.Scripts.Monsters
 
         private GameObject _battleSmokeInstance;
 
+        public AudioClip audioClip;
+        private AudioSource audioSource;
+
         void Start()
         {
             _initialXRotation = transform.rotation.eulerAngles.x;
@@ -179,6 +182,17 @@ namespace Assets.Scripts.Monsters
         public override int GetHashCode()
         {
             return AttackRating.GetHashCode() + DefenseRating.GetHashCode() + MovementRating.GetHashCode();
+        }
+
+        public void PlaySound(float delay)
+        {
+           // if (audioSource == null)
+           // {
+            //    audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+            //}
+
+            //audioSource.clip = audioClip;
+            //audioSource.PlayDelayed(delay);
         }
     }
 }
