@@ -52,6 +52,7 @@ namespace Assets.Scripts
         public GameObject CounterPushResultTextPrefab;
         public GameObject CounterKillResultTextPrefab;
 
+        public List<AudioClip> AttackSounds;
 
         public GameState()
         {
@@ -384,8 +385,11 @@ namespace Assets.Scripts
             attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
             defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
 
-            attacker.PlaySound(0);
-            defender.PlaySound(0);
+            Random r = new Random();
+            int number = r.Next(0, AttackSounds.Count);
+            int number2 = r.Next(0, AttackSounds.Count);
+            attacker.PlaySound(AttackSounds[number]);
+            defender.PlaySound(AttackSounds[number2]);
 
             switch (attackResult)
             {
