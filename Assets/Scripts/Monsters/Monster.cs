@@ -38,7 +38,6 @@ namespace Assets.Scripts.Monsters
 
         private GameObject _battleSmokeInstance;
 
-        public AudioClip audioClip;
         private AudioSource audioSource;
 
         void Start()
@@ -184,15 +183,15 @@ namespace Assets.Scripts.Monsters
             return AttackRating.GetHashCode() + DefenseRating.GetHashCode() + MovementRating.GetHashCode();
         }
 
-        public void PlaySound(float delay)
+        public void PlaySound(AudioClip soundToPlay)
         {
-           // if (audioSource == null)
-           // {
-            //    audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
-            //}
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+            }
 
-            //audioSource.clip = audioClip;
-            //audioSource.PlayDelayed(delay);
+            audioSource.clip = soundToPlay;
+            audioSource.PlayDelayed(0);
         }
     }
 }
