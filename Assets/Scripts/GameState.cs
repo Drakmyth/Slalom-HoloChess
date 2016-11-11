@@ -53,6 +53,7 @@ namespace Assets.Scripts
         public GameObject CounterKillResultTextPrefab;
 
         public List<AudioClip> AttackSounds;
+        public List<AudioClip> MovementSounds;
 
         public GameState()
         {
@@ -385,9 +386,8 @@ namespace Assets.Scripts
             attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
             defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
 
-            Random r = new Random();
-            int number = r.Next(0, AttackSounds.Count);
-            int number2 = r.Next(0, AttackSounds.Count);
+            int number = _random.Next(0, AttackSounds.Count);
+            int number2 = _random.Next(0, AttackSounds.Count);
             attacker.PlaySound(AttackSounds[number]);
             defender.PlaySound(AttackSounds[number2]);
 
@@ -504,6 +504,9 @@ namespace Assets.Scripts
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
+            int number = _random.Next(0, MovementSounds.Count);
+            selectedMonster.PlaySound(MovementSounds[number]);
+
             selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
 
             _isAnimationRunning = true;
