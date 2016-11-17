@@ -97,16 +97,16 @@ namespace DejarikLibraryTests
                 for (int d = 2; d < 9; d++)
                 {
                     System.Diagnostics.Debug.WriteLine("resultAverages[" + a + "].Add(" + d +
-                                      ", new Dictionary<AttackResult, decimal>()));");
+                                      ", new Dictionary<AttackResult, decimal>());");
 
                     System.Diagnostics.Debug.WriteLine("resultAverages[" + a + "][" + d + "].Add(AttackResult.Kill, " +
-                                      resultAverages[a][d][AttackResult.Kill] + ");");
+                                      resultAverages[a][d][AttackResult.Kill] + "m);");
                     System.Diagnostics.Debug.WriteLine("resultAverages[" + a + "][" + d + "].Add(AttackResult.Push, " +
-                                      resultAverages[a][d][AttackResult.Push] + ");");
+                                      resultAverages[a][d][AttackResult.Push] + "m);");
                     System.Diagnostics.Debug.WriteLine("resultAverages[" + a + "][" + d + "].Add(AttackResult.CounterPush, " +
-                                      resultAverages[a][d][AttackResult.CounterPush] + ");");
+                                      resultAverages[a][d][AttackResult.CounterPush] + "m);");
                     System.Diagnostics.Debug.WriteLine("resultAverages[" + a + "][" + d + "].Add(AttackResult.CounterKill, " +
-                                      resultAverages[a][d][AttackResult.CounterKill] + ");");
+                                      resultAverages[a][d][AttackResult.CounterKill] + "m);");
                 }
             }
         }
