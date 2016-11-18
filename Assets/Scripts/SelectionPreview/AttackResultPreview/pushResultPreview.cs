@@ -28,12 +28,18 @@ namespace Assets.Scripts.SelectionPreview.AttackResultPreview
 
         }
 
-        void OnUpdateAttackResultPreview(IDictionary<AttackResult, decimal> attackResults)
+        void OnUpdate(IDictionary<AttackResult, decimal> attackResults)
         {
             float offsetX = (float)attackResults[AttackResult.Kill] * _initialWidth;
 
             GetComponent<RectTransform>().sizeDelta = new Vector2(_initialWidth * 4 * (float)attackResults[AttackResult.Push], _initialHeight);
             GetComponent<RectTransform>().anchoredPosition = new Vector2(offsetX, _initialY);
+        }
+
+        void OnClear()
+        {
+            GetComponent<RectTransform>().sizeDelta = new Vector2(0, _initialHeight);
+            GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _initialY);
         }
     }
 }

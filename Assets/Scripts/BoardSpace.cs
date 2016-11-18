@@ -108,5 +108,11 @@ namespace Assets.Scripts
         {
             gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
         }
+
+        void OnPreviewEnter(GameObject gameStateObject)
+        {
+            gameStateObject.SendMessage("OnPreviewEnter", Node.Id);
+        }
+
     }
 }
