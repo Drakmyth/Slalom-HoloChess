@@ -191,6 +191,7 @@ namespace Assets.Scripts.Monsters
             }
 
             audioSource.clip = soundToPlay;
+            audioSource.volume = audioSource.volume/2;
             audioSource.PlayDelayed(0);
         }
     }
