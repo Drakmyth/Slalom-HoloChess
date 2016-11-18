@@ -3,17 +3,16 @@ using System.Collections.Generic;
 
 namespace DejarikLibrary
 {
-    public class AttackResultPreview
+    public static class AttackResultPreview
     {
         private static Dictionary<int, Dictionary<int, Dictionary<AttackResult, decimal>>> ResultAverages { get; set; }
 
-
-        public AttackResultPreview()
+        static  AttackResultPreview()
         {
             BuildResultAverages();
         }
 
-        public IDictionary<AttackResult, decimal> GetAttackResultPercentages(int attack, int defense)
+        public static IDictionary<AttackResult, decimal> GetAttackResultPercentages(int attack, int defense)
         {
             if (!ResultAverages.ContainsKey(attack))
             {
@@ -28,7 +27,7 @@ namespace DejarikLibrary
 
         }
 
-        public decimal GetAttackResultPercentage(int attack, int defense, AttackResult attackResult)
+        public static decimal GetAttackResultPercentage(int attack, int defense, AttackResult attackResult)
         {
             if (!ResultAverages.ContainsKey(attack))
             {

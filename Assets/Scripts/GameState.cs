@@ -40,6 +40,7 @@ namespace Assets.Scripts
         private bool _isEasyAI = true;
         private bool _isAnimationRunning = false;
         private Monster SelectedMonster { get; set; }
+        private Monster PreviewMonster { get; set; }
         private Node SelectedAttackNode { get; set; }
         private NodePath SelectedMovementPath { get; set; }
 
@@ -95,7 +96,6 @@ namespace Assets.Scripts
             {
                 AssignMonstersToPlayers();
             }
-
         }
 
         void Update()
@@ -231,6 +231,10 @@ namespace Assets.Scripts
                 if (_subActionNumber == 2)
                 {
                     SubActionTwo(nodeId, true);
+
+                    //TODO: remove this once preview gaze is implemented
+                    UpdateAttackResultPreview();
+
                 }
 
                 if (_subActionNumber == 4)
@@ -384,7 +388,7 @@ namespace Assets.Scripts
 
         private void DisplaySelectionPreviewMenu()
         {
-            SelectionPreviewMenu = Instantiate(SelectionPreviewPrefab);
+//            SelectionPreviewMenu = Instantiate(SelectionPreviewPrefab);
         }
 
         private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)
@@ -807,16 +811,29 @@ namespace Assets.Scripts
 
         }
 
+        private void UpdateAttackResultPreview()
+        {
+            //TODO: set this dynamically
+            PreviewMonster = Player2Monsters.First();
+
+            IDictionary<AttackResult, decimal> attackResultPercentages = AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating, PreviewMonster.DefenseRating);
+
+            GameObject.Find("KillResultPreview").SendMessage("OnUpdateAttackResultPreview", attackResultPercentages);
+            GameObject.Find("PushResultPreview").SendMessage("OnUpdateAttackResultPreview", attackResultPercentages);
+            GameObject.Find("CounterPushResultPreview").SendMessage("OnUpdateAttackResultPreview", attackResultPercentages);
+            GameObject.Find("CounterKillResultPreview").SendMessage("OnUpdateAttackResultPreview", attackResultPercentages);
+
+        }
+
+
 
         private void EndGameWin()
         {
-            //TODO: intermediate scene/object to indicate result before booting to main menu
             SceneManager.LoadScene("wingame");
         }
 
         private void EndGameLose()
         {
-            //TODO: intermediate scene/object to indicate result before booting to main menu
             SceneManager.LoadScene("losegame");
         }
 
