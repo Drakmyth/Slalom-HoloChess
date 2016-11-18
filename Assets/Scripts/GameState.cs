@@ -132,6 +132,9 @@ namespace Assets.Scripts
                     AwaitSubActionTwoSelection();
                     break;
                 case 3:
+                    //TODO: reassess this once preview gaze is implemented
+                    UpdateAttackResultPreview();
+
                     SubActionThree();
                     break;
                 case 4:
@@ -231,10 +234,6 @@ namespace Assets.Scripts
                 if (_subActionNumber == 2)
                 {
                     SubActionTwo(nodeId, true);
-
-                    //TODO: remove this once preview gaze is implemented
-                    UpdateAttackResultPreview();
-
                 }
 
                 if (_subActionNumber == 4)
@@ -388,7 +387,8 @@ namespace Assets.Scripts
 
         private void DisplaySelectionPreviewMenu()
         {
-//            SelectionPreviewMenu = Instantiate(SelectionPreviewPrefab);
+            //TODO: remove??
+//            SelectionPreviewMenu = Instantiate(SelectionPreviewPrefab, SelectionPreviewPrefab.transform.position, SelectionPreviewPrefab.transform.rotation) as GameObject;
         }
 
         private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)

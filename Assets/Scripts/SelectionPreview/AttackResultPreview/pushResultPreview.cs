@@ -6,18 +6,20 @@ namespace Assets.Scripts.SelectionPreview.AttackResultPreview
 {
     public class PushResultPreview : MonoBehaviour {
 
-        private float InitialX;
-        private float InitialY;
-        private float InitialWidth;
-        private float InitialHeight;
+        private float _initialY;
+        private float _initialWidth;
+        private float _initialHeight;
 
         // Use this for initialization
         void Start()
         {
-            InitialX = GetComponent<RectTransform>().rect.x;
-            InitialY = GetComponent<RectTransform>().rect.y;
-            InitialWidth = GetComponent<RectTransform>().rect.width;
-            InitialHeight = GetComponent<RectTransform>().rect.height;
+            _initialY = GetComponent<RectTransform>().anchoredPosition.y;
+            _initialWidth = GetComponent<RectTransform>().sizeDelta.x;
+            _initialHeight = GetComponent<RectTransform>().sizeDelta.y;
+
+            GetComponent<RectTransform>().sizeDelta = new Vector2(0, _initialHeight);
+            GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _initialY);
+
         }
 
         // Update is called once per frame
@@ -28,9 +30,10 @@ namespace Assets.Scripts.SelectionPreview.AttackResultPreview
 
         void OnUpdateAttackResultPreview(IDictionary<AttackResult, decimal> attackResults)
         {
-            float offsetX = ((float)attackResults[AttackResult.Kill]) * InitialX;
+            float offsetX = (float)attackResults[AttackResult.Kill] * _initialWidth;
 
-            GetComponent<RectTransform>().rect.Set(offsetX, InitialY, InitialWidth * (float)attackResults[AttackResult.CounterPush], InitialHeight);
+            GetComponent<RectTransform>().sizeDelta = new Vector2(_initialWidth * 4 * (float)attackResults[AttackResult.Push], _initialHeight);
+            GetComponent<RectTransform>().anchoredPosition = new Vector2(offsetX, _initialY);
         }
     }
 }
