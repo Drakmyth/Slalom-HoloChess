@@ -55,4 +55,5 @@ namespace DejarikLibrary
 			return AttackResult.CounterPush;
 		}
 	}
+
 }
