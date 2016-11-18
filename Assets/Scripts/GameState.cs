@@ -19,6 +19,9 @@ namespace Assets.Scripts
         public List<Monster> Player1Monsters { get; set; }
         public List<Monster> Player2Monsters { get; set; } 
 
+        //TODO this could probably use its own class
+        public GameObject SelectionPreviewMenu { get; set; }
+
         private readonly Random _random;
         //3, 4 are opponent actions, 1, 2 are player actions
         private int _actionNumber;
@@ -46,6 +49,10 @@ namespace Assets.Scripts
         public List<Monster> MonsterPrefabs;
         public List<BoardSpace> SpacePrefabs;
         public GameObject BattleSmoke;
+
+        //TODO: this could probably use its own class
+        public GameObject SelectionPreviewPrefab;
+
         //TODO: consolidate these
         public GameObject PushResultTextPrefab;
         public GameObject KillResultTextPrefab;
@@ -81,6 +88,8 @@ namespace Assets.Scripts
             }
 
             DisplayBoardSpaces();
+
+            DisplaySelectionPreviewMenu();
 
             if (_isHostPlayer)
             {
@@ -371,6 +380,11 @@ namespace Assets.Scripts
                 }
             }
 
+        }
+
+        private void DisplaySelectionPreviewMenu()
+        {
+            SelectionPreviewMenu = Instantiate(SelectionPreviewPrefab);
         }
 
         private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)
