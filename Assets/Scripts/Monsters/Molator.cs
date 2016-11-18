@@ -16,5 +16,10 @@
         {
             get { return 2; }
         }
+
+        public override string Name
+        {
+            get { return "molator"; }
+        }
     }
 }
