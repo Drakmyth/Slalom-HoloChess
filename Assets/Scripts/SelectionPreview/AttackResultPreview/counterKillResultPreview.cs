@@ -1,15 +1,35 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections.Generic;
+using DejarikLibrary;
+using UnityEngine;
 
-public class counterKillResultPreview : MonoBehaviour {
+namespace Assets.Scripts.SelectionPreview.AttackResultPreview
+{
+    public class CounterKillResultPreview : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+        private float InitialX;
+        private float InitialY;
+        private float InitialWidth;
+        private float InitialHeight;
+
+        // Use this for initialization
+        void Start ()
+        {
+            InitialX = GetComponent<RectTransform>().rect.x;
+            InitialY = GetComponent<RectTransform>().rect.y;
+            InitialWidth = GetComponent<RectTransform>().rect.width;
+            InitialHeight = GetComponent<RectTransform>().rect.height;
+        }
+
+        // Update is called once per frame
+        void Update () {
 	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+        }
+
+        void OnUpdateAttackResultPreview(IDictionary<AttackResult, decimal> attackResults)
+        {
+            float offsetX = ((float)attackResults[AttackResult.Kill] + (float)attackResults[AttackResult.Push] + (float)attackResults[AttackResult.CounterPush]) * InitialX;
+
+            GetComponent<RectTransform>().rect.Set(offsetX, InitialY, InitialWidth * (float)attackResults[AttackResult.CounterPush], InitialHeight);
+        }
+    }
 }
