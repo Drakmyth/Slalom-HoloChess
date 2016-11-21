@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using UnityEngine;
@@ -7,28 +8,32 @@ namespace Assets.Scripts
 {
     public class Client : MonoBehaviour
     {
+        public bool IsHost = false;
+        public string ClientName = "client";
 
-        private bool isSocketReady;
-        private TcpClient socket;
-        private NetworkStream stream;
-        private StreamWriter writer;
-        private StreamReader reader;
+        private bool _isSocketReady;
+        private TcpClient _socket;
+        private NetworkStream _stream;
+        private StreamWriter _writer;
+        private StreamReader _reader;
+
+        private List<GameClient> _players = new List<GameClient>();
 
         public bool ConnectToServer(string host, int port)
         {
-            if (isSocketReady)
+            if (_isSocketReady)
             {
                 return false;
             }
 
             try
             {
-                socket = new TcpClient(host, port);
-                stream = socket.GetStream();
-                writer = new StreamWriter(stream);
-                reader = new StreamReader(stream);
+                _socket = new TcpClient(host, port);
+                _stream = _socket.GetStream();
+                _writer = new StreamWriter(_stream);
+                _reader = new StreamReader(_stream);
 
-                isSocketReady = true;
+                _isSocketReady = true;
 
             }
             catch (Exception e)
@@ -36,24 +41,50 @@ namespace Assets.Scripts
                 Debug.Log(e.Message);
             }
 
-            return isSocketReady;
+            return _isSocketReady;
 
         }
 
         public void Send(string data)
         {
-            if (!isSocketReady)
+            if (!_isSocketReady)
             {
                 return;
             }
 
-            writer.WriteLine(data);
-            writer.Flush();
+            _writer.WriteLine(data);
+            _writer.Flush();
         }
 
+        //TODO: MessageModels instead of string parsing
         private void OnIncomingData(string data)
         {
+            string[] parsedData = data.Split('|');
+
+            switch (parsedData[0])
+            {
+                case "srv.connect":
+                    Send("cli.connect|" + ClientName + "|" + ((IsHost)?1:0));
+                    break;
+                case "srv.playerConnected":
+                    break;
+            }
+
+
+
             Debug.Log(data);
+        }
+
+        private void UserConnected(string clientName)
+        {
+            GameClient gameClient = new GameClient {Name = clientName };
+
+            _players.Add(gameClient);
+
+            if (_players.Count == 2)
+            {
+                GameManager.Instance.StartGame();
+            }
         }
 
         private void OnApplicationQuit()
@@ -68,23 +99,28 @@ namespace Assets.Scripts
 
         private void CloseSocket()
         {
-            if (!isSocketReady)
+            if (!_isSocketReady)
             {
                 return;
             }
 
-            writer.Close();
-            reader.Close();
-            socket.Close();
+            _writer.Close();
+            _reader.Close();
+            _socket.Close();
 
-            isSocketReady = false;
+            _isSocketReady = false;
+        }
+
+        void Start()
+        {
+            DontDestroyOnLoad(gameObject);
         }
 
         void Update()
         {
-            if (isSocketReady && stream.DataAvailable)
+            if (_isSocketReady && _stream.DataAvailable)
             {
-                string data = reader.ReadLine();
+                string data = _reader.ReadLine();
                 if (data != null)
                 {
                     OnIncomingData(data);
@@ -96,7 +132,7 @@ namespace Assets.Scripts
 
     public class GameClient
     {
-        public string name;
-        public bool isHost;
+        public string Name;
+        public bool IsHost;
     }
 }
