@@ -10,27 +10,27 @@ namespace Assets.Scripts
     public class Server : MonoBehaviour
     {
 
-        public int port = 1300;
+        public int Port = 1300;
 
-        private List<ServerClient> clients;
-        private List<ServerClient> disconnectList;
+        private List<ServerClient> _clients;
+        private List<ServerClient> _disconnectList;
 
-        private TcpListener server;
-        private bool isServerStarted;
+        private TcpListener _server;
+        private bool _isServerStarted;
 
         public void Init()
         {
             DontDestroyOnLoad(gameObject);
-            clients = new List<ServerClient>();
-            disconnectList = new List<ServerClient>();
+            _clients = new List<ServerClient>();
+            _disconnectList = new List<ServerClient>();
 
             try
             {
-                server = new TcpListener(IPAddress.Any, port);
-                server.Start();
+                _server = new TcpListener(IPAddress.Any, Port);
+                _server.Start();
 
                 StartListening();
-                isServerStarted = true;
+                _isServerStarted = true;
             }
             catch (Exception e)
             {
@@ -40,22 +40,22 @@ namespace Assets.Scripts
 
         void Update()
         {
-            if (!isServerStarted)
+            if (!_isServerStarted)
             {
                 return;
             }
 
-            foreach (ServerClient client in clients)
+            foreach (ServerClient client in _clients)
             {
-                if (!IsConnected(client.tcpClient))
+                if (!IsConnected(client.TcpClient))
                 {
-                    client.tcpClient.Close();
-                    disconnectList.Add(client);
+                    client.TcpClient.Close();
+                    _disconnectList.Add(client);
                     continue;
                 }
                 else
                 {
-                    NetworkStream stream = client.tcpClient.GetStream();
+                    NetworkStream stream = client.TcpClient.GetStream();
                     if (stream.DataAvailable)
                     {
                         StreamReader reader = new StreamReader(stream, true);
@@ -68,10 +68,10 @@ namespace Assets.Scripts
                     }
                 }
 
-                for (int i = 0; i < disconnectList.Count; i++)
+                for (int i = 0; i < _disconnectList.Count; i++)
                 {
-                    clients.Remove(disconnectList[i]);
-                    disconnectList.RemoveAt(i);
+                    _clients.Remove(_disconnectList[i]);
+                    _disconnectList.RemoveAt(i);
                 }
             }
         }
@@ -79,7 +79,7 @@ namespace Assets.Scripts
 
         private void StartListening()
         {
-            server.BeginAcceptTcpClient(AcceptTcpClient, server);
+            _server.BeginAcceptTcpClient(AcceptTcpClient, _server);
         }
 
         private void AcceptTcpClient(IAsyncResult result)
@@ -88,9 +88,13 @@ namespace Assets.Scripts
 
             ServerClient client = new ServerClient(listener.EndAcceptTcpClient(result));
 
-            clients.Add(client);
+            _clients.Add(client);
 
             StartListening();
+
+            Debug.Log("User has connected");
+
+            Broadcast("User has connected", _clients[_clients.Count - 1]);
         }
 
 
@@ -123,34 +127,53 @@ namespace Assets.Scripts
         {
             foreach (ServerClient client in clients)
             {
-                try
-                {
-                    StreamWriter writer = new StreamWriter(client.tcpClient.GetStream());
-                    writer.WriteLine(data);
-                    writer.Flush();
-                }
-                catch (Exception e)
-                {
-                    Debug.Log(e.Message);
-                }
+                Broadcast(data, client);
             }
 
         }
 
+        private void Broadcast(string data, ServerClient client)
+        {
+            try
+            {
+                StreamWriter writer = new StreamWriter(client.TcpClient.GetStream());
+                writer.WriteLine(data);
+                writer.Flush();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
+        }
+
+        //TODO: MessageModels instead of string parsing
         private void OnIncomingData(ServerClient client, string data)
         {
+            string[] parsedData = data.Split('|');
+
+            switch (parsedData[0])
+            {
+                case "cli.connect":
+                    Broadcast("srv.playerConnected|" + client.ClientName + " has connected", _clients);
+                    break;
+            }
+
+
+
             Debug.Log(data);
         }
+
     }
 
     public class ServerClient
     {
-        public string clientName;
-        public TcpClient tcpClient;
+        public string ClientName;
+        public TcpClient TcpClient;
 
         public ServerClient(TcpClient tcpClient)
         {
-            this.tcpClient = tcpClient;
+            TcpClient = tcpClient;
         }
     }
 }

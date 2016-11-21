@@ -33,7 +33,7 @@ namespace Assets.Scripts
         //7 : Listen for CounterPush result (await opponent input)
         private int _subActionNumber;
 
-        private bool _isHostPlayer = true;
+        private bool _isHostPlayer;
         private bool _isEasyAI = true;
         private bool _isAnimationRunning = false;
         private Monster SelectedMonster { get; set; }
@@ -81,6 +81,10 @@ namespace Assets.Scripts
             {
                 SceneManager.UnloadScene("startup");
             }
+
+            Client client = FindObjectOfType<Client>();
+
+            _isHostPlayer = client.IsHost
 
             DisplayBoardSpaces();
 
@@ -151,7 +155,6 @@ namespace Assets.Scripts
                 }
                 _actionNumber = 1;
                 _subActionNumber = 1;
-                _isHostPlayer = true;
                 SelectedMonster = null;
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
@@ -179,7 +182,6 @@ namespace Assets.Scripts
                 }
                 _actionNumber++;
                 _subActionNumber = 1;
-                _isHostPlayer = false;
                 SelectedMonster = null;
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
