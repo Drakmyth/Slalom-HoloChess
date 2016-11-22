@@ -394,7 +394,7 @@ namespace Assets.Scripts
             switch (attackResult)
             {
                 case AttackResult.Kill:
-                    AttackResultText attackKillResultText = Instantiate(KillResultTextPrefab, battleSmokePosition,
+                    AttackResultText attackKillResultText = Instantiate(KillResultTextPrefab as UnityEngine.Object, battleSmokePosition,
                         battleSmokeQuaternion) as AttackResultText;
 
                     if (attackKillResultText != null)
@@ -405,7 +405,7 @@ namespace Assets.Scripts
                     ProcessKill(defender, !isHostAttacker, battleSmokeInstance);
                     break;
                 case AttackResult.CounterKill:
-                    AttackResultText attackCounterKillResultText = Instantiate(CounterKillResultTextPrefab, battleSmokePosition,
+                    AttackResultText attackCounterKillResultText = Instantiate(CounterKillResultTextPrefab as UnityEngine.Object, battleSmokePosition,
                         battleSmokeQuaternion) as AttackResultText;
 
 
@@ -423,7 +423,7 @@ namespace Assets.Scripts
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
-                    AttackResultText attackPushResultText = Instantiate(PushResultTextPrefab, battleSmokePosition,
+                    AttackResultText attackPushResultText = Instantiate(PushResultTextPrefab as UnityEngine.Object, battleSmokePosition,
                         battleSmokeQuaternion) as AttackResultText;
 
 
@@ -450,7 +450,7 @@ namespace Assets.Scripts
                     break;
                 case AttackResult.CounterPush:
 
-                    AttackResultText attackCounterPushResultText = Instantiate(CounterPushResultTextPrefab, battleSmokePosition,
+                    AttackResultText attackCounterPushResultText = Instantiate(CounterPushResultTextPrefab as UnityEngine.Object, battleSmokePosition,
                         battleSmokeQuaternion) as AttackResultText;
 
                     if (attackCounterPushResultText != null)
