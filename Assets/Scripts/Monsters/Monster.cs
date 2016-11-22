@@ -9,7 +9,6 @@ namespace Assets.Scripts.Monsters
         public abstract int AttackRating { get; }
         public abstract int DefenseRating { get; }
         public abstract int MovementRating { get; }
-        public abstract string Name { get; }
 
         public Node CurrentNode { get; set; }
 
@@ -39,7 +38,7 @@ namespace Assets.Scripts.Monsters
 
         private GameObject _battleSmokeInstance;
 
-        private AudioSource _audioSource;
+        private AudioSource audioSource;
 
         void Start()
         {
@@ -186,13 +185,13 @@ namespace Assets.Scripts.Monsters
 
         public void PlaySound(AudioClip soundToPlay)
         {
-            if (_audioSource == null)
+            if (audioSource == null)
             {
-                _audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+                audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
             }
 
-            _audioSource.clip = soundToPlay;
-            _audioSource.PlayDelayed(0);
+            audioSource.clip = soundToPlay;
+            audioSource.PlayDelayed(0);
         }
     }
 }

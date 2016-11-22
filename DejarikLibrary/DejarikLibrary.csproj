@@ -35,7 +35,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AttackResultPreview.cs" />
     <Compile Include="AttackCalculator.cs" />
     <Compile Include="BoardGraph.cs" />
     <Compile Include="Monsters\IMonster.cs" />
