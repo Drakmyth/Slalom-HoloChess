@@ -16,10 +16,5 @@
         {
             get { return 3; }
         }
-
-        public override string Name
-        {
-            get { return "strider"; }
-        }
     }
 }

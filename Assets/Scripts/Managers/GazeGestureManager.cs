@@ -51,13 +51,6 @@ namespace Assets.Scripts
                 _recognizer.CancelGestures();
                 _recognizer.StartCapturingGestures();
             }
-
-            // If the focused object changed this frame,
-            // start detecting fresh gestures again.
-            if (FocusedObject != null && oldFocusObject != null && FocusedObject.name != oldFocusObject.name)
-            {
-                FocusedObject.SendMessage("OnPreviewEnter", gameObject);
-            }
         }
     }
 }
