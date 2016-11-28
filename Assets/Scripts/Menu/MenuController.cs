@@ -8,7 +8,7 @@ namespace Assets.Scripts.Menu
         // Use this for initialization
         void Start ()
         {
-            SceneManager.UnloadScene("dejarik");
+            SceneManager.UnloadSceneAsync("dejarik");
         }
 	
         // Update is called once per frame
