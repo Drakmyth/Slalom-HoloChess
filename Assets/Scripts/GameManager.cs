@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -14,10 +15,12 @@ namespace Assets.Scripts
         public GameObject ConnectMenu;
         public GameObject HostMenu;
 
-        public GameObject ServerPrefab;
-        public GameObject ClientPrefab;
+        public Client Client;
 
-        // Use this for initialization
+        public Server Server;
+
+        private bool _isHosting;
+
         void Start()
         {
             Instance = this;
@@ -25,13 +28,25 @@ namespace Assets.Scripts
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
 
+            _isHosting = false;
+
             DontDestroyOnLoad(gameObject);
 
         }
 
-        // Update is called once per frame
         void Update()
         {
+            if (Client != null && Client.connection != null)
+            {
+                Debug.Log("Address: " + Client.connection.address);
+            }
+
+            if (_isHosting)
+            {
+                Debug.Log("Port: " + NetworkServer.listenPort);
+                Debug.Log("Connections: " + NetworkServer.connections.Count);
+            }
+
 
         }
 
@@ -47,13 +62,11 @@ namespace Assets.Scripts
         {
             try
             {
-                Server server = Instantiate(ServerPrefab).GetComponent<Server>();
-                server.Init();
-
-                Client client = Instantiate(ClientPrefab).GetComponent<Client>();
-                client.IsHost = true;
-                client.ClientName = "host";
-                client.ConnectToServer("127.0.0.1", 1300);
+                Server = new Server();
+                Server.Init();
+                
+                Client = new Client();
+                Client.InitHost();
             }
             catch (Exception e)
             {
@@ -77,17 +90,13 @@ namespace Assets.Scripts
 
             try
             {
-                Client client = Instantiate(ClientPrefab).GetComponent<Client>();
-                client.ConnectToServer(hostAddress, 1300);
-                ConnectMenu.SetActive(false);
-                //enter dejarik scene
+                Client = new Client();
+                Client.Init(hostAddress);
             }
             catch (Exception e)
             {
                 Debug.Log(e.Message);
             }
-
-
         }
 
         public void BackButton()
@@ -96,16 +105,17 @@ namespace Assets.Scripts
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
 
-            Server server = FindObjectOfType<Server>();
-            if (server != null)
+            if (Client != null && Client.isConnected)
             {
-                Destroy(server.gameObject);
+                Client.Disconnect();
+                Client = null;
             }
 
-            Client client = FindObjectOfType<Client>();
-            if (client != null)
+            if (_isHosting)
             {
-                Destroy(client.gameObject);
+                _isHosting = false;
+                Server.ShutDown();
+                Server = null;
             }
 
         }
@@ -114,5 +124,6 @@ namespace Assets.Scripts
         {
             SceneManager.LoadScene("dejarik");
         }
+
     }
 }

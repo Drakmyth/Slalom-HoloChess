@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.Networking.NetworkSystem;
 
 namespace Assets.Scripts
 {
@@ -11,33 +10,8 @@ namespace Assets.Scripts
     {
 
         public int Port = 1300;
-
-        private List<ServerClient> _clients;
-        private List<ServerClient> _disconnectList;
-
-        private TcpListener _server;
         private bool _isServerStarted;
-
-        public void Init()
-        {
-            DontDestroyOnLoad(gameObject);
-            _clients = new List<ServerClient>();
-            _disconnectList = new List<ServerClient>();
-
-            try
-            {
-                _server = new TcpListener(IPAddress.Any, Port);
-                _server.Start();
-
-                StartListening();
-                _isServerStarted = true;
-            }
-            catch (Exception e)
-            {
-                Debug.Log("Socket error: " + e.Message);
-            }
-        }
-
+        
         void Update()
         {
             if (!_isServerStarted)
@@ -45,135 +19,173 @@ namespace Assets.Scripts
                 return;
             }
 
-            foreach (ServerClient client in _clients)
+
+
+
+
+
+
+
+
+
+        }
+
+        public void StartGame()
+        {
+            DisplayBoardSpaces();
+
+            //TODO: server
+            //            if (_isHostPlayer)
+            //            {
+            AssignMonstersToPlayers();
+
+        }
+
+        private void AssignMonstersToPlayers()
+        {
+            /*
+            List<Node> player1StartingNodes = new List<Node>
             {
-                if (!IsConnected(client.TcpClient))
+                GameGraph.Nodes[23],
+                GameGraph.Nodes[24],
+                GameGraph.Nodes[13],
+                GameGraph.Nodes[14]
+            };
+
+            List<Node> player2StartingNodes = new List<Node>
+            {
+                GameGraph.Nodes[17],
+                GameGraph.Nodes[18],
+                GameGraph.Nodes[19],
+                GameGraph.Nodes[20]
+            };
+
+            List<Monster> availableMonsters = new List<Monster>(MonsterPrefabs);
+            while (availableMonsters.Any())
+            {
+                int monsterIndex = _random.Next(0, availableMonsters.Count);
+
+                Monster currentMonster = availableMonsters[monsterIndex];
+
+                Monster monsterPrefab = MonsterPrefabs[MonsterPrefabs.IndexOf(currentMonster)];
+
+                Quaternion monsterQuaternion;
+
+                if (availableMonsters.Count % 2 == 0)
                 {
-                    client.TcpClient.Close();
-                    _disconnectList.Add(client);
-                    continue;
+                    currentMonster.CurrentNode = player1StartingNodes[0];
+                    player1StartingNodes.RemoveAt(0);
+                    monsterQuaternion = Quaternion.Euler(monsterPrefab.transform.rotation.eulerAngles.x, monsterPrefab.transform.rotation.eulerAngles.y + 180, monsterPrefab.transform.rotation.eulerAngles.z);
+                    Monster monsterInstance =
+                        Instantiate(monsterPrefab,
+                            new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
+                            monsterQuaternion) as Monster;
+                    if (monsterInstance != null)
+                    {
+                        monsterInstance.BelongsToHost = true;
+                        monsterInstance.CurrentNode = currentMonster.CurrentNode;
+                        Player1Monsters.Add(monsterInstance);
+                    }
                 }
                 else
                 {
-                    NetworkStream stream = client.TcpClient.GetStream();
-                    if (stream.DataAvailable)
+                    currentMonster.CurrentNode = player2StartingNodes[0];
+                    player2StartingNodes.RemoveAt(0);
+                    monsterQuaternion = monsterPrefab.transform.rotation;
+                    Monster monsterInstance =
+                        Instantiate(monsterPrefab,
+                            new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
+                            monsterQuaternion) as Monster;
+                    if (monsterInstance != null)
                     {
-                        StreamReader reader = new StreamReader(stream, true);
-                        string data = reader.ReadLine();
-
-                        if (data != null)
-                        {
-                            OnIncomingData(client, data);
-                        }
+                        monsterInstance.BelongsToHost = false;
+                        monsterInstance.CurrentNode = currentMonster.CurrentNode;
+                        Player2Monsters.Add(monsterInstance);
                     }
                 }
 
-                for (int i = 0; i < _disconnectList.Count; i++)
-                {
-                    _clients.Remove(_disconnectList[i]);
-                    _disconnectList.RemoveAt(i);
-                }
+
+                availableMonsters.RemoveAt(monsterIndex);
+
             }
+            */
         }
 
-
-        private void StartListening()
+        private void DisplayBoardSpaces()
         {
-            _server.BeginAcceptTcpClient(AcceptTcpClient, _server);
-        }
+            /*
 
-        private void AcceptTcpClient(IAsyncResult result)
-        {
-            TcpListener listener = (TcpListener) result.AsyncState;
-
-            ServerClient client = new ServerClient(listener.EndAcceptTcpClient(result));
-
-            _clients.Add(client);
-
-            StartListening();
-
-            Debug.Log("User has connected");
-
-            Broadcast("User has connected", _clients[_clients.Count - 1]);
-        }
-
-
-        private bool IsConnected(TcpClient tcpClient)
-        {
-            try
+            for (int i = 0; i < SpacePrefabs.Count; i++)
             {
-                if (tcpClient != null && tcpClient.Client != null && tcpClient.Client.Connected)
+                BoardSpace spacePrefab = SpacePrefabs[i];
+                float yAngleOffset = 30 * ((i - 1) % 12);
+                Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y + yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
+                if (!BoardSpaces.ContainsKey(i))
                 {
-                    if (tcpClient.Client.Poll(0, SelectMode.SelectRead))
+                    BoardSpace space =
+                        Instantiate(spacePrefab,
+                            new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y - .005f,
+                                spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace;
+                    if (space != null)
                     {
-                        return tcpClient.Client.Receive(new byte[1], SocketFlags.Peek) != 0;
+                        space.Node = GameGraph.Nodes[i];
+
+                        BoardSpaces.Add(i, space);
                     }
-
-                    return true;
-
                 }
-
-                return false;
-
             }
-            catch
-            {
-                return false;
-            }
+            */
         }
 
 
-        private void Broadcast(string data, List<ServerClient> clients)
+        public void Init(string ipAddress = "127.0.0.1")
         {
-            foreach (ServerClient client in clients)
-            {
-                Broadcast(data, client);
-            }
+            DontDestroyOnLoad(gameObject);
 
+            try
+            {
+                NetworkServer.Listen(ipAddress, Port);
+
+                _isServerStarted = true;
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Server error: " + e.Message);
+            }
         }
 
-        private void Broadcast(string data, ServerClient client)
+        public void SendToAll(string data, short messageTypeId = 0)
+        {
+            NetworkServer.SendToAll(messageTypeId, new StringMessage(data));
+        }
+
+        public void SendToClient(string data, Client client, short messageTypeId = 0)
         {
             try
             {
-                StreamWriter writer = new StreamWriter(client.TcpClient.GetStream());
-                writer.WriteLine(data);
-                writer.Flush();
+                NetworkServer.SendToClient(client.connection.connectionId, messageTypeId, new StringMessage(data));
             }
             catch (Exception e)
             {
                 Debug.Log(e.Message);
             }
-
         }
 
-        //TODO: MessageModels instead of string parsing
-        private void OnIncomingData(ServerClient client, string data)
+        public void ShutDown()
         {
-            string[] parsedData = data.Split('|');
+            NetworkServer.DisconnectAll();
+            NetworkServer.Shutdown();
+        }
 
-            switch (parsedData[0])
+        private void OnConnected(NetworkMessage netMsg)
+        {
+            Debug.Log("Client has been connected to host");
+            if (NetworkServer.connections.Count == 2)
             {
-                case "cli.connect":
-                    Broadcast("srv.playerConnected|" + client.ClientName + " has connected", _clients);
-                    break;
+                NetworkServer.SendToAll(MsgType.Scene, new StringMessage("dejarik"));
             }
 
-
-
-            Debug.Log(data);
         }
 
-    }
-
-    public class ServerClient
-    {
-        public string ClientName;
-        public TcpClient TcpClient;
-
-        public ServerClient(TcpClient tcpClient)
-        {
-            TcpClient = tcpClient;
-        }
     }
 }

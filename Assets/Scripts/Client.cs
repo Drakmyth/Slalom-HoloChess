@@ -1,138 +1,78 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
-    public class Client : MonoBehaviour
+    public class Client : NetworkClient
     {
+
         public bool IsHost = false;
         public string ClientName = "client";
 
-        private bool _isSocketReady;
-        private TcpClient _socket;
-        private NetworkStream _stream;
-        private StreamWriter _writer;
-        private StreamReader _reader;
-
-        private List<GameClient> _players = new List<GameClient>();
-
-        public bool ConnectToServer(string host, int port)
+        public void Init(string hostAddress, int port = 1300)
         {
-            if (_isSocketReady)
-            {
-                return false;
-            }
 
+            IsHost = false;
             try
             {
-                _socket = new TcpClient(host, port);
-                _stream = _socket.GetStream();
-                _writer = new StreamWriter(_stream);
-                _reader = new StreamReader(_stream);
 
-                _isSocketReady = true;
+                RegisterHandler(MsgType.Connect, OnConnected);
 
+                RegisterHandler(MsgType.Disconnect, OnDisconnected);
+
+                RegisterHandler(MsgType.Error, OnError);
+
+                Connect(hostAddress, port);
+                Debug.Log("Client");
             }
             catch (Exception e)
             {
                 Debug.Log(e.Message);
             }
 
-            return _isSocketReady;
-
         }
 
-        public void Send(string data)
+        public void InitHost()
         {
-            if (!_isSocketReady)
+
+            IsHost = true;
+            try
             {
-                return;
+                var localClient = ClientScene.ConnectLocalServer();
+
+                Init(localClient.serverIp, localClient.serverPort);
+                Debug.Log("HostClient");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
             }
 
-            _writer.WriteLine(data);
-            _writer.Flush();
         }
 
-        //TODO: MessageModels instead of string parsing
-        private void OnIncomingData(string data)
+
+        private void OnConnected(NetworkMessage netMsg)
         {
-            string[] parsedData = data.Split('|');
-
-            switch (parsedData[0])
-            {
-                case "srv.connect":
-                    Send("cli.connect|" + ClientName + "|" + ((IsHost)?1:0));
-                    break;
-                case "srv.playerConnected":
-                    break;
-            }
-
-
-
-            Debug.Log(data);
+            Debug.Log("Connected to server");
         }
 
-        private void UserConnected(string clientName)
+        private void OnDisconnected(NetworkMessage msg)
         {
-            GameClient gameClient = new GameClient {Name = clientName };
-
-            _players.Add(gameClient);
-
-            if (_players.Count == 2)
-            {
-                GameManager.Instance.StartGame();
-            }
+            Debug.Log("Disconnected from server");
         }
 
-        private void OnApplicationQuit()
+        private void OnError(NetworkMessage msg)
         {
-            CloseSocket();
+            Debug.Log("Error connecting with code " + msg.reader.ReadString());
         }
 
-        private void OnDisable()
+        private void OnSceneChange(NetworkMessage netMsg)
         {
-            CloseSocket();
+            string sceneName = netMsg.reader.ReadString();
+            SceneManager.LoadSceneAsync(sceneName);
         }
 
-        private void CloseSocket()
-        {
-            if (!_isSocketReady)
-            {
-                return;
-            }
-
-            _writer.Close();
-            _reader.Close();
-            _socket.Close();
-
-            _isSocketReady = false;
-        }
-
-        void Start()
-        {
-            DontDestroyOnLoad(gameObject);
-        }
-
-        void Update()
-        {
-            if (_isSocketReady && _stream.DataAvailable)
-            {
-                string data = _reader.ReadLine();
-                if (data != null)
-                {
-                    OnIncomingData(data);
-                }
-            }
-        }
-
-    }
-
-    public class GameClient
-    {
-        public string Name;
-        public bool IsHost;
     }
 }
