@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Assets.Scripts.Monsters;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -10,11 +12,13 @@ namespace Assets.Scripts
 
         public bool IsHost = false;
         public string ClientName = "client";
+        private ClientGameState _gameState;
 
         public void Init(string hostAddress, int port = 1300)
         {
 
             IsHost = false;
+            ClientName = "guest";
             try
             {
 
@@ -25,7 +29,7 @@ namespace Assets.Scripts
                 RegisterHandler(MsgType.Error, OnError);
 
                 Connect(hostAddress, port);
-                Debug.Log("Client");
+                Debug.Log("Guest");
             }
             catch (Exception e)
             {
@@ -38,6 +42,7 @@ namespace Assets.Scripts
         {
 
             IsHost = true;
+            ClientName = "host";
             try
             {
                 var localClient = ClientScene.ConnectLocalServer();
@@ -51,7 +56,6 @@ namespace Assets.Scripts
             }
 
         }
-
 
         private void OnConnected(NetworkMessage netMsg)
         {
@@ -72,6 +76,15 @@ namespace Assets.Scripts
         {
             string sceneName = netMsg.reader.ReadString();
             SceneManager.LoadSceneAsync(sceneName);
+        }
+
+        private void OnGameStart(NetworkMessage netMsg)
+        {
+            //TODO: Net get monsters from message
+            List<Monster> friendlyMonsters = new List<Monster>();
+            List<Monster> enemyMonsters = new List<Monster>();
+
+            _gameState = new ClientGameState(this, friendlyMonsters, enemyMonsters);
         }
 
     }

@@ -15,13 +15,21 @@ namespace Assets.Scripts
         public BoardGraph GameGraph { get; set; }
         public AttackCalculator AttackCalculator { get; set; }
         public MoveCalculator MoveCalculator { get; set; }
-        public Dictionary<int, BoardSpace> BoardSpaces { get; set; }
-        public List<Monster> Player1Monsters { get; set; }
-        public List<Monster> Player2Monsters { get; set; } 
+        public List<Monster> HostMonsters { get; set; }
+        public List<Monster> GuestMonsters { get; set; } 
 
         private readonly Random _random;
-        //3, 4 are opponent actions, 1, 2 are player actions
+
+        //TODO: Net
+        public bool IsGameStateUpdated = false;
+
+        //0 : GameEnded
+        //1 : HostAction
+        //2 : HostAction
+        //3 : GuestAction
+        //4 : GuestAction
         private int _actionNumber;
+
 
         //TODO: seems a decent candidate for an enum
         //1 : Highlight available monsters
@@ -32,10 +40,8 @@ namespace Assets.Scripts
         //6 : Select Push result (await user input)
         //7 : Listen for CounterPush result (await opponent input)
         private int _subActionNumber;
-
-        private bool _isAnimationRunning = false;
+        
         private Monster SelectedMonster { get; set; }
-        private Monster PreviewMonster { get; set; }
         private Node SelectedAttackNode { get; set; }
         private NodePath SelectedMovementPath { get; set; }
 
@@ -59,14 +65,12 @@ namespace Assets.Scripts
         {
             _random = new Random();
 
-            //TODO:needs to be set by whatever function determines who starts
             _actionNumber = 1;
             _subActionNumber = 1;
 
             GameGraph = new BoardGraph();
-            BoardSpaces = new Dictionary<int, BoardSpace>();
-            Player1Monsters = new List<Monster>();
-            Player2Monsters = new List<Monster>();
+            HostMonsters = new List<Monster>();
+            GuestMonsters = new List<Monster>();
             AttackCalculator = new AttackCalculator();
             MoveCalculator = new MoveCalculator();
 
@@ -79,29 +83,36 @@ namespace Assets.Scripts
             {
                 SceneManager.UnloadSceneAsync("startup");
             }
+
+            if (SceneManager.GetSceneByName("lobby").isLoaded)
+            {
+                SceneManager.UnloadSceneAsync("lobby");
+            }
+
+            AssignMonstersToPlayers();
+            //TODO: Net sendResponse StartGame
         }
 
         void Update()
         {
 
-            if (_isAnimationRunning)
-            {
-                return;
-            }
-
             if (_actionNumber < 1)
             {
-                //This should be unreachable
+                //The game should end at this point
                 return;
             }
 
-            if (Player1Monsters.Count == 0)
+            if (HostMonsters.Count == 0)
             {
-                EndGameLose();
+                _actionNumber = 0;
+                //TODO: Net sendResponse EndGame
+
             }
-            else if (Player2Monsters.Count == 0)
+            else if (GuestMonsters.Count == 0)
             {
-                EndGameWin();
+                _actionNumber = 0;
+                //TODO: Net sendResponse EndGame
+
             }
 
 
@@ -112,34 +123,31 @@ namespace Assets.Scripts
                     break;
                 case 2:
                     //Wait for user to select from available actions
-                    AwaitSubActionTwoSelection();
-                    break;
+                    //TODO: Net awaitResponse
+                    return;
                 case 3:
-                    UpdateSelectionMenu();
                     SubActionThree();
                     break;
                 case 4:
                     //Wait for user to select from available actions
-                    AwaitSubActionFourSelection();
+                    //TODO: Net awaitResponse
                     break;
                 case 5:
                     SubActionFive();
                     break;
                 case 6:
-                    AwaitSubActionSixSelection();
+                    //Wait for user to select push destination
+                    //TODO: Net awaitResponse
                     break;
                 case 7:
-                    AwaitSubActionSevenSelection();
+                    //Wait for user to select counter push destination
+                    //TODO: Net awaitResponse
                     break;
 
             }
 
             if (_actionNumber == 4 && _subActionNumber == 0)
             {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnClearHighlighting");
-                }
                 _actionNumber = 1;
                 _subActionNumber = 1;
                 SelectedMonster = null;
@@ -149,10 +157,6 @@ namespace Assets.Scripts
             }
             else if (_actionNumber == 3 && _subActionNumber == 0)
             {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnClearHighlighting");
-                }
                 _actionNumber ++;
                 _subActionNumber = 1;
                
@@ -162,11 +166,6 @@ namespace Assets.Scripts
             }
             else if(_actionNumber == 2 && _subActionNumber == 0)
             {
-                ClearSelectionMenu();
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnClearHighlighting");
-                }
                 _actionNumber++;
                 _subActionNumber = 1;
                 SelectedMonster = null;
@@ -175,27 +174,8 @@ namespace Assets.Scripts
             }
             else if (_actionNumber == 1 && _subActionNumber == 0)
             {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    Node selectedNode = null;
 
-                    if (SelectedMonster != null)
-                    {
-                        selectedNode = SelectedMonster.CurrentNode;
-                        _subActionNumber = 3;
-                        IEnumerable<BoardSpace> availableSpaces =
-                            BoardSpaces.Values.Where(s => Player1Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
-                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
-                    }
-                    else
-                    {
-                        ClearSelectionMenu();
-                        space.SendMessage("OnClearHighlighting");
-                        _subActionNumber = 1;
-                    }
-
-                    space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
-                }
+                _subActionNumber = SelectedMonster != null ? 3 : 1;
 
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
@@ -205,95 +185,16 @@ namespace Assets.Scripts
             }
         }
 
-        void OnSpaceSelected(int nodeId)
-        {
-
-            Node selectedNode = GameGraph.Nodes[nodeId];
-
-            if (_actionNumber == 1 || _actionNumber == 2)
-            {
-                if (_subActionNumber == 2)
-                {
-                    SubActionTwo(nodeId, true);
-                }
-
-                if (_subActionNumber == 4)
-                {
-                    SubActionFour(selectedNode, true);
-                }
-
-                if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
-                {
-                    SubActionSix(selectedNode, true);
-                }
-
-                if (_subActionNumber == 7 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
-                {
-                    SubActionSeven(selectedNode, false);
-                }
-
-            }
-
-            if (_actionNumber == 3 || _actionNumber == 4)
-            {
-                if (_subActionNumber == 2)
-                {
-                    SubActionTwo(nodeId, false);
-                }
-
-                if (_subActionNumber == 4)
-                {
-                    SubActionFour(selectedNode, false);
-                }
-
-                if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
-                {
-                    SubActionSix(selectedNode, false);
-                }
-
-                if (_subActionNumber == 7 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
-                {
-                    SubActionSeven(selectedNode, true);
-                }
-
-            }
-
-        }
-
-        void OnPreviewEnter(int nodeId)
-        {
-            if (_actionNumber == 1 || _actionNumber == 2)
-            {
-                PreviewMonster = Player2Monsters.FirstOrDefault(m => m.CurrentNode.Id == nodeId) ?? Player1Monsters.FirstOrDefault(m => m.CurrentNode.Id == nodeId);
-
-                UpdatePreviewMenu();
-
-                if (SelectedMonster != null && Player2Monsters.Any(m => m.CurrentNode.Id == nodeId))
-                {
-                    UpdateAttackResultPreview();
-                }
-                else if (SelectedMonster != null && Player1Monsters.Any(m => m.CurrentNode.Id == nodeId))
-                {
-                    ClearAttackResultPreview();
-                }
-            }
-        }
-
-        void OnAnimationComplete()
-        {
-            _isAnimationRunning = false;
-        }
-
         private Monster GetEnemyAtNode(Node node, bool isHostPlayer)
         {
-            List<Monster> enemyMonsters = isHostPlayer ? Player2Monsters : Player1Monsters;
+            List<Monster> enemyMonsters = isHostPlayer ? GuestMonsters : HostMonsters;
 
             return enemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(node));
         }
 
         private void AssignMonstersToPlayers()
         {
-            List<Node> player1StartingNodes = new List<Node>
+            List<Node> hostStartingNodes = new List<Node>
             {
                 GameGraph.Nodes[23],
                 GameGraph.Nodes[24],
@@ -301,7 +202,7 @@ namespace Assets.Scripts
                 GameGraph.Nodes[14]
             };
 
-            List<Node> player2StartingNodes = new List<Node>
+            List<Node> guestStartingNodes = new List<Node>
             {
                 GameGraph.Nodes[17],
                 GameGraph.Nodes[18],
@@ -318,41 +219,20 @@ namespace Assets.Scripts
 
                 Monster monsterPrefab = MonsterPrefabs[MonsterPrefabs.IndexOf(currentMonster)];
 
-                Quaternion monsterQuaternion;
-
                 if(availableMonsters.Count % 2 == 0)
                 {
-                    currentMonster.CurrentNode = player1StartingNodes[0];
-                    player1StartingNodes.RemoveAt(0);
-                    monsterQuaternion = Quaternion.Euler(monsterPrefab.transform.rotation.eulerAngles.x, monsterPrefab.transform.rotation.eulerAngles.y + 180, monsterPrefab.transform.rotation.eulerAngles.z); 
-                    Monster monsterInstance =
-                        Instantiate(monsterPrefab,
-                            new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
-                            monsterQuaternion) as Monster;
-                    if (monsterInstance != null)
-                    {
-                        monsterInstance.BelongsToHost = true;
-                        monsterInstance.CurrentNode = currentMonster.CurrentNode;
-                        Player1Monsters.Add(monsterInstance);
-                    }
+                    monsterPrefab.CurrentNode = hostStartingNodes[0];
+                    hostStartingNodes.RemoveAt(0);
+                    monsterPrefab.BelongsToHost = true;
+                    HostMonsters.Add(monsterPrefab);
                 }
                 else
                 {
-                    currentMonster.CurrentNode = player2StartingNodes[0];
-                    player2StartingNodes.RemoveAt(0);
-                    monsterQuaternion = monsterPrefab.transform.rotation;
-                    Monster monsterInstance = 
-                        Instantiate(monsterPrefab,
-                            new Vector3(currentMonster.CurrentNode.XPosition, 0, currentMonster.CurrentNode.YPosition),
-                            monsterQuaternion) as Monster;
-                    if (monsterInstance != null)
-                    {
-                        monsterInstance.BelongsToHost = false;
-                        monsterInstance.CurrentNode = currentMonster.CurrentNode;
-                        Player2Monsters.Add(monsterInstance);
-                    }
+                    monsterPrefab.CurrentNode = guestStartingNodes[0];
+                    guestStartingNodes.RemoveAt(0);
+                    monsterPrefab.BelongsToHost = false;
+                    GuestMonsters.Add(monsterPrefab);
                 }
-
 
                 availableMonsters.RemoveAt(monsterIndex);
 
@@ -360,43 +240,11 @@ namespace Assets.Scripts
 
         }
 
-        private void DisplayBoardSpaces()
-        {
-
-            for(int i = 0; i < SpacePrefabs.Count; i ++)
-            {
-                BoardSpace spacePrefab = SpacePrefabs[i];
-                float yAngleOffset = 30 * ((i - 1) % 12);
-                Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y + yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
-                if (!BoardSpaces.ContainsKey(i))
-                {
-                    BoardSpace space =
-                        Instantiate(spacePrefab,
-                            new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y -.005f,
-                                spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace;
-                    if (space != null)
-                    {
-                        space.Node = GameGraph.Nodes[i];
-
-                        BoardSpaces.Add(i, space);
-                    }
-                }
-            }
-
-        }
-
         private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)
         {
-            Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
-            Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition)/2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
-            GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, battleSmokeQuaternion) as GameObject;
-
             AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
-            IEnumerable<Node> friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
-            IEnumerable<Node> enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
-
-            attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
-            defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
+            IEnumerable<Node> friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
+            IEnumerable<Node> enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
 
             int number = _random.Next(0, AttackSounds.Count);
             int number2 = _random.Next(0, AttackSounds.Count);
@@ -406,51 +254,16 @@ namespace Assets.Scripts
             switch (attackResult)
             {
                 case AttackResult.Kill:
-                    AttackResultText attackKillResultText = Instantiate(KillResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
-
-                    if (attackKillResultText != null)
-                    {
-                        attackKillResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
-                    ProcessKill(defender, !isHostAttacker, battleSmokeInstance);
+                    ProcessKill(defender, !isHostAttacker);
                     break;
                 case AttackResult.CounterKill:
-                    AttackResultText attackCounterKillResultText = Instantiate(CounterKillResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
-
-
-                    if (attackCounterKillResultText != null)
-                    {
-                    attackCounterKillResultText.LerpDestination = attackCounterKillResultText.transform.position + Vector3.up;
-                        attackCounterKillResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
-                    ProcessKill(attacker, isHostAttacker, battleSmokeInstance);
+                    ProcessKill(attacker, isHostAttacker);
                     SelectedMonster = null;
                     break;
                 case AttackResult.Push:
 
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
-
-                    AttackResultText attackPushResultText = Instantiate(PushResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
-
-
-                    if (attackPushResultText != null)
-                    {
-                        attackPushResultText.LerpDestination = attackPushResultText.transform.position + Vector3.up;
-                        attackPushResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
-                    foreach (BoardSpace space in BoardSpaces.Values)
-                    {
-                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
-                    }
-
-                    Destroy(battleSmokeInstance);
 
                     _subActionNumber = 6;
 
@@ -462,25 +275,8 @@ namespace Assets.Scripts
                     break;
                 case AttackResult.CounterPush:
 
-                    AttackResultText attackCounterPushResultText = Instantiate(CounterPushResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
-
-                    if (attackCounterPushResultText != null)
-                    {
-                        attackCounterPushResultText.LerpDestination = attackCounterPushResultText.transform.position + Vector3.up;
-                        attackCounterPushResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
                     AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
-
-                    foreach (BoardSpace space in BoardSpaces.Values)
-                    {
-                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
-                    }
-
-                    //TODO: wait until push action is complete
-                    Destroy(battleSmokeInstance);
 
                     _subActionNumber = 7;
                     //send network message with available push nodes
@@ -490,7 +286,6 @@ namespace Assets.Scripts
                         _subActionNumber = 0;
                     }
 
-
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -498,19 +293,17 @@ namespace Assets.Scripts
 
         }
 
-        private void ProcessKill(Monster killed, bool belongsToHost, GameObject battleSmokeInstance)
+        private void ProcessKill(Monster killed, bool belongsToHost)
         {
             MonsterPrefabs.Remove(killed);
             if (belongsToHost)
             {
-                Player1Monsters.Remove(killed);
+                HostMonsters.Remove(killed);
             }
             else
             {
-                Player2Monsters.Remove(killed);
+                GuestMonsters.Remove(killed);
             }
-            _isAnimationRunning = true;
-            killed.SendMessage("OnLoseBattle", battleSmokeInstance);
             _subActionNumber = 0;
         }
 
@@ -521,63 +314,21 @@ namespace Assets.Scripts
 
             selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
 
-            _isAnimationRunning = true;
-
-            selectedMonster.SendMessage("OnBeginMoveAnimation", path);
-
             _subActionNumber = 0;
         }
 
-        private void GonkDroidAI()
-        {
-
-        }
-
+        //TODO: Net awaitRequest
         private void SubActionOne()
         {
-            IEnumerable<BoardSpace> availableSpaces =
-            BoardSpaces.Values.Where(s => Player1Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
-
-            foreach (BoardSpace space in availableSpaces)
-            {
-                space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
-            }
+            IEnumerable<int> availableNodeIds =
+            GameGraph.Nodes.Where(n => HostMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id)).Select(n => n.Id);
 
             _subActionNumber = 2;
-        }
-
-        private void AwaitSubActionTwoSelection()
-        {
-            if (_actionNumber == 3 || _actionNumber == 4)
-            {
-                IEnumerable<BoardSpace> availableSpaces =
-                    BoardSpaces.Values.Where(s => Player2Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
-                //TODO: bake this into gonk droid et al
-                if (availableSpaces.Any())
-                {
-                    BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
-
-                    OnSpaceSelected(aiChoice.Node.Id);
-
-                }
-            }
+            //TODO: Net sendResponse AvailableSpaces | subActionOneResponse
 
         }
 
-        private void SubActionTwo(int nodeId, bool isHostPlayer)
-        {
-            SelectedMonster = isHostPlayer ? Player1Monsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId) : Player2Monsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
-
-            if (SelectedMonster != null)
-            {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnMonsterSelected", nodeId);
-                }
-                _subActionNumber = 3;
-            }
-        }
-
+        //TODO: Net awaitRequest
         private void SubActionThree()
         {
             if (SelectedMonster != null)
@@ -587,13 +338,13 @@ namespace Assets.Scripts
 
                 if (_actionNumber == 1 || _actionNumber == 2)
                 {
-                    friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
-                    enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
+                    friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
+                    enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
                 }
                 else
                 {
-                    friendlyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
-                    enemyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
+                    friendlyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
+                    enemyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
                 }
 
 
@@ -602,52 +353,15 @@ namespace Assets.Scripts
 
                 IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                     enemyOccupiedNodes).Select(a => a.Id);
-
-                //Update board highlighting
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
-                    space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
-                }
 
                 _subActionNumber = 4;
+
+                //TODO: Net sendResponse availableActions | subActionThreeResponse
             }
 
         }
 
-        private void AwaitSubActionFourSelection()
-        {
-            if (_actionNumber == 3 || _actionNumber == 4)
-            {
-                IEnumerable<Node> friendlyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
-                IEnumerable<Node> enemyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
-
-                IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
-                    SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.DestinationNode.Id);
-
-                IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
-                    enemyOccupiedNodes).Select(a => a.Id);
-                //TODO: bake this into gonk droid et al
-                int aiActionNodeId;
-                if (availableAttackActionNodeIds.Any())
-                {
-                    aiActionNodeId = availableAttackActionNodeIds.ElementAt(_random.Next(availableAttackActionNodeIds.Count()));
-                }
-                else if (availableMoveActionNodeIds.Any())
-                {
-                    aiActionNodeId = availableMoveActionNodeIds.ElementAt(_random.Next(availableMoveActionNodeIds.Count()));
-                }
-                else
-                {
-                    _subActionNumber = 2;
-                    return;
-                }
-
-                OnSpaceSelected(aiActionNodeId);
-
-            }
-        }
-
+        //TODO: Net awaitRequest
         private void SubActionFour(Node selectedNode, bool isHostPlayer)
         {
             if (SelectedMonster == null)
@@ -660,13 +374,13 @@ namespace Assets.Scripts
             IEnumerable<Node> enemyOccupiedNodes;
             if (isHostPlayer)
             {
-                friendlyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
-                enemyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
+                friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
+                enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
             }
             else
             {
-                friendlyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
-                enemyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
+                friendlyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
+                enemyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
             }
 
             IEnumerable<NodePath> movementPaths = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
@@ -679,15 +393,11 @@ namespace Assets.Scripts
 
             if (friendlyOccupiedNodes.Contains(selectedNode))
             {
-                SelectedMonster = Player1Monsters.Single(m => m.CurrentNode.Equals(selectedNode));
+                SelectedMonster = HostMonsters.Single(m => m.CurrentNode.Equals(selectedNode));
                 SelectedAttackNode = null;
-
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnMonsterSelected", selectedNode.Id);
-                }
-
+                
                 _subActionNumber = 3;
+
             }
             else if (availableAttackActions.Contains(selectedNode))
             {
@@ -701,6 +411,8 @@ namespace Assets.Scripts
                 SelectedAttackNode = null;
                 _subActionNumber = 5;
             }
+
+            //TODO: Net sendResponse stateUpdated
 
         }
 
@@ -727,142 +439,32 @@ namespace Assets.Scripts
 
         }
 
-        private void AwaitSubActionSixSelection()
-        {
-            if (_actionNumber == 3 || _actionNumber == 4)
-            {               
-                //TODO: bake this into gonk droid et al
-                Node aiActionNode;
-                if (AvailablePushDestinations.Any())
-                {
-                    aiActionNode = AvailablePushDestinations.ElementAt(_random.Next(AvailablePushDestinations.Count()));
-                }
-                else
-                {
-                    _subActionNumber = 0;
-                    return;
-                }
-
-                OnSpaceSelected(aiActionNode.Id);
-
-            }
-        }
-
-
 
         private void SubActionSix(Node selectedNode, bool isHostPlayer)
         {
-            Monster pushedMonster = isHostPlayer ? Player2Monsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id) : Player1Monsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            Monster pushedMonster = isHostPlayer ? GuestMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id) : HostMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
 
             List<Node> pathToDestination = new List<Node> { selectedNode };
             NodePath movementPath = new NodePath(pathToDestination, selectedNode);
-            _isAnimationRunning = true;
-            pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
 
             pushedMonster.CurrentNode = selectedNode;
 
             _subActionNumber = 0;
 
         }
-
-
-        private void AwaitSubActionSevenSelection()
-        {
-            if (_actionNumber == 1 || _actionNumber == 2)
-            {
-
-                //TODO: bake this into gonk droid et al
-                Node aiActionNode;
-                if (AvailablePushDestinations.Any())
-                {
-                    aiActionNode = AvailablePushDestinations.ElementAt(_random.Next(AvailablePushDestinations.Count()));
-                }
-                else
-                {
-                    _subActionNumber = 0;
-                    return;
-                }
-
-                OnSpaceSelected(aiActionNode.Id);
-
-            }
-        }
-
 
 
         private void SubActionSeven(Node selectedNode, bool isHostPlayer)
         {
-            Monster pushedMonster = isHostPlayer ? Player2Monsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id) : Player1Monsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
+            Monster pushedMonster = isHostPlayer ? GuestMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id) : HostMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
 
             List<Node> pathToDestination = new List<Node> { selectedNode };
             NodePath movementPath = new NodePath(pathToDestination, selectedNode);
-            _isAnimationRunning = true;
-            pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
 
             pushedMonster.CurrentNode = selectedNode;
 
             _subActionNumber = 0;
 
-        }
-
-        private void UpdateAttackResultPreview()
-        {
-            IDictionary<AttackResult, decimal> attackResultPercentages = AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating, PreviewMonster.DefenseRating);
-
-            GameObject.Find("KillResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("PushResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("CounterPushResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("CounterKillResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-        }
-
-        private void ClearAttackResultPreview()
-        {
-            GameObject.Find("KillResultPreview").SendMessage("OnClear");
-            GameObject.Find("PushResultPreview").SendMessage("OnClear");
-            GameObject.Find("CounterPushResultPreview").SendMessage("OnClear");
-            GameObject.Find("CounterKillResultPreview").SendMessage("OnClear");
-        }
-
-        private void UpdatePreviewMenu()
-        {
-            if (PreviewMonster != null)
-            {
-                GameObject.Find("PreviewName").SendMessage("OnUpdate", PreviewMonster.Name);
-                GameObject.Find("PreviewMovement").SendMessage("OnUpdate", PreviewMonster.MovementRating.ToString());
-                GameObject.Find("PreviewAttack").SendMessage("OnUpdate", PreviewMonster.AttackRating.ToString());
-                GameObject.Find("PreviewDefense").SendMessage("OnUpdate", PreviewMonster.DefenseRating.ToString());
-            }
-        }
-
-        private void UpdateSelectionMenu()
-        {
-            if (SelectedMonster != null)
-            {
-                GameObject.Find("SelectionName").SendMessage("OnUpdate", SelectedMonster.Name);
-                GameObject.Find("SelectionMovement").SendMessage("OnUpdate", SelectedMonster.MovementRating.ToString());
-                GameObject.Find("SelectionAttack").SendMessage("OnUpdate", SelectedMonster.AttackRating.ToString());
-                GameObject.Find("SelectionDefense").SendMessage("OnUpdate", SelectedMonster.DefenseRating.ToString());
-            }
-        }
-
-        private void ClearSelectionMenu()
-        {
-            GameObject.Find("SelectionName").SendMessage("OnClear");
-            GameObject.Find("SelectionMovement").SendMessage("OnClear");
-            GameObject.Find("SelectionAttack").SendMessage("OnClear");
-            GameObject.Find("SelectionDefense").SendMessage("OnClear");
-        }
-
-
-
-        private void EndGameWin()
-        {
-            SceneManager.LoadScene("wingame");
-        }
-
-        private void EndGameLose()
-        {
-            SceneManager.LoadScene("losegame");
         }
 
     }
