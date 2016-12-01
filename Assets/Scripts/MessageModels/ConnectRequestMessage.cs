@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.MessageModels
 {
-    public class ConnectRequestMessage : GameMessage
+    public class ConnectRequestMessage : GameStateMessage
     {
 
         public string ClientName { get; set; }

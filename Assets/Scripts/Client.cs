@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Assets.Scripts.MessageModels;
 using Assets.Scripts.Monsters;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -27,6 +29,8 @@ namespace Assets.Scripts
                 RegisterHandler(MsgType.Disconnect, OnDisconnected);
 
                 RegisterHandler(MsgType.Error, OnError);
+
+                RegisterHandler(CustomMessageTypes.GameStart, OnGameStart);
 
                 Connect(hostAddress, port);
                 Debug.Log("Guest");
@@ -80,9 +84,10 @@ namespace Assets.Scripts
 
         private void OnGameStart(NetworkMessage netMsg)
         {
-            //TODO: Net get monsters from message
-            List<Monster> friendlyMonsters = new List<Monster>();
-            List<Monster> enemyMonsters = new List<Monster>();
+            GameStartMessage gameStartMessage = netMsg.ReadMessage<GameStartMessage>();
+
+            List<Monster> friendlyMonsters = IsHost? gameStartMessage.HostMonsters.ToList() : gameStartMessage.GuestMonsters.ToList();
+            List<Monster> enemyMonsters = IsHost ? gameStartMessage.GuestMonsters.ToList() : gameStartMessage.HostMonsters.ToList();
 
             _gameState = new ClientGameState(this, friendlyMonsters, enemyMonsters);
         }

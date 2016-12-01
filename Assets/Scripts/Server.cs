@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Scripts.MessageModels;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
@@ -33,6 +34,11 @@ namespace Assets.Scripts
         public void StartGame()
         {
             _gameState = new GameState();
+
+            GameStartMessage gameStartMessage = new GameStartMessage(_gameState.HostMonsters.ToArray(), _gameState.GuestMonsters.ToArray());
+
+            SendToAll(gameStartMessage);
+
         }
 
 
@@ -52,9 +58,9 @@ namespace Assets.Scripts
             }
         }
 
-        public void SendToAll(string data, short messageTypeId = 0)
+        public void SendToAll(GameStateMessage msg)
         {
-            NetworkServer.SendToAll(messageTypeId, new StringMessage(data));
+            NetworkServer.SendToAll(msg.MessageTypeId, msg);
         }
 
         public void SendToClient(string data, Client client, short messageTypeId = 0)
@@ -78,9 +84,9 @@ namespace Assets.Scripts
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Client has been connected to host");
-            if (NetworkServer.connections.Count == 2)
+            if (NetworkServer.connections.Count == 1) //TODO: Net this should be 2
             {
-                NetworkServer.SendToAll(MsgType.Scene, new StringMessage("dejarik"));
+                StartGame();
             }
 
         }
