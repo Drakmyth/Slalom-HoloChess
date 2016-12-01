@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using Assets.Scripts.MessageModels;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
 using UnityEngine.SceneManagement;
@@ -21,6 +22,7 @@ namespace Assets.Scripts
         private readonly Random _random;
 
         //TODO: Net
+        private Server _hostServer;
         public bool IsGameStateUpdated = false;
 
         //0 : GameEnded
@@ -48,23 +50,14 @@ namespace Assets.Scripts
         //TODO: we can probably do better than this
         private IEnumerable<Node> AvailablePushDestinations { get; set; }
 
-        public List<Monster> MonsterPrefabs;
-        public List<BoardSpace> SpacePrefabs;
-        public GameObject BattleSmoke;
-
-        //TODO: consolidate these
-        public GameObject PushResultTextPrefab;
-        public GameObject KillResultTextPrefab;
-        public GameObject CounterPushResultTextPrefab;
-        public GameObject CounterKillResultTextPrefab;
-
-        public List<AudioClip> AttackSounds;
-        public List<AudioClip> MovementSounds;
-
         public GameState()
         {
             _random = new Random();
 
+        }
+
+        void Start()
+        {
             _actionNumber = 1;
             _subActionNumber = 1;
 
@@ -75,10 +68,21 @@ namespace Assets.Scripts
             MoveCalculator = new MoveCalculator();
 
             AvailablePushDestinations = new List<Node>();
-        }
 
-        void Start()
-        {
+            GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+            if (gameManager == null || gameManager.Server == null)
+            {
+                throw new InvalidOperationException("Server must exist to begin game");
+            }
+
+            _hostServer = gameManager.Server;
+
+            if (_hostServer == null || !_hostServer.IsServerStarted)
+            {
+                throw new InvalidOperationException("Server must be running to begin game");
+            }
+
             if (SceneManager.GetSceneByName("startup").isLoaded)
             {
                 SceneManager.UnloadSceneAsync("startup");
@@ -90,13 +94,17 @@ namespace Assets.Scripts
             }
 
             AssignMonstersToPlayers();
-            //TODO: Net sendResponse StartGame
+
+            GameStartMessage gameStartMessage = new GameStartMessage(HostMonsters, GuestMonsters);
+
+            _hostServer.SendToAll(gameStartMessage);
+
         }
 
         void Update()
         {
 
-            if (_actionNumber < 1)
+            if (_hostServer == null || _actionNumber < 1)
             {
                 //The game should end at this point
                 return;
@@ -210,28 +218,37 @@ namespace Assets.Scripts
                 GameGraph.Nodes[20]
             };
 
-            List<Monster> availableMonsters = new List<Monster>(MonsterPrefabs);
+            List<Monster> availableMonsters = new List<Monster>
+            {
+                new Ghhhk(),
+                new Houjix(),
+                new Klorslug(),
+                new Molator(),
+                new Monnok(),
+                new Ngok(),
+                new Savrip(),
+                new Strider()
+            };
+
             while (availableMonsters.Any())
             {
                 int monsterIndex = _random.Next(0, availableMonsters.Count);
                    
                 Monster currentMonster = availableMonsters[monsterIndex];
 
-                Monster monsterPrefab = MonsterPrefabs[MonsterPrefabs.IndexOf(currentMonster)];
-
                 if(availableMonsters.Count % 2 == 0)
                 {
-                    monsterPrefab.CurrentNode = hostStartingNodes[0];
+                    currentMonster.CurrentNode = hostStartingNodes[0];
                     hostStartingNodes.RemoveAt(0);
-                    monsterPrefab.BelongsToHost = true;
-                    HostMonsters.Add(monsterPrefab);
+                    currentMonster.BelongsToHost = true;
+                    HostMonsters.Add(currentMonster);
                 }
                 else
                 {
-                    monsterPrefab.CurrentNode = guestStartingNodes[0];
+                    currentMonster.CurrentNode = guestStartingNodes[0];
                     guestStartingNodes.RemoveAt(0);
-                    monsterPrefab.BelongsToHost = false;
-                    GuestMonsters.Add(monsterPrefab);
+                    currentMonster.BelongsToHost = false;
+                    GuestMonsters.Add(currentMonster);
                 }
 
                 availableMonsters.RemoveAt(monsterIndex);
@@ -245,11 +262,6 @@ namespace Assets.Scripts
             AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
             IEnumerable<Node> friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
             IEnumerable<Node> enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
-
-            int number = _random.Next(0, AttackSounds.Count);
-            int number2 = _random.Next(0, AttackSounds.Count);
-            attacker.PlaySound(AttackSounds[number]);
-            defender.PlaySound(AttackSounds[number2]);
 
             switch (attackResult)
             {
@@ -295,7 +307,6 @@ namespace Assets.Scripts
 
         private void ProcessKill(Monster killed, bool belongsToHost)
         {
-            MonsterPrefabs.Remove(killed);
             if (belongsToHost)
             {
                 HostMonsters.Remove(killed);
@@ -309,9 +320,6 @@ namespace Assets.Scripts
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
-            int number = _random.Next(0, MovementSounds.Count);
-            selectedMonster.PlaySound(MovementSounds[number]);
-
             selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
 
             _subActionNumber = 0;

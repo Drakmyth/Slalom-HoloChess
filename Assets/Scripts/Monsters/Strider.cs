@@ -1,5 +1,8 @@
-﻿namespace Assets.Scripts.Monsters
+﻿using System;
+
+namespace Assets.Scripts.Monsters
 {
+    [Serializable]
     public class Strider : Monster
     {
         public override int AttackRating
