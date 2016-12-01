@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.MessageModels
 {
-    public class SelectMonsterMessage : GameMessage
+    public class SelectMonsterStateMessage : GameStateMessage
     {
         public Monster SelectedMonster { get; set; }
 

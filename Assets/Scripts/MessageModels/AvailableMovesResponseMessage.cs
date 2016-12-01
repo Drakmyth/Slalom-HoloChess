@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using Assets.Scripts.Monsters;
+﻿using Assets.Scripts.Monsters;
 using DejarikLibrary;
 
 namespace Assets.Scripts.MessageModels
 {
-    public class AvailableMovesResponseMessage : GameMessage
+    public class AvailableMovesResponseMessage : GameStateMessage
     {
         public Monster SelectedMonster;
-        public IEnumerable<Node> AvailableMoves;
-        public IEnumerable<Node> AvailableAttacks;
+        public Node[] AvailableMoves;
+        public Node[] AvailableAttacks;
     }
 }

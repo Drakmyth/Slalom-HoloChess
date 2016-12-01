@@ -3,7 +3,7 @@ using DejarikLibrary;
 
 namespace Assets.Scripts.MessageModels
 {
-    public class AttackResultMessage : GameMessage
+    public class AttackResultMessage : GameStateMessage
     {
         public Monster AttackingMonster { get; set; }
         public Monster DefendingMonster { get; set; }
