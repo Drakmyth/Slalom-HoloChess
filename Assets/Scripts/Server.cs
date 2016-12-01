@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.MessageModels;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -7,7 +7,7 @@ using UnityEngine.Networking.NetworkSystem;
 
 namespace Assets.Scripts
 {
-    public class Server : MonoBehaviour
+    public class Server : NetworkBehaviour
     {
 
         public int Port = 1300;
@@ -33,7 +33,7 @@ namespace Assets.Scripts
 
         public void StartGame()
         {
-            _gameState = new GameState();
+            _gameState = gameObject.AddComponent<GameState>();
 
             GameStartMessage gameStartMessage = new GameStartMessage(_gameState.HostMonsters.ToArray(), _gameState.GuestMonsters.ToArray());
 
@@ -48,6 +48,9 @@ namespace Assets.Scripts
 
             try
             {
+
+                NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnected);
+
                 NetworkServer.Listen(ipAddress, Port);
 
                 _isServerStarted = true;
@@ -67,7 +70,11 @@ namespace Assets.Scripts
         {
             try
             {
-                NetworkServer.SendToClient(client.connection.connectionId, messageTypeId, new StringMessage(data));
+                NetworkServer.SendToClient(client._netClient.connection.connectionId, messageTypeId, new StringMessage(data));
+            }
+            catch (NullReferenceException npe)
+            {
+                Debug.Log("Connection does not exist for " + client.ClientName);
             }
             catch (Exception e)
             {
@@ -81,10 +88,10 @@ namespace Assets.Scripts
             NetworkServer.Shutdown();
         }
 
-        private void OnConnected(NetworkMessage netMsg)
+        private void OnClientConnected(NetworkMessage netMsg)
         {
             Debug.Log("Client has been connected to host");
-            if (NetworkServer.connections.Count == 1) //TODO: Net this should be 2
+            if (NetworkServer.connections.Count(c => c != null) == 1) //TODO: Net this should be 2
             {
                 StartGame();
             }

@@ -22,5 +22,10 @@
             get { return "savrip"; }
         }
 
+        public override int MonsterTypeId
+        {
+            get { return MonsterTypes.Savrip; }
+        }
+
     }
 }

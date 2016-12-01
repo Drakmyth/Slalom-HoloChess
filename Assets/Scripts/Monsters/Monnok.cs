@@ -21,5 +21,11 @@
         {
             get { return "monnok"; }
         }
+
+        public override int MonsterTypeId
+        {
+            get { return MonsterTypes.Monnok; }
+        }
+
     }
 }
