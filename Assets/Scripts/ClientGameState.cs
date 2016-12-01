@@ -20,7 +20,7 @@ namespace Assets.Scripts
         public List<Monster> FriendlyMonsters { get; set; }
         public List<Monster> EnemyMonsters { get; set; } 
 
-        private readonly Random _random;
+        private readonly Random _random = new Random();
 
         //0 : GameEnded
         //1 : HostAction
@@ -61,11 +61,10 @@ namespace Assets.Scripts
         public List<AudioClip> AttackSounds;
         public List<AudioClip> MovementSounds;
 
-        public ClientGameState(Client client, List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
+        public void Init(Client client, List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {
             Client = client;
 
-            _random = new Random();
 
             _actionNumber = 1;
 
@@ -91,16 +90,9 @@ namespace Assets.Scripts
         }
 
         void Update()
-        {
-
-            if (_isAnimationRunning)
+        {      
+            if (Client == null || _actionNumber < 1 || _isAnimationRunning)
             {
-                return;
-            }
-
-            if (_actionNumber < 1)
-            {
-                //The game should end at this point
                 return;
             }
 
@@ -803,7 +795,6 @@ namespace Assets.Scripts
         {
             SceneManager.LoadScene("losegame");
         }
-
     }
 
 }

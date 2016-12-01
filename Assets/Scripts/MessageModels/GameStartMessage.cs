@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Monsters;
+﻿using System.Collections.Generic;
+using Assets.Scripts.Monsters;
 using UnityEngine;
 
 namespace Assets.Scripts.MessageModels
@@ -22,10 +23,21 @@ namespace Assets.Scripts.MessageModels
             SubActionId = 1;
         }
 
-        public GameStartMessage(Monster[] hostMonsters, Monster[] guestMonsters)
+        public GameStartMessage(List<Monster> hostMonsters, List<Monster> guestMonsters)
         {
-            HostMonsters = JsonUtility.ToJson(hostMonsters);
-            GuestMonsters = JsonUtility.ToJson(guestMonsters);
+            // ridiculous that JsonUtility doesn't support arrays unless nested in an object
+            MonsterListWrapper hostWrapper = new MonsterListWrapper
+            {
+                Monsters = hostMonsters
+            };
+
+            MonsterListWrapper guestWrapper = new MonsterListWrapper
+            {
+                Monsters = guestMonsters
+            };
+
+            HostMonsters = JsonUtility.ToJson(hostWrapper);
+            GuestMonsters = JsonUtility.ToJson(guestWrapper);
             ActionId = 1;
             SubActionId = 1;
         }

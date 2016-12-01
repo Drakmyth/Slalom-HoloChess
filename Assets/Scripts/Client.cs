@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.MessageModels;
 using Assets.Scripts.Monsters;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
@@ -85,10 +88,29 @@ namespace Assets.Scripts
             GameStartMessage gameStartMessage = netMsg.ReadMessage<GameStartMessage>();
 
             //Convert json strings to objects
-            List<Monster> friendlyMonsters = IsHost? JsonUtility.FromJson<List<Monster>>(gameStartMessage.HostMonsters) : JsonUtility.FromJson<List<Monster>>(gameStartMessage.GuestMonsters);
-            List<Monster> enemyMonsters = IsHost ? JsonUtility.FromJson<List<Monster>>(gameStartMessage.GuestMonsters) : JsonUtility.FromJson<List<Monster>>(gameStartMessage.HostMonsters);
+            List<Monster> friendlyMonsters = IsHost? JsonUtility.FromJson<MonsterListWrapper>(gameStartMessage.HostMonsters).Monsters : JsonUtility.FromJson<MonsterListWrapper>(gameStartMessage.GuestMonsters).Monsters;
+            List<Monster> enemyMonsters = IsHost ? JsonUtility.FromJson<MonsterListWrapper>(gameStartMessage.GuestMonsters).Monsters : JsonUtility.FromJson<MonsterListWrapper>(gameStartMessage.HostMonsters).Monsters;
 
-            _gameState = new ClientGameState(this, friendlyMonsters, enemyMonsters);
+            StartGame(friendlyMonsters, enemyMonsters);
+
+
+        }
+
+        private IEnumerator StartGame(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
+        {
+            AsyncOperation loadSceneOperation = SceneManager.LoadSceneAsync("dejarik");
+
+            while (!loadSceneOperation.isDone)
+            {
+                print("Loading the Scene");
+                yield return null;
+            }
+
+            _gameState = SceneManager.GetSceneByName("dejarik").GetRootGameObjects().Single(g => g.name == "GameState").GetComponent<ClientGameState>();
+
+            _gameState.Init(this, friendlyMonsters, enemyMonsters);
+
+            SceneManager.UnloadSceneAsync("lobby");
         }
 
     }

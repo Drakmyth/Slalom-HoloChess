@@ -11,36 +11,18 @@ namespace Assets.Scripts
     {
 
         public int Port = 1300;
-        private bool _isServerStarted;
+        public bool IsServerStarted;
         private GameState _gameState;
         private Client _hostClient;
         private Client _guestClient;
         
         void Update()
         {
-            if (!_isServerStarted)
+            if (!IsServerStarted)
             {
                 return;
             }
-
-
-
-
-
-
-
         }
-
-        public void StartGame()
-        {
-            _gameState = gameObject.AddComponent<GameState>();
-
-            GameStartMessage gameStartMessage = new GameStartMessage(_gameState.HostMonsters.ToArray(), _gameState.GuestMonsters.ToArray());
-
-            SendToAll(gameStartMessage);
-
-        }
-
 
         public void Init(string ipAddress = "127.0.0.1")
         {
@@ -53,7 +35,7 @@ namespace Assets.Scripts
 
                 NetworkServer.Listen(ipAddress, Port);
 
-                _isServerStarted = true;
+                IsServerStarted = true;
             }
             catch (Exception e)
             {
@@ -93,7 +75,7 @@ namespace Assets.Scripts
             Debug.Log("Client has been connected to host");
             if (NetworkServer.connections.Count(c => c != null) == 1) //TODO: Net this should be 2
             {
-                StartGame();
+                _gameState = gameObject.AddComponent<GameState>();
             }
 
         }
