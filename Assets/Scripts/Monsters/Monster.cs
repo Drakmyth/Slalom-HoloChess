@@ -10,6 +10,7 @@ namespace Assets.Scripts.Monsters
         public abstract int DefenseRating { get; }
         public abstract int MovementRating { get; }
         public abstract string Name { get; }
+        public abstract int MonsterTypeId { get; }
 
         public Node CurrentNode { get; set; }
 

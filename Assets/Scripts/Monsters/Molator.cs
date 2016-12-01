@@ -21,5 +21,11 @@
         {
             get { return "molator"; }
         }
+
+        public override int MonsterTypeId
+        {
+            get { return MonsterTypes.Molator; }
+        }
+
     }
 }

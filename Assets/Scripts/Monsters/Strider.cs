@@ -21,5 +21,11 @@
         {
             get { return "strider"; }
         }
+
+        public override int MonsterTypeId
+        {
+            get { return MonsterTypes.Strider; }
+        }
+
     }
 }

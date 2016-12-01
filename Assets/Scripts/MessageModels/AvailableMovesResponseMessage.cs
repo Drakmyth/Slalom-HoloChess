@@ -1,12 +1,15 @@
-﻿using Assets.Scripts.Monsters;
-using DejarikLibrary;
-
-namespace Assets.Scripts.MessageModels
+﻿namespace Assets.Scripts.MessageModels
 {
     public class AvailableMovesResponseMessage : GameStateMessage
     {
-        public Monster SelectedMonster;
-        public Node[] AvailableMoves;
-        public Node[] AvailableAttacks;
+        public int SelectedMonsterTypeId;
+        public int[] AvailableMoveNodeIds;
+        public int[] AvailableAttackNodeIds;
+
+        public override short MessageTypeId
+        {
+            get { return CustomMessageTypes.AvailableMovesResponse; }
+        }
+
     }
 }

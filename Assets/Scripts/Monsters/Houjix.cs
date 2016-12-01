@@ -21,5 +21,11 @@
         {
             get { return "houjix"; }
         }
+
+        public override int MonsterTypeId
+        {
+            get { return MonsterTypes.Houjix; }
+        }
+
     }
 }

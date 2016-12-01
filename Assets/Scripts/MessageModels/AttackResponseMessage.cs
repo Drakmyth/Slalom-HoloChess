@@ -1,13 +1,14 @@
 ﻿namespace Assets.Scripts.MessageModels
 {
-    public class AttackRequestMessage : GameStateMessage
+    public class AttackResponseMessage : GameStateMessage
     {
         public int AttackingMonsterTypeId { get; set; }
         public int DefendingMonsterTypeId { get; set; }
+        public int AttackResultId { get; set; }
 
         public override short MessageTypeId
         {
-            get { return CustomMessageTypes.AttackRequest; }
+            get { return CustomMessageTypes.AttackResponse; }
         }
     }
 }

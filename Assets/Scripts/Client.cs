@@ -1,39 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.MessageModels;
 using Assets.Scripts.Monsters;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
-    public class Client : NetworkClient
+    public class Client : NetworkBehaviour
     {
 
         public bool IsHost = false;
+        //TODO: Net make this private and abstract necessary functionality out
+        public NetworkClient _netClient;
         public string ClientName = "client";
         private ClientGameState _gameState;
 
-        public void Init(string hostAddress, int port = 1300)
+        public void Init(string hostAddress, int port)
         {
 
-            IsHost = false;
-            ClientName = "guest";
+            if (!IsHost)
+            {
+                ClientName = "guest";
+            }
+                        
             try
             {
+                _netClient = new NetworkClient();
 
-                RegisterHandler(MsgType.Connect, OnConnected);
+                _netClient.RegisterHandler(MsgType.Connect, OnConnected);
 
-                RegisterHandler(MsgType.Disconnect, OnDisconnected);
+                _netClient.RegisterHandler(MsgType.Disconnect, OnDisconnected);
 
-                RegisterHandler(MsgType.Error, OnError);
+                _netClient.RegisterHandler(MsgType.Error, OnError);
 
-                RegisterHandler(CustomMessageTypes.GameStart, OnGameStart);
+                _netClient.RegisterHandler(CustomMessageTypes.GameStart, OnGameStart);
 
-                Connect(hostAddress, port);
-                Debug.Log("Guest");
+                _netClient.Connect(hostAddress, port);
+
+                Debug.Log("Client");
             }
             catch (Exception e)
             {
@@ -49,9 +54,7 @@ namespace Assets.Scripts
             ClientName = "host";
             try
             {
-                var localClient = ClientScene.ConnectLocalServer();
-
-                Init(localClient.serverIp, localClient.serverPort);
+                Init("127.0.0.1", 1300);
                 Debug.Log("HostClient");
             }
             catch (Exception e)
@@ -64,6 +67,7 @@ namespace Assets.Scripts
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Connected to server");
+            //Send(MsgType.Connect, new StringMessage(ClientName));
         }
 
         private void OnDisconnected(NetworkMessage msg)
@@ -76,18 +80,13 @@ namespace Assets.Scripts
             Debug.Log("Error connecting with code " + msg.reader.ReadString());
         }
 
-        private void OnSceneChange(NetworkMessage netMsg)
-        {
-            string sceneName = netMsg.reader.ReadString();
-            SceneManager.LoadSceneAsync(sceneName);
-        }
-
         private void OnGameStart(NetworkMessage netMsg)
         {
             GameStartMessage gameStartMessage = netMsg.ReadMessage<GameStartMessage>();
 
-            List<Monster> friendlyMonsters = IsHost? gameStartMessage.HostMonsters.ToList() : gameStartMessage.GuestMonsters.ToList();
-            List<Monster> enemyMonsters = IsHost ? gameStartMessage.GuestMonsters.ToList() : gameStartMessage.HostMonsters.ToList();
+            //Convert json strings to objects
+            List<Monster> friendlyMonsters = IsHost? JsonUtility.FromJson<List<Monster>>(gameStartMessage.HostMonsters) : JsonUtility.FromJson<List<Monster>>(gameStartMessage.GuestMonsters);
+            List<Monster> enemyMonsters = IsHost ? JsonUtility.FromJson<List<Monster>>(gameStartMessage.GuestMonsters) : JsonUtility.FromJson<List<Monster>>(gameStartMessage.HostMonsters);
 
             _gameState = new ClientGameState(this, friendlyMonsters, enemyMonsters);
         }

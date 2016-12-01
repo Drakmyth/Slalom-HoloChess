@@ -36,9 +36,9 @@ namespace Assets.Scripts
 
         void Update()
         {
-            if (Client != null && Client.connection != null)
+            if (Client != null && Client._netClient.connection != null)
             {
-                Debug.Log("Address: " + Client.connection.address);
+                //Debug.Log("Address: " + Client.connection.address);
             }
 
             if (_isHosting)
@@ -62,7 +62,7 @@ namespace Assets.Scripts
         {
             try
             {
-                Server = new Server();
+                Server = gameObject.AddComponent<Server>();
                 Server.Init();
                 
                 Client = new Client();
@@ -91,7 +91,7 @@ namespace Assets.Scripts
             try
             {
                 Client = new Client();
-                Client.Init(hostAddress);
+                Client.Init(hostAddress, 1300);
             }
             catch (Exception e)
             {
@@ -105,9 +105,9 @@ namespace Assets.Scripts
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
 
-            if (Client != null && Client.isConnected)
+            if (Client != null && Client._netClient.isConnected)
             {
-                Client.Disconnect();
+                Client._netClient.Disconnect();
                 Client = null;
             }
 
