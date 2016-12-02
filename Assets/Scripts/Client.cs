@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.MessageModels;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -39,6 +40,10 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameStart, OnGameStart);
 
+                NetClient.RegisterHandler(CustomMessageTypes.SelectMonsterResponse, OnSelectMonster);
+
+                NetClient.RegisterHandler(CustomMessageTypes.AvailableMovesResponse, OnAvailableMoves);
+
                 NetClient.Connect(hostAddress, port);
 
                 Debug.Log("Client");
@@ -67,6 +72,11 @@ namespace Assets.Scripts
 
         }
 
+        public bool Send(short messageType, GameStateMessage message)
+        {
+            return NetClient.Send(messageType, message);
+        }
+
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Connected to server");
@@ -82,6 +92,25 @@ namespace Assets.Scripts
             Debug.Log("Error connecting with code " + msg.reader.ReadString());
         }
 
+        private void OnSelectMonster(NetworkMessage msg)
+        {
+            Debug.Log("Monster selected");
+            SelectMonsterResponseMessage message = msg.ReadMessage<SelectMonsterResponseMessage>();
+
+            _gameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionId, message.SubActionId);
+
+        }
+
+        private void OnAvailableMoves(NetworkMessage msg)
+        {
+            Debug.Log("Available moves calculated");
+            AvailableMovesResponseMessage message = msg.ReadMessage<AvailableMovesResponseMessage>();
+
+            _gameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionId, message.SubActionId);
+
+        }
+
+
         private void OnGameStart(NetworkMessage netMsg)
         {
             GameStartMessage gameStartMessage = netMsg.ReadMessage<GameStartMessage>();
@@ -95,8 +124,6 @@ namespace Assets.Scripts
             gameManager.EnemyMonsterInitialNodeIds = enemyMonsterIds;
 
             StartCoroutine(LoadGameScene());
-
-
         }
 
         IEnumerator LoadGameScene()

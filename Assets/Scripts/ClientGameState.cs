@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using Assets.Scripts.MessageModels;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
 using UnityEngine.SceneManagement;
@@ -128,17 +129,12 @@ namespace Assets.Scripts
                 case 2:
                     //Wait for user to select from available actions
                     return;
-//TODO: Net remove?                    AwaitSubActionTwoSelection();
-//                    break;
                 case 3:
                     UpdateSelectionMenu();
-                    SubActionThree();
                     break;
                 case 4:
                     //Wait for user to select from available actions
                     return;
-                    //TODO: Net remove?                    AwaitSubActionFourSelection();
-                    //break;
                 case 5:
                     SubActionFive();
                     break;
@@ -329,7 +325,7 @@ namespace Assets.Scripts
                 {
                     monsterInstance.BelongsToHost = false;
                     monsterInstance.CurrentNode = monster.CurrentNode;
-                    FriendlyMonsters.Add(monsterInstance);
+                    EnemyMonsters.Add(monsterInstance);
                 }
             }
 
@@ -521,47 +517,43 @@ namespace Assets.Scripts
 
             //TODO: Net request
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
-
-
-            //TODO: Net onResponse
-            if (SelectedMonster != null)
+            Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
             {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnMonsterSelected", nodeId);
-                }
-                _subActionNumber = 3;
-            }
+                ActionId = _actionNumber,
+                SubActionId = _subActionNumber,
+                Message = SelectedMonster.Name,
+                MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
+                SelectedMonsterTypeId = SelectedMonster.MonsterTypeId
+            });
         }
 
-        private void SubActionThree()
+        public void ConfirmSubActionTwo(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
+            SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId);
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
 
-            //TODO: Net awaitResponse
             if (SelectedMonster != null)
             {
-                IEnumerable<Node> friendlyOccupiedNodes;
-                IEnumerable<Node> enemyOccupiedNodes;
-
-                friendlyOccupiedNodes = FriendlyMonsters.Select(monster => monster.CurrentNode).ToList();
-                enemyOccupiedNodes = EnemyMonsters.Select(monster => monster.CurrentNode).ToList();
-
-                IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
-                    SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.DestinationNode.Id);
-
-                IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
-                    enemyOccupiedNodes).Select(a => a.Id);
-
-                //Update board highlighting
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
-                    space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
-                    space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
+                    space.SendMessage("OnMonsterSelected", SelectedMonster.CurrentNode.Id);
                 }
-
-                _subActionNumber = 4;
             }
 
+        }
+
+        public void ConfirmSubActionThree(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
+        {              
+            //Update board highlighting
+            foreach (BoardSpace space in BoardSpaces.Values)
+            {
+                space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
+                space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
+            }
+
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
         }
 
         private void AwaitSubActionFourSelection()
