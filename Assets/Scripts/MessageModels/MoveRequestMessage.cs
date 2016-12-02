@@ -5,10 +5,9 @@
         public int SelectedMonsterTypeId { get; set; }
         public int DestinationNodeId { get; set; }
 
-        public override short MessageTypeId
+        public MoveRequestMessage()
         {
-            get { return CustomMessageTypes.MoveRequest; }
+            MessageTypeId = CustomMessageTypes.MoveRequest;
         }
-
     }
 }

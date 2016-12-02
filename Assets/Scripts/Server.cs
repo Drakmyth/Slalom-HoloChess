@@ -52,7 +52,7 @@ namespace Assets.Scripts
         {
             try
             {
-                NetworkServer.SendToClient(client._netClient.connection.connectionId, messageTypeId, new StringMessage(data));
+                NetworkServer.SendToClient(client.NetClient.connection.connectionId, messageTypeId, new StringMessage(data));
             }
             catch (NullReferenceException npe)
             {

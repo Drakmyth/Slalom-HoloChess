@@ -61,10 +61,11 @@ namespace Assets.Scripts
         public List<AudioClip> AttackSounds;
         public List<AudioClip> MovementSounds;
 
-        public void Init(Client client, List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
+        public void Init(Client client, List<int> friendlyMonsterIds, List<int> enemyMonsterIds)
         {
             Client = client;
 
+            DontDestroyOnLoad(gameObject);
 
             _actionNumber = 1;
 
@@ -83,6 +84,9 @@ namespace Assets.Scripts
             MoveCalculator = new MoveCalculator();
 
             AvailablePushDestinations = new List<Node>();
+
+            List<Monster> friendlyMonsters = MonsterPrefabs.Where(m => friendlyMonsterIds.Contains(m.MonsterTypeId)).ToList();
+            List<Monster> enemyMonsters = MonsterPrefabs.Where(m => enemyMonsterIds.Contains(m.MonsterTypeId)).ToList();
 
             DisplayBoardSpaces();
             DisplayMonsters(friendlyMonsters, enemyMonsters);

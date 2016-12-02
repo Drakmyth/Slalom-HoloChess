@@ -6,10 +6,9 @@
         public string ClientName { get; set; }
         public bool IsHost  { get; set; }
 
-        public override short MessageTypeId
+        public ConnectRequestMessage()
         {
-            get { return CustomMessageTypes.ConnectRequest; }
+            MessageTypeId = CustomMessageTypes.ConnectRequest;
         }
-
     }
 }
