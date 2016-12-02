@@ -61,11 +61,22 @@ namespace Assets.Scripts
         public List<AudioClip> AttackSounds;
         public List<AudioClip> MovementSounds;
 
-        public void Init(Client client, List<int> friendlyMonsterIds, List<int> enemyMonsterIds)
+        void Start()
         {
-            Client = client;
+            GameGraph = new BoardGraph();
+            BoardSpaces = new Dictionary<int, BoardSpace>();
+            FriendlyMonsters = new List<Monster>();
+            EnemyMonsters = new List<Monster>();
+            AttackCalculator = new AttackCalculator();
+            MoveCalculator = new MoveCalculator();
 
-            DontDestroyOnLoad(gameObject);
+            AvailablePushDestinations = new List<Node>();
+            DisplayBoardSpaces();
+
+
+            
+
+            Client = GameManager.Instance.Client;
 
             _actionNumber = 1;
 
@@ -76,19 +87,23 @@ namespace Assets.Scripts
 
             _subActionNumber = 1;
 
-            GameGraph = new BoardGraph();
-            BoardSpaces = new Dictionary<int, BoardSpace>();
-            FriendlyMonsters = new List<Monster>();
-            EnemyMonsters = new List<Monster>();
-            AttackCalculator = new AttackCalculator();
-            MoveCalculator = new MoveCalculator();
+            List<Monster> friendlyMonsters = new List<Monster>();
+            List<Monster> enemyMonsters = new List<Monster>();
+            foreach (Monster monster in MonsterPrefabs)
+            {
+                if (GameManager.Instance.FriendlyMonsterInitialNodeIds.ContainsKey(monster.MonsterTypeId))
+                {
+                    monster.CurrentNode = GameGraph.Nodes[GameManager.Instance.FriendlyMonsterInitialNodeIds[monster.MonsterTypeId]];
+                    friendlyMonsters.Add(monster);
+                }
+                else
+                {
+                    monster.CurrentNode = GameGraph.Nodes[GameManager.Instance.EnemyMonsterInitialNodeIds[monster.MonsterTypeId]];
+                    enemyMonsters.Add(monster);
+                }
 
-            AvailablePushDestinations = new List<Node>();
+            }
 
-            List<Monster> friendlyMonsters = MonsterPrefabs.Where(m => friendlyMonsterIds.Contains(m.MonsterTypeId)).ToList();
-            List<Monster> enemyMonsters = MonsterPrefabs.Where(m => enemyMonsterIds.Contains(m.MonsterTypeId)).ToList();
-
-            DisplayBoardSpaces();
             DisplayMonsters(friendlyMonsters, enemyMonsters);
 
         }

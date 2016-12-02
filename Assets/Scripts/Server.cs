@@ -26,7 +26,7 @@ namespace Assets.Scripts
 
         public void Init(string ipAddress = "127.0.0.1")
         {
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(this);
 
             try
             {
