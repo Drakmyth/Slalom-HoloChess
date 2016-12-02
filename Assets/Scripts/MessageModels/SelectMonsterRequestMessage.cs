@@ -4,10 +4,9 @@
     {
         public int SelectedMonsterTypeId { get; set; }
 
-        public override short MessageTypeId
+        public SelectMonsterRequestMessage()
         {
-            get { return CustomMessageTypes.SelectMonster; }
+            MessageTypeId = CustomMessageTypes.SelectMonster;
         }
-
     }
 }

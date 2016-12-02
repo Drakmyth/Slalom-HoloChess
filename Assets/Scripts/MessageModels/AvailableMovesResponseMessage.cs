@@ -6,9 +6,9 @@
         public int[] AvailableMoveNodeIds;
         public int[] AvailableAttackNodeIds;
 
-        public override short MessageTypeId
+        public AvailableMovesResponseMessage()
         {
-            get { return CustomMessageTypes.AvailableMovesResponse; }
+            MessageTypeId = CustomMessageTypes.AvailableMovesResponse;
         }
 
     }

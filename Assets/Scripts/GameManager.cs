@@ -36,7 +36,7 @@ namespace Assets.Scripts
 
         void Update()
         {
-            if (Client != null && Client._netClient.connection != null)
+            if (Client != null && Client.NetClient.connection != null)
             {
                 //Debug.Log("Address: " + Client.connection.address);
             }
@@ -105,9 +105,9 @@ namespace Assets.Scripts
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
 
-            if (Client != null && Client._netClient.isConnected)
+            if (Client != null && Client.NetClient.isConnected)
             {
-                Client._netClient.Disconnect();
+                Client.NetClient.Disconnect();
                 Client = null;
             }
 

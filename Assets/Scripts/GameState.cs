@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Assets.Scripts.MessageModels;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
+using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 using Random = System.Random;
 
@@ -58,6 +59,8 @@ namespace Assets.Scripts
 
         void Start()
         {
+            DontDestroyOnLoad(gameObject);
+
             _actionNumber = 1;
             _subActionNumber = 1;
 
@@ -95,7 +98,13 @@ namespace Assets.Scripts
 
             AssignMonstersToPlayers();
 
-            GameStartMessage gameStartMessage = new GameStartMessage(HostMonsters, GuestMonsters);
+            GameStartMessage gameStartMessage = new GameStartMessage
+            {
+                HostMonsters = JsonConvert.SerializeObject(HostMonsters.Select(m => m.MonsterTypeId)),
+                GuestMonsters = JsonConvert.SerializeObject(GuestMonsters.Select(m => m.MonsterTypeId)),
+                ActionId = 1,
+                SubActionId = 1
+            };
 
             _hostServer.SendToAll(gameStartMessage);
 

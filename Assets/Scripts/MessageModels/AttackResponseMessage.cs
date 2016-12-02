@@ -6,9 +6,9 @@
         public int DefendingMonsterTypeId { get; set; }
         public int AttackResultId { get; set; }
 
-        public override short MessageTypeId
+        public AttackResponseMessage()
         {
-            get { return CustomMessageTypes.AttackResponse; }
+            MessageTypeId = CustomMessageTypes.AttackResponse;
         }
     }
 }

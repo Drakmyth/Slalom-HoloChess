@@ -198,7 +198,4 @@ namespace Assets.Scripts.Monsters
             _audioSource.PlayDelayed(0);
         }
     }
-
-    [Serializable]
-    public struct MonsterListWrapper { public List<Monster> Monsters; }
 }
