@@ -6,7 +6,7 @@
 
         public SelectMonsterRequestMessage()
         {
-            MessageTypeId = CustomMessageTypes.SelectMonster;
+            MessageTypeId = CustomMessageTypes.SelectMonsterRequest;
         }
     }
 }
