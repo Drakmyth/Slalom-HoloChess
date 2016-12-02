@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.MessageModels;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -21,7 +20,7 @@ namespace Assets.Scripts
 
         public void Init(string hostAddress, int port)
         {
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(this);
 
             if (!IsHost)
             {
@@ -71,7 +70,6 @@ namespace Assets.Scripts
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Connected to server");
-            //Send(MsgType.Connect, new StringMessage(ClientName));
         }
 
         private void OnDisconnected(NetworkMessage msg)
@@ -89,26 +87,19 @@ namespace Assets.Scripts
             GameStartMessage gameStartMessage = netMsg.ReadMessage<GameStartMessage>();
 
             //Convert json strings to objects
-            List<int> friendlyMonsterIds = IsHost? JsonConvert.DeserializeObject<List<int>>(gameStartMessage.HostMonsters) : JsonConvert.DeserializeObject<List<int>>(gameStartMessage.GuestMonsters);
-            List<int> enemyMonsterIds = IsHost ? JsonConvert.DeserializeObject<List<int>>(gameStartMessage.GuestMonsters) : JsonConvert.DeserializeObject<List<int>>(gameStartMessage.HostMonsters);
+            Dictionary<int, int> friendlyMonsterIds = IsHost? JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters) : JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters);
+            Dictionary<int, int> enemyMonsterIds = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters) : JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters);
 
-            IEnumerator enumerator = LoadGameScene();
+            GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+            gameManager.FriendlyMonsterInitialNodeIds = friendlyMonsterIds;
+            gameManager.EnemyMonsterInitialNodeIds = enemyMonsterIds;
 
-            while (enumerator == null || enumerator.Current == null)
-            {
-
-            }
-
-            _gameState = SceneManager.GetSceneByName("dejarik").GetRootGameObjects().Single(g => g.name == "GameState").GetComponent<ClientGameState>();
-
-            _gameState.Init(this, friendlyMonsterIds, enemyMonsterIds);
-
-            SceneManager.UnloadSceneAsync("lobby");
+            StartCoroutine(LoadGameScene());
 
 
         }
 
-        private IEnumerator LoadGameScene()
+        IEnumerator LoadGameScene()
         {
             AsyncOperation loadSceneOperation = SceneManager.LoadSceneAsync("dejarik");
 
@@ -117,7 +108,7 @@ namespace Assets.Scripts
                 Debug.Log("Loading the Game Scene");
                 yield return null;
             }
-        }
 
+        }
     }
 }

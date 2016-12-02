@@ -91,17 +91,12 @@ namespace Assets.Scripts
                 SceneManager.UnloadSceneAsync("startup");
             }
 
-            if (SceneManager.GetSceneByName("lobby").isLoaded)
-            {
-                SceneManager.UnloadSceneAsync("lobby");
-            }
-
             AssignMonstersToPlayers();
 
             GameStartMessage gameStartMessage = new GameStartMessage
             {
-                HostMonsters = JsonConvert.SerializeObject(HostMonsters.Select(m => m.MonsterTypeId)),
-                GuestMonsters = JsonConvert.SerializeObject(GuestMonsters.Select(m => m.MonsterTypeId)),
+                HostMonsters = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id}).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                GuestMonsters = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
                 ActionId = 1,
                 SubActionId = 1
             };

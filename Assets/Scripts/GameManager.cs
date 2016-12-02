@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,10 @@ namespace Assets.Scripts
         public GameObject LobbyMenu;
         public GameObject ConnectMenu;
         public GameObject HostMenu;
+
+        // monsterTypeIds keyed to initial position nodeIds
+        public Dictionary<int, int> FriendlyMonsterInitialNodeIds;
+        public Dictionary<int, int> EnemyMonsterInitialNodeIds;
 
         public Client Client;
 
@@ -65,7 +70,7 @@ namespace Assets.Scripts
                 Server = gameObject.AddComponent<Server>();
                 Server.Init();
                 
-                Client = new Client();
+                Client = gameObject.AddComponent<Client>();
                 Client.InitHost();
             }
             catch (Exception e)
@@ -90,7 +95,7 @@ namespace Assets.Scripts
 
             try
             {
-                Client = new Client();
+                Client = gameObject.AddComponent<Client>();
                 Client.Init(hostAddress, 1300);
             }
             catch (Exception e)
