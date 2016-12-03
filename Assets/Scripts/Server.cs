@@ -32,6 +32,13 @@ namespace Assets.Scripts
             {
 
                 NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnected);
+                
+                NetworkServer.RegisterHandler(CustomMessageTypes.SelectMonsterRequest, OnSelectMonster);
+
+                NetworkServer.RegisterHandler(CustomMessageTypes.SelectActionRequest, OnSelectAction);
+
+                NetworkServer.RegisterHandler(CustomMessageTypes.AttackRequest, OnProcessAttackAction);
+
 
                 NetworkServer.Listen(ipAddress, Port);
 
@@ -70,6 +77,11 @@ namespace Assets.Scripts
             NetworkServer.Shutdown();
         }
 
+        public bool ClientsAreReady()
+        {
+            return NetworkServer.connections.Where(c => c != null).All(c => c.isReady);
+        }
+
         private void OnClientConnected(NetworkMessage netMsg)
         {
             Debug.Log("Client has been connected to host");
@@ -80,5 +92,46 @@ namespace Assets.Scripts
 
         }
 
+        public void OnSelectMonster(NetworkMessage msg)
+        {
+            SelectMonsterRequestMessage message = msg.ReadMessage<SelectMonsterRequestMessage>();
+
+            _gameState.SelectMonster(message.SelectedMonsterTypeId);
+
+            SendToAll(new SelectMonsterResponseMessage
+            {
+                ActionNumber = _gameState.ActionNumber,
+                SubActionNumber = 3,
+                SelectedMonsterTypeId = _gameState.SelectedMonster.MonsterTypeId,
+                Message = _gameState.SelectedMonster.Name,
+                MessageTypeId = CustomMessageTypes.SelectMonsterResponse
+                
+            });
+        }
+
+        public void OnSelectAction(NetworkMessage msg)
+        {
+            SelectActionRequestMessage message = msg.ReadMessage<SelectActionRequestMessage>();
+
+            if (_gameState.SelectedMonster == null)
+            {
+                SendToAll(new GameStateMessage
+                {
+                    ActionNumber = _gameState.ActionNumber,
+                    SubActionNumber = 2,
+                    MessageTypeId = CustomMessageTypes.GameState
+                });
+                return;
+            }
+
+            _gameState.SelectAction(message.SelectedNodeId);
+        }
+
+        public void OnProcessAttackAction(NetworkMessage msg)
+        {
+            AttackRequestMessage message = msg.ReadMessage<AttackRequestMessage>();
+
+            _gameState.ProcessAttackAction(message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.XCoordinate, message.YCoordinate, message.ZCoordinate);
+        }
     }
 }

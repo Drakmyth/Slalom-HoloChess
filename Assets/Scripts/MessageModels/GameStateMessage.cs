@@ -4,8 +4,8 @@ namespace Assets.Scripts.MessageModels
 {
     public class GameStateMessage : MessageBase
     {
-        public int ActionId;
-        public int SubActionId;
+        public int ActionNumber;
+        public int SubActionNumber;
         public string Message;
         public short MessageTypeId;
 

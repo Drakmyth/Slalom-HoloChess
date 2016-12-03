@@ -31,7 +31,7 @@ namespace Assets.Scripts
         //2 : HostAction
         //3 : GuestAction
         //4 : GuestAction
-        private int _actionNumber;
+        public int ActionNumber;
 
 
         //TODO: seems a decent candidate for an enum
@@ -42,11 +42,11 @@ namespace Assets.Scripts
         //5 : Process Action
         //6 : Select Push result (await user input)
         //7 : Listen for CounterPush result (await opponent input)
-        private int _subActionNumber;
+        public int SubActionNumber;
         
-        private Monster SelectedMonster { get; set; }
-        private Node SelectedAttackNode { get; set; }
-        private NodePath SelectedMovementPath { get; set; }
+        public Monster SelectedMonster { get; set; }
+        public Node SelectedAttackNode { get; set; }
+        public NodePath SelectedMovementPath { get; set; }
 
         //TODO: we can probably do better than this
         private IEnumerable<Node> AvailablePushDestinations { get; set; }
@@ -61,8 +61,8 @@ namespace Assets.Scripts
         {
             DontDestroyOnLoad(gameObject);
 
-            _actionNumber = 1;
-            _subActionNumber = 1;
+            ActionNumber = 1;
+            SubActionNumber = 1;
 
             GameGraph = new BoardGraph();
             HostMonsters = new List<Monster>();
@@ -97,8 +97,8 @@ namespace Assets.Scripts
             {
                 HostMonsters = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id}).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
                 GuestMonsters = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
-                ActionId = 1,
-                SubActionId = 1
+                ActionNumber = 1,
+                SubActionNumber = 1
             };
 
             _hostServer.SendToAll(gameStartMessage);
@@ -108,7 +108,7 @@ namespace Assets.Scripts
         void Update()
         {
 
-            if (_hostServer == null || _actionNumber < 1)
+            if (_hostServer == null || !_hostServer.ClientsAreReady() || ActionNumber < 1)
             {
                 //The game should end at this point
                 return;
@@ -116,19 +116,19 @@ namespace Assets.Scripts
 
             if (HostMonsters.Count == 0)
             {
-                _actionNumber = 0;
+                ActionNumber = 0;
                 //TODO: Net sendResponse EndGame
 
             }
             else if (GuestMonsters.Count == 0)
             {
-                _actionNumber = 0;
+                ActionNumber = 0;
                 //TODO: Net sendResponse EndGame
 
             }
 
 
-            switch (_subActionNumber)
+            switch (SubActionNumber)
             {
                 case 1:
                     SubActionOne();
@@ -158,41 +158,41 @@ namespace Assets.Scripts
 
             }
 
-            if (_actionNumber == 4 && _subActionNumber == 0)
+            if (ActionNumber == 4 && SubActionNumber == 0)
             {
-                _actionNumber = 1;
-                _subActionNumber = 1;
+                ActionNumber = 1;
+                SubActionNumber = 1;
                 SelectedMonster = null;
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
 
             }
-            else if (_actionNumber == 3 && _subActionNumber == 0)
+            else if (ActionNumber == 3 && SubActionNumber == 0)
             {
-                _actionNumber ++;
-                _subActionNumber = 1;
+                ActionNumber ++;
+                SubActionNumber = 1;
                
                 SelectedMonster = null;
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
             }
-            else if(_actionNumber == 2 && _subActionNumber == 0)
+            else if(ActionNumber == 2 && SubActionNumber == 0)
             {
-                _actionNumber++;
-                _subActionNumber = 1;
+                ActionNumber++;
+                SubActionNumber = 1;
                 SelectedMonster = null;
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
             }
-            else if (_actionNumber == 1 && _subActionNumber == 0)
+            else if (ActionNumber == 1 && SubActionNumber == 0)
             {
 
-                _subActionNumber = SelectedMonster != null ? 3 : 1;
+                SubActionNumber = SelectedMonster != null ? 3 : 1;
 
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
 
-                _actionNumber++;
+                ActionNumber++;
 
             }
         }
@@ -261,8 +261,105 @@ namespace Assets.Scripts
 
         }
 
-        private void ProcessAttackAction(Monster attacker, Monster defender, bool isHostAttacker)
+        public void SelectMonster(int selectedMonsterTypeId)
         {
+            if (ActionNumber == 1 || ActionNumber == 2)
+            {
+                SelectedMonster = HostMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterTypeId);
+            }
+            else
+            {
+                SelectedMonster = GuestMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterTypeId);
+            }
+        }
+
+
+
+        public void SelectAction(int selectedNodeId)
+        {
+            IEnumerable<Node> friendlyOccupiedNodes;
+            IEnumerable<Node> enemyOccupiedNodes;
+
+            List<Monster> friendlyMonsters = ActionNumber == 1 || ActionNumber == 2 ? HostMonsters : GuestMonsters;
+            List<Monster> enemyMonsters = ActionNumber == 1 || ActionNumber == 2 ? GuestMonsters : HostMonsters;
+
+            friendlyOccupiedNodes = friendlyMonsters.Select(monster => monster.CurrentNode).ToList();
+            enemyOccupiedNodes = enemyMonsters.Select(monster => monster.CurrentNode).ToList();
+
+            IEnumerable<NodePath> movementPaths = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
+                SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes));
+
+            IEnumerable<Node> availableMoveActions = movementPaths.Select(p => p.DestinationNode);
+
+            IEnumerable<Node> availableAttackActions = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
+                enemyOccupiedNodes);
+
+            if (friendlyOccupiedNodes.Select(n => n.Id).Contains(selectedNodeId))
+            {
+                SelectedMonster = friendlyMonsters.Single(m => m.CurrentNode.Id == selectedNodeId);
+                SelectedAttackNode = null;
+
+                SubActionNumber = 3;
+
+                _hostServer.SendToAll(new SelectMonsterResponseMessage
+                {
+                    ActionNumber = ActionNumber,
+                    SubActionNumber = SubActionNumber,
+                    SelectedMonsterTypeId = SelectedMonster.MonsterTypeId,
+                    Message = SelectedMonster.Name,
+                });
+
+            }
+            else if (availableAttackActions.Select(a => a.Id).Contains(selectedNodeId))
+            {
+                SelectedAttackNode = availableAttackActions.Single(a => a.Id == selectedNodeId);
+                SelectedMovementPath = null;
+                SubActionNumber = 5;
+
+                _hostServer.SendToAll(new SelectAttackResponseMessage
+                {
+                    ActionNumber = ActionNumber,
+                    SubActionNumber = SubActionNumber,
+
+                    Message = "Attack selected",
+                    AttackNodeId = SelectedAttackNode.Id
+                });
+            }
+            else if (availableMoveActions.Select(m => m.Id).Contains(selectedNodeId))
+            {
+                SelectedMovementPath = movementPaths.Single(m => m.DestinationNode.Id ==selectedNodeId);
+                SelectedAttackNode = null;
+                SubActionNumber = 5;
+
+                _hostServer.SendToAll(new SelectMoveResponseMessage
+                {
+                    ActionNumber = ActionNumber,
+                    SubActionNumber = SubActionNumber,
+
+                    Message = SelectedMovementPath.ToString(),
+                    MovementPathIds = SelectedMovementPath.PathToDestination.Select(n => n.Id).ToList(),
+                    DestinationNodeId = SelectedMovementPath.DestinationNode.Id
+                });
+            }
+        }
+
+
+        public void ProcessAttackAction(int attackingMonsterTypeId, int defendingMonsterTypeId, float xCoordinate, float yCoordinate, float zCoordinate)
+        {
+            Monster attacker;
+            Monster defender;
+            bool isHostAttacker = ActionNumber == 1 || ActionNumber == 2;
+            if (isHostAttacker)
+            {
+                attacker = HostMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
+                defender = GuestMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
+            }
+            else
+            { 
+                attacker = GuestMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
+                defender = HostMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
+            }
+
             AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
             IEnumerable<Node> friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
             IEnumerable<Node> enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
@@ -270,23 +367,80 @@ namespace Assets.Scripts
             switch (attackResult)
             {
                 case AttackResult.Kill:
-                    ProcessKill(defender, !isHostAttacker);
+                    if (isHostAttacker)
+                    {
+                        GuestMonsters.Remove(defender);
+                    }
+                    else
+                    {
+                        HostMonsters.Remove(defender);
+                    }
+                    SelectedMonster = null;
+                    SubActionNumber = 0;
+
+                    _hostServer.SendToAll(new AttackResponseMessage
+                    {
+                        ActionNumber = ActionNumber,
+                        SubActionNumber = SubActionNumber,
+                        AttackingMonsterTypeId = attackingMonsterTypeId,
+                        DefendingMonsterTypeId = defendingMonsterTypeId,
+                        XCoordinate = xCoordinate,
+                        YCoordinate = yCoordinate,
+                        ZCoordinate = zCoordinate,
+                        AttackResultId = (int)AttackResult.Kill,
+                        Message = "Kill"
+                    });
                     break;
                 case AttackResult.CounterKill:
-                    ProcessKill(attacker, isHostAttacker);
+                    if (isHostAttacker)
+                    {
+                        HostMonsters.Remove(attacker);
+                    }
+                    else
+                    {
+                        GuestMonsters.Remove(attacker);
+                    }
                     SelectedMonster = null;
+                    SubActionNumber = 0;
+
+                    _hostServer.SendToAll(new AttackResponseMessage
+                    {
+                        ActionNumber = ActionNumber,
+                        SubActionNumber = SubActionNumber,
+                        AttackingMonsterTypeId = attackingMonsterTypeId,
+                        DefendingMonsterTypeId = defendingMonsterTypeId,
+                        XCoordinate = xCoordinate,
+                        YCoordinate = yCoordinate,
+                        ZCoordinate = zCoordinate,
+                        AttackResultId = (int)AttackResult.CounterKill,
+                        Message = "Counter Kill"
+                    });
                     break;
+
                 case AttackResult.Push:
 
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
-                    _subActionNumber = 6;
+                    SubActionNumber = 6;
 
                     if (!AvailablePushDestinations.Any())
                     {
-                        _subActionNumber = 0;
+                        SubActionNumber = 0;
                     }
+                    _hostServer.SendToAll(new AttackPushResponseMessage
+                    {
+                        ActionNumber = ActionNumber,
+                        SubActionNumber = SubActionNumber,
+                        AttackingMonsterTypeId = attackingMonsterTypeId,
+                        DefendingMonsterTypeId = defendingMonsterTypeId,
+                        XCoordinate = xCoordinate,
+                        YCoordinate = yCoordinate,
+                        ZCoordinate = zCoordinate,
+                        AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
+                        AttackResultId = (int)AttackResult.Push,
+                        Message = "Push"
+                    });
 
                     break;
                 case AttackResult.CounterPush:
@@ -294,14 +448,26 @@ namespace Assets.Scripts
                     AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
-                    _subActionNumber = 7;
+                    SubActionNumber = 7;
                     //send network message with available push nodes
 
                     if (!AvailablePushDestinations.Any())
                     {
-                        _subActionNumber = 0;
+                        SubActionNumber = 0;
                     }
-
+                    _hostServer.SendToAll(new AttackPushResponseMessage
+                    {
+                        ActionNumber = ActionNumber,
+                        SubActionNumber = SubActionNumber,
+                        AttackingMonsterTypeId = attackingMonsterTypeId,
+                        DefendingMonsterTypeId = defendingMonsterTypeId,
+                        XCoordinate = xCoordinate,
+                        YCoordinate = yCoordinate,
+                        ZCoordinate = zCoordinate,
+                        AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
+                        AttackResultId = (int)AttackResult.CounterPush,
+                        Message = "Counter Push"
+                    });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -309,24 +475,12 @@ namespace Assets.Scripts
 
         }
 
-        private void ProcessKill(Monster killed, bool belongsToHost)
-        {
-            if (belongsToHost)
-            {
-                HostMonsters.Remove(killed);
-            }
-            else
-            {
-                GuestMonsters.Remove(killed);
-            }
-            _subActionNumber = 0;
-        }
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
             selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
 
-            _subActionNumber = 0;
+            SubActionNumber = 0;
         }
 
         //TODO: Net awaitRequest
@@ -335,7 +489,7 @@ namespace Assets.Scripts
             IEnumerable<int> availableNodeIds =
             GameGraph.Nodes.Where(n => HostMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id)).Select(n => n.Id);
 
-            _subActionNumber = 2;
+            SubActionNumber = 2;
             //TODO: Net sendResponse AvailableSpaces | subActionOneResponse
 
         }
@@ -348,7 +502,7 @@ namespace Assets.Scripts
                 IEnumerable<Node> friendlyOccupiedNodes;
                 IEnumerable<Node> enemyOccupiedNodes;
 
-                if (_actionNumber == 1 || _actionNumber == 2)
+                if (ActionNumber == 1 || ActionNumber == 2)
                 {
                     friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
                     enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
@@ -366,7 +520,7 @@ namespace Assets.Scripts
                 IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                     enemyOccupiedNodes).Select(a => a.Id);
 
-                _subActionNumber = 4;
+                SubActionNumber = 4;
 
                 //TODO: Net sendResponse availableActions | subActionThreeResponse
             }
@@ -378,7 +532,7 @@ namespace Assets.Scripts
         {
             if (SelectedMonster == null)
             {
-                _subActionNumber = 2;
+                SubActionNumber = 2;
                 return;
             }
 
@@ -408,20 +562,20 @@ namespace Assets.Scripts
                 SelectedMonster = HostMonsters.Single(m => m.CurrentNode.Equals(selectedNode));
                 SelectedAttackNode = null;
                 
-                _subActionNumber = 3;
+                SubActionNumber = 3;
 
             }
             else if (availableAttackActions.Contains(selectedNode))
             {
                 SelectedAttackNode = selectedNode;
                 SelectedMovementPath = null;
-                _subActionNumber = 5;
+                SubActionNumber = 5;
             }
             else if (availableMoveActions.Contains(selectedNode))
             {
                 SelectedMovementPath = movementPaths.Single(m => m.DestinationNode.Equals(selectedNode));
                 SelectedAttackNode = null;
-                _subActionNumber = 5;
+                SubActionNumber = 5;
             }
 
             //TODO: Net sendResponse stateUpdated
@@ -430,11 +584,11 @@ namespace Assets.Scripts
 
         private void SubActionFive()
         {
-            bool isHostPlayer = _actionNumber == 1 || _actionNumber == 2;
+            bool isHostPlayer = ActionNumber == 1 || ActionNumber == 2;
 
             if (SelectedMonster == null)
             {
-                _subActionNumber = 2;
+                SubActionNumber = 2;
                 return;
             }
 
@@ -461,7 +615,7 @@ namespace Assets.Scripts
 
             pushedMonster.CurrentNode = selectedNode;
 
-            _subActionNumber = 0;
+            SubActionNumber = 0;
 
         }
 
@@ -475,7 +629,7 @@ namespace Assets.Scripts
 
             pushedMonster.CurrentNode = selectedNode;
 
-            _subActionNumber = 0;
+            SubActionNumber = 0;
 
         }
 
