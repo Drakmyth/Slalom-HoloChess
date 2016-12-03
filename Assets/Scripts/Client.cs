@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.MessageModels;
+using DejarikLibrary;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -44,6 +45,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.AvailableMovesResponse, OnAvailableMoves);
 
+                NetClient.RegisterHandler(CustomMessageTypes.SelectActionResponse, OnSelectAttackAction);
+
                 NetClient.Connect(hostAddress, port);
 
                 Debug.Log("Client");
@@ -77,6 +80,11 @@ namespace Assets.Scripts
             return NetClient.Send(messageType, message);
         }
 
+        public void SetReady(bool isReady)
+        {
+            NetClient.connection.isReady = isReady;
+        }
+
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Connected to server");
@@ -97,7 +105,7 @@ namespace Assets.Scripts
             Debug.Log("Monster selected");
             SelectMonsterResponseMessage message = msg.ReadMessage<SelectMonsterResponseMessage>();
 
-            _gameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionId, message.SubActionId);
+            _gameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionNumber, message.SubActionNumber);
 
         }
 
@@ -106,10 +114,36 @@ namespace Assets.Scripts
             Debug.Log("Available moves calculated");
             AvailableMovesResponseMessage message = msg.ReadMessage<AvailableMovesResponseMessage>();
 
-            _gameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionId, message.SubActionId);
+            _gameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionNumber, message.SubActionNumber);
 
         }
 
+        private void OnSelectMoveAction(NetworkMessage msg)
+        {
+            Debug.Log("Action selected");
+
+            SelectMoveResponseMessage message = msg.ReadMessage<SelectMoveResponseMessage>();
+
+            _gameState.ConfirmSelectMoveAction(message.MovementPathIds, message.DestinationNodeId, message.ActionNumber, message.SubActionNumber);
+        }
+
+        private void OnSelectAttackAction(NetworkMessage msg)
+        {
+            Debug.Log("Action selected");
+
+            SelectAttackResponseMessage message = msg.ReadMessage<SelectAttackResponseMessage>();
+
+            _gameState.ConfirmSelectAttackAction(message.AttackNodeId, message.ActionNumber, message.SubActionNumber);
+        }
+
+        private void OnAttackResult(NetworkMessage msg)
+        {
+            Debug.Log("Attack Result");
+
+            AttackResponseMessage message = msg.ReadMessage<AttackResponseMessage>();
+
+            _gameState.ConfirmAttackResult((AttackResult)message.AttackResultId, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.XCoordinate, message.YCoordinate, message.ZCoordinate);
+        }
 
         private void OnGameStart(NetworkMessage netMsg)
         {
@@ -137,5 +171,7 @@ namespace Assets.Scripts
             }
 
         }
+
+
     }
 }
