@@ -39,6 +39,7 @@ namespace Assets.Scripts
 
                 NetworkServer.RegisterHandler(CustomMessageTypes.AttackRequest, OnProcessAttackAction);
 
+                NetworkServer.RegisterHandler(CustomMessageTypes.PushDestinationRequest, OnProcessPushDestination);
 
                 NetworkServer.Listen(ipAddress, Port);
 
@@ -133,6 +134,13 @@ namespace Assets.Scripts
             AttackRequestMessage message = msg.ReadMessage<AttackRequestMessage>();
 
             _gameState.ProcessAttackAction(message.AttackingMonsterTypeId, message.DefendingMonsterTypeId);
+        }
+
+        public void OnProcessPushDestination(NetworkMessage msg)
+        {
+            PushDestinationRequestMessage message = msg.ReadMessage<PushDestinationRequestMessage>();
+
+            _gameState.ProcessPushDestination(message.SelectedNodeId);
         }
     }
 }

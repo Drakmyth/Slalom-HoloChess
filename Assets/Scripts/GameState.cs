@@ -540,7 +540,7 @@ namespace Assets.Scripts
 
         }
 
-        //TODO: Net awaitRequest
+        //TODO: Net remove?
         private void SubActionFour(Node selectedNode, bool isHostPlayer)
         {
             if (SelectedMonster == null)
@@ -591,8 +591,6 @@ namespace Assets.Scripts
                 SubActionNumber = 5;
             }
 
-            //TODO: Net sendResponse stateUpdated
-
         }
 
         private void SubActionFive()
@@ -619,33 +617,49 @@ namespace Assets.Scripts
         }
 
 
-        private void SubActionSix(Node selectedNode, bool isHostPlayer)
+        public void ProcessPushDestination(int selectedNodeId)
         {
-            Monster pushedMonster = isHostPlayer ? GuestMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id) : HostMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            bool guestPush = (ActionNumber == 3 || ActionNumber == 4) && SubActionNumber == 6;
+            bool guestCounterPush = (ActionNumber == 1 || ActionNumber == 2) && SubActionNumber == 7;
 
-            List<Node> pathToDestination = new List<Node> { selectedNode };
-            NodePath movementPath = new NodePath(pathToDestination, selectedNode);
+            bool hostPush = (ActionNumber == 1 || ActionNumber == 2) && SubActionNumber == 6;
+            bool hostCounterPush = (ActionNumber == 3 || ActionNumber == 4) && SubActionNumber == 7;
+
+            
+            Monster pushedMonster;
+
+            if (hostPush || hostCounterPush)
+            {
+                pushedMonster = GuestMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            }
+            else if (guestPush || guestCounterPush)
+            {
+                pushedMonster = HostMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            }
+            else
+            {
+                SubActionNumber = 0;
+                return;
+            }
+
+            Node selectedNode = GameGraph.Nodes[selectedNodeId];
 
             pushedMonster.CurrentNode = selectedNode;
 
-            SubActionNumber = 0;
-
-        }
-
-
-        private void SubActionSeven(Node selectedNode, bool isHostPlayer)
-        {
-            Monster pushedMonster = isHostPlayer ? GuestMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id) : HostMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
-
-            List<Node> pathToDestination = new List<Node> { selectedNode };
-            NodePath movementPath = new NodePath(pathToDestination, selectedNode);
-
-            pushedMonster.CurrentNode = selectedNode;
+            int[] pathToDestination = { selectedNode.Id };
 
             SubActionNumber = 0;
 
-        }
+            _hostServer.SendToAll(CustomMessageTypes.PushDestinationResponse, new PushDestinationResponseMessage
+            {
+                ActionNumber = ActionNumber,
+                SubActionNumber = SubActionNumber,
+                DestinationNodeId = selectedNodeId,
+                PushedMonsterTypeId = pushedMonster.MonsterTypeId,
+                PathToDestinationNodeIds = pathToDestination
+            });
 
+        }
     }
 
 }

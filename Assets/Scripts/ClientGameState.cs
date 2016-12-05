@@ -136,10 +136,8 @@ namespace Assets.Scripts
                 case 5:
                     return;
                 case 6:
-                    AwaitSubActionSixSelection();
                     break;
                 case 7:
-                    AwaitSubActionSevenSelection();
                     break;
 
             }
@@ -217,9 +215,10 @@ namespace Assets.Scripts
 
         void OnSpaceSelected(int nodeId)
         {
+            Node selectedNode = GameGraph.Nodes[nodeId];
+
             if (_actionNumber == 1 || _actionNumber == 2)
             {
-                Node selectedNode = GameGraph.Nodes[nodeId];
 
                 if (_subActionNumber == 2)
                 {
@@ -233,14 +232,12 @@ namespace Assets.Scripts
 
                 if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
                 {
-                    SubActionSix(selectedNode);
+                    SelectPushDestination(selectedNode);
                 }
-
-                if (_subActionNumber == 7 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
-                {
-                    SubActionSeven(selectedNode);
-                }
-
+            }
+            else if (_subActionNumber == 7 && (_actionNumber == 3 || _actionNumber == 4))
+            {
+                SelectPushDestination(selectedNode);
             }
 
         }
@@ -355,8 +352,8 @@ namespace Assets.Scripts
 
         private void ProcessKill(Monster killed, bool isFriendlyMonster, GameObject battleSmokeInstance)
         {
-            //TODO: Net wait for verification
-//            MonsterPrefabs.Remove(killed);
+            MonsterPrefabs.Remove(killed);
+
             if (isFriendlyMonster)
             {
                 FriendlyMonsters.Remove(killed);
@@ -365,6 +362,7 @@ namespace Assets.Scripts
             {
                 EnemyMonsters.Remove(killed);
             }
+
             _isAnimationRunning = true;
             killed.SendMessage("OnLoseBattle", battleSmokeInstance);
             _subActionNumber = 0;
@@ -383,6 +381,23 @@ namespace Assets.Scripts
             selectedMonster.SendMessage("OnBeginMoveAnimation", path);
 
             _subActionNumber = 0;
+        }
+
+        public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
+                int subActionNumber)
+        {
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
+
+            var availableSpaces = availableMonsterNodeIds.Select(s => BoardSpaces[s]);
+
+            foreach (BoardSpace space in availableSpaces)
+            {
+                space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+            }
+
+            Client.SetReady(true);
+
         }
 
         private void SubActionOne()
@@ -598,25 +613,43 @@ namespace Assets.Scripts
             Client.SetReady(true);
         }
 
-        private void SubActionSix(Node selectedNode)
+        private void SelectPushDestination(Node selectedNode)
         {
-            Monster pushedMonster = EnemyMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
-
-            List<Node> pathToDestination = new List<Node> { selectedNode };
-            NodePath movementPath = new NodePath(pathToDestination, selectedNode);
-            _isAnimationRunning = true;
-            pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
-
-            pushedMonster.CurrentNode = selectedNode;
-
-            _subActionNumber = 0;
-
+            Client.Send(CustomMessageTypes.PushDestinationRequest, new PushDestinationRequestMessage
+            {
+                ActionNumber = _actionNumber,
+                SubActionNumber = _subActionNumber,
+                SelectedNodeId = selectedNode.Id
+            });
         }
 
-        private void SubActionSeven(Node selectedNode)
+        public void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
         {
-            Monster pushedMonster = EnemyMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
 
+            bool enemyPush = (_actionNumber == 3 || _actionNumber == 4) && _subActionNumber == 6;
+            bool enemyCounterPush = (_actionNumber == 1 || _actionNumber == 2) && _subActionNumber == 7;
+
+            bool push = (_actionNumber == 1 || _actionNumber == 2) && _subActionNumber == 6;
+            bool counterPush = (_actionNumber == 3 || _actionNumber == 4) && _subActionNumber == 7;
+
+            Monster pushedMonster;
+
+            if (push || counterPush)
+            {
+                pushedMonster = EnemyMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            }
+            else if (enemyPush || enemyCounterPush)
+            {
+                pushedMonster = FriendlyMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            }
+            else
+            {
+                _subActionNumber = 0;
+                return;
+            }
+            Node selectedNode = GameGraph.Nodes[destinationNodeId];
             List<Node> pathToDestination = new List<Node> { selectedNode };
             NodePath movementPath = new NodePath(pathToDestination, selectedNode);
             _isAnimationRunning = true;
@@ -625,6 +658,7 @@ namespace Assets.Scripts
             pushedMonster.CurrentNode = selectedNode;
 
             _subActionNumber = 0;
+
 
         }
 
