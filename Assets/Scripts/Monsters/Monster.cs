@@ -82,7 +82,7 @@ namespace Assets.Scripts.Monsters
 
                     if (MovementNodes.Count == 0)
                     {
-                        GameObject.Find("GameState").SendMessage("OnAnimationComplete");
+                        GameObject.Find("ClientGameState").SendMessage("OnAnimationComplete");
                     }
 
                 }
@@ -140,7 +140,7 @@ namespace Assets.Scripts.Monsters
 
                     Destroy(gameObject);
 
-                    GameObject.Find("GameState").SendMessage("OnAnimationComplete");
+                    GameObject.Find("ClientGameState").SendMessage("OnAnimationComplete");
 
                 }
 

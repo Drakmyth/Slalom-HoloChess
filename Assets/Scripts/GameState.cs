@@ -540,6 +540,8 @@ namespace Assets.Scripts
 
         }
 
+
+        /*
         //TODO: Net remove?
         private void SubActionFour(Node selectedNode, bool isHostPlayer)
         {
@@ -592,6 +594,7 @@ namespace Assets.Scripts
             }
 
         }
+        */
 
         private void SubActionFive()
         {
