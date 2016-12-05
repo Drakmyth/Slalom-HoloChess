@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Assets.Scripts.MessageModels;
 using DejarikLibrary;
-using Assets.Scripts.Monsters;
+using Assets.Scripts.Monsters.ServerObjects;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 using Random = System.Random;
@@ -22,9 +22,7 @@ namespace Assets.Scripts
 
         private readonly Random _random;
 
-        //TODO: Net
         private Server _hostServer;
-        public bool IsGameStateUpdated = false;
 
         //0 : GameEnded
         //1 : HostAction
@@ -135,26 +133,24 @@ namespace Assets.Scripts
                     break;
                 case 2:
                     //Wait for user to select from available actions
-                    //TODO: Net awaitResponse
                     return;
                 case 3:
                     SubActionThree();
                     break;
                 case 4:
                     //Wait for user to select from available actions
-                    //TODO: Net awaitResponse
                     break;
                 case 5:
                     SubActionFive();
                     break;
                 case 6:
                     //Wait for user to select push destination
-                    //TODO: Net awaitResponse
                     break;
                 case 7:
                     //Wait for user to select counter push destination
-                    //TODO: Net awaitResponse
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
 
             }
 
@@ -244,14 +240,12 @@ namespace Assets.Scripts
                 {
                     currentMonster.CurrentNode = hostStartingNodes[0];
                     hostStartingNodes.RemoveAt(0);
-                    currentMonster.BelongsToHost = true;
                     HostMonsters.Add(currentMonster);
                 }
                 else
                 {
                     currentMonster.CurrentNode = guestStartingNodes[0];
                     guestStartingNodes.RemoveAt(0);
-                    currentMonster.BelongsToHost = false;
                     GuestMonsters.Add(currentMonster);
                 }
 
@@ -318,7 +312,7 @@ namespace Assets.Scripts
                 SelectedMovementPath = null;
                 SubActionNumber = 5;
 
-                _hostServer.SendToAll(CustomMessageTypes.SelectActionResponse, new SelectAttackResponseMessage
+                _hostServer.SendToAll(CustomMessageTypes.SelectAttackActionResponse, new SelectAttackResponseMessage
                 {
                     ActionNumber = ActionNumber,
                     SubActionNumber = SubActionNumber,
@@ -333,13 +327,13 @@ namespace Assets.Scripts
                 SelectedAttackNode = null;
                 SubActionNumber = 5;
 
-                _hostServer.SendToAll(CustomMessageTypes.SelectActionResponse, new SelectMoveResponseMessage
+                _hostServer.SendToAll(CustomMessageTypes.SelectMoveActionResponse, new SelectMoveResponseMessage
                 {
                     ActionNumber = ActionNumber,
                     SubActionNumber = SubActionNumber,
 
                     Message = SelectedMovementPath.ToString(),
-                    MovementPathIds = SelectedMovementPath.PathToDestination.Select(n => n.Id).ToList(),
+                    MovementPathIds = SelectedMovementPath.PathToDestination.Select(n => n.Id).ToArray(),
                     DestinationNodeId = SelectedMovementPath.DestinationNode.Id
                 });
             }
@@ -354,12 +348,12 @@ namespace Assets.Scripts
             if (isHostAttacker)
             {
                 attacker = HostMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
-                defender = GuestMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
+                defender = GuestMonsters.Single(m => m.MonsterTypeId == defendingMonsterTypeId);
             }
             else
             { 
                 attacker = GuestMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
-                defender = HostMonsters.Single(m => m.MonsterTypeId == attackingMonsterTypeId);
+                defender = HostMonsters.Single(m => m.MonsterTypeId == defendingMonsterTypeId);
             }
 
             AttackResult attackResult = AttackCalculator.Calculate(attacker.AttackRating, defender.DefenseRating);
@@ -437,7 +431,7 @@ namespace Assets.Scripts
                             SubActionNumber = SubActionNumber,
                             AttackingMonsterTypeId = attackingMonsterTypeId,
                             DefendingMonsterTypeId = defendingMonsterTypeId,
-                            AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
+                            AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToArray(),
                             AttackResultId = (int)AttackResult.Push,
                             Message = "Push"
                         });
@@ -469,7 +463,7 @@ namespace Assets.Scripts
                             SubActionNumber = SubActionNumber,
                             AttackingMonsterTypeId = attackingMonsterTypeId,
                             DefendingMonsterTypeId = defendingMonsterTypeId,
-                            AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
+                            AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToArray(),
                             AttackResultId = (int)AttackResult.CounterPush,
                             Message = "Counter Push"
                         });
@@ -489,7 +483,6 @@ namespace Assets.Scripts
             SubActionNumber = 0;
         }
 
-        //TODO: Net awaitRequest
         private void SubActionOne()
         {
             IEnumerable<int> availableNodeIds =
@@ -497,10 +490,16 @@ namespace Assets.Scripts
 
             SubActionNumber = 2;
             //TODO: Net sendResponse AvailableSpaces | subActionOneResponse
+            _hostServer.SendToAll(CustomMessageTypes.AvailableMonstersResponse, new AvailableMonstersResponseMessage
+            {
+                ActionNumber = ActionNumber,
+                SubActionNumber = SubActionNumber,
+                AvailableMonsterNodeIds = availableNodeIds.ToArray(),
+                Message = "Monsters available for selection"
+            });
 
         }
 
-        //TODO: Net awaitRequest
         private void SubActionThree()
         {
             if (SelectedMonster != null)
@@ -528,7 +527,15 @@ namespace Assets.Scripts
 
                 SubActionNumber = 4;
 
-                //TODO: Net sendResponse availableActions | subActionThreeResponse
+                _hostServer.SendToAll(CustomMessageTypes.AvailableMovesResponse, new AvailableMovesResponseMessage
+                {
+                    ActionNumber = ActionNumber,
+                    SubActionNumber = SubActionNumber,
+                    AvailableAttackNodeIds = availableAttackActionNodeIds.ToArray(),
+                    AvailableMoveNodeIds = availableMoveActionNodeIds.ToArray(),
+                    Message = "Available actions",
+                    SelectedMonsterTypeId = SelectedMonster.MonsterTypeId
+                });
             }
 
         }

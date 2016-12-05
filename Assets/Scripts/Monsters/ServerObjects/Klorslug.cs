@@ -1,4 +1,4 @@
-﻿namespace Assets.Scripts.Monsters
+﻿namespace Assets.Scripts.Monsters.ServerObjects
 {
     public class Klorslug : Monster
     {

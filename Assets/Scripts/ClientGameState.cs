@@ -134,8 +134,7 @@ namespace Assets.Scripts
                     //Wait for user to select from available actions
                     return;
                 case 5:
-                    SubActionFive();
-                    break;
+                    return;
                 case 6:
                     AwaitSubActionSixSelection();
                     break;
@@ -400,30 +399,8 @@ namespace Assets.Scripts
             Client.SetReady(true);
         }
 
-        /*
-        private void AwaitSubActionTwoSelection()
-        {
-            if (ActionNumber == 3 || ActionNumber == 4)
-            {
-                IEnumerable<BoardSpace> availableSpaces =
-                    BoardSpaces.Values.Where(s => Player2Monsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
-                //TODO: bake this into gonk droid et al
-                if (availableSpaces.Any())
-                {
-                    BoardSpace aiChoice = availableSpaces.ElementAt(_random.Next(availableSpaces.Count()));
-
-                    OnSpaceSelected(aiChoice.Node.Id);
-
-                }
-            }
-
-        }
-        */
-
         private void SubActionTwo(int nodeId)
         {
-
-            //TODO: Net request
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
             Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
             {
@@ -465,40 +442,7 @@ namespace Assets.Scripts
             Client.SetReady(true);
         }
 
-        private void AwaitSubActionFourSelection()
-        {
-            /*
-            if (ActionNumber == 3 || ActionNumber == 4)
-            {
-                IEnumerable<Node> friendlyOccupiedNodes = Player2Monsters.Select(monster => monster.CurrentNode).ToList();
-                IEnumerable<Node> enemyOccupiedNodes = Player1Monsters.Select(monster => monster.CurrentNode).ToList();
 
-                IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
-                    SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.DestinationNode.Id);
-
-                IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
-                    enemyOccupiedNodes).Select(a => a.Id);
-                //TODO: bake this into gonk droid et al
-                int aiActionNodeId;
-                if (availableAttackActionNodeIds.Any())
-                {
-                    aiActionNodeId = availableAttackActionNodeIds.ElementAt(_random.Next(availableAttackActionNodeIds.Count()));
-                }
-                else if (availableMoveActionNodeIds.Any())
-                {
-                    aiActionNodeId = availableMoveActionNodeIds.ElementAt(_random.Next(availableMoveActionNodeIds.Count()));
-                }
-                else
-                {
-                    SubActionNumber = 2;
-                    return;
-                }
-
-                OnSpaceSelected(aiActionNodeId);
-
-            }
-            */
-        }
 
         private void SubActionFour(Node selectedNode)
         {
@@ -521,6 +465,9 @@ namespace Assets.Scripts
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
             Client.SetReady(true);
+
+            ProcessMoveAction(SelectedMonster, SelectedMovementPath);
+
         }
 
 
@@ -532,23 +479,10 @@ namespace Assets.Scripts
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
             Client.SetReady(true);
-        }
 
-        private void SubActionFive()
-        {
-            //TODO: Net awaitResult
+            Monster opponent = EnemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(SelectedAttackNode));
 
-            if (SelectedAttackNode != null)
-            {
-                Monster opponent = EnemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(SelectedAttackNode));
-
-                ProcessAttackAction(SelectedMonster, opponent);
-            }
-            else if (SelectedMovementPath != null)
-            {
-                ProcessMoveAction(SelectedMonster, SelectedMovementPath);
-            }
-
+            ProcessAttackAction(SelectedMonster, opponent);
         }
 
         public void ConfirmAttackResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
@@ -664,32 +598,6 @@ namespace Assets.Scripts
             Client.SetReady(true);
         }
 
-
-        private void AwaitSubActionSixSelection()
-        {
-            /*
-            if (ActionNumber == 3 || ActionNumber == 4)
-            {               
-                //TODO: bake this into gonk droid et al
-                Node aiActionNode;
-                if (AvailablePushDestinations.Any())
-                {
-                    aiActionNode = AvailablePushDestinations.ElementAt(_random.Next(AvailablePushDestinations.Count()));
-                }
-                else
-                {
-                    SubActionNumber = 0;
-                    return;
-                }
-
-                OnSpaceSelected(aiActionNode.Id);
-
-            }
-            */
-        }
-
-
-
         private void SubActionSix(Node selectedNode)
         {
             Monster pushedMonster = EnemyMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
@@ -704,34 +612,6 @@ namespace Assets.Scripts
             _subActionNumber = 0;
 
         }
-
-
-        private void AwaitSubActionSevenSelection()
-        {
-            //TODO: Net awaitResult
-            /*
-            if (ActionNumber == 1 || ActionNumber == 2)
-            {
-
-                //TODO: bake this into gonk droid et al
-                Node aiActionNode;
-                if (AvailablePushDestinations.Any())
-                {
-                    aiActionNode = AvailablePushDestinations.ElementAt(_random.Next(AvailablePushDestinations.Count()));
-                }
-                else
-                {
-                    SubActionNumber = 0;
-                    return;
-                }
-
-                OnSpaceSelected(aiActionNode.Id);
-
-            }
-            */
-        }
-
-
 
         private void SubActionSeven(Node selectedNode)
         {

@@ -1,8 +1,5 @@
-﻿using System;
-
-namespace Assets.Scripts.Monsters
+﻿namespace Assets.Scripts.Monsters
 {
-    [Serializable]
     public class Houjix : Monster
     {
         public override int AttackRating

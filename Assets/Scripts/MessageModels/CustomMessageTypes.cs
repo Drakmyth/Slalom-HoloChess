@@ -16,6 +16,8 @@
         public static readonly short SelectMonsterRequest = 110;
         public static readonly short SelectMonsterResponse = 111;
         public static readonly short SelectActionRequest = 112;
-        public static readonly short SelectActionResponse = 113;
+        public static readonly short SelectMoveActionResponse = 113;
+        public static readonly short SelectAttackActionResponse = 114;
+        public static readonly short AvailableMonstersResponse = 115;
     }
 }

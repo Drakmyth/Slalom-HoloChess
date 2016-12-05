@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Scripts.AI;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -70,6 +71,9 @@ namespace Assets.Scripts
                 Server = gameObject.AddComponent<Server>();
                 Server.Init();
                 
+                //TODO: AI should have its own option
+                Server.gameObject.AddComponent<GonkDroidAI>();
+
                 Client = gameObject.AddComponent<Client>();
                 Client.InitHost();
             }

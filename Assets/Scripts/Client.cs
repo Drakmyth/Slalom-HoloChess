@@ -45,8 +45,10 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.AvailableMovesResponse, OnAvailableMoves);
 
-                NetClient.RegisterHandler(CustomMessageTypes.SelectActionResponse, OnSelectAttackAction);
+                NetClient.RegisterHandler(CustomMessageTypes.SelectMoveActionResponse, OnSelectMoveAction);
 
+                NetClient.RegisterHandler(CustomMessageTypes.SelectAttackActionResponse, OnSelectAttackAction);
+                
                 NetClient.RegisterHandler(CustomMessageTypes.AttackKillResponse, OnAttackKillResponse);
 
                 NetClient.RegisterHandler(CustomMessageTypes.AttackPushResponse, OnAttackPushResponse);
@@ -131,7 +133,7 @@ namespace Assets.Scripts
 
             SelectMoveResponseMessage message = msg.ReadMessage<SelectMoveResponseMessage>();
 
-            GameState.ConfirmSelectMoveAction(message.MovementPathIds, message.DestinationNodeId, message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmSelectMoveAction(message.MovementPathIds.ToList(), message.DestinationNodeId, message.ActionNumber, message.SubActionNumber);
         }
 
         private void OnSelectAttackAction(NetworkMessage msg)
