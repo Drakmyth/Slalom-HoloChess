@@ -64,6 +64,7 @@ namespace Assets.Scripts
             catch (NullReferenceException npe)
             {
                 Debug.Log("Connection does not exist for " + client.ClientName);
+                Debug.Log(npe.Message);
             }
             catch (Exception e)
             {
@@ -85,7 +86,7 @@ namespace Assets.Scripts
         private void OnClientConnected(NetworkMessage netMsg)
         {
             Debug.Log("Client has been connected to host");
-            if (NetworkServer.connections.Count(c => c != null) == 1) //TODO: Net this should be 2
+            if (NetworkServer.connections.Count(c => c != null) == 2)
             {
                 _gameState = gameObject.AddComponent<GameState>();
             }

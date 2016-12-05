@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DejarikLibrary;
 using UnityEngine;
 
 namespace Assets.Scripts.Monsters
 {
-    [Serializable]
     public abstract class Monster : MonoBehaviour
     {
         public abstract int AttackRating { get; }

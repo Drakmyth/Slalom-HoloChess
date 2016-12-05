@@ -1,8 +1,5 @@
-﻿using System;
-
-namespace Assets.Scripts.Monsters
+﻿namespace Assets.Scripts.Monsters
 {
-    [Serializable]
     public class Ngok : Monster
     {
         public override int AttackRating

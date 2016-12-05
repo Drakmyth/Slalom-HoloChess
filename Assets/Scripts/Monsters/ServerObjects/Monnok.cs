@@ -1,30 +1,30 @@
-﻿namespace Assets.Scripts.Monsters
+﻿namespace Assets.Scripts.Monsters.ServerObjects
 {
-    public class Klorslug : Monster
+    public class Monnok : Monster
     {
         public override int AttackRating
         {
-            get { return 7; }
+            get { return 6; }
         }
 
         public override int DefenseRating
         {
-            get { return 3; }
+            get { return 5; }
         }
 
         public override int MovementRating
         {
-            get { return 2; }
+            get { return 3; }
         }
 
         public override string Name
         {
-            get { return "k'lor'slug"; }
+            get { return "monnok"; }
         }
 
         public override int MonsterTypeId
         {
-            get { return MonsterTypes.Klorslug; }
+            get { return MonsterTypes.Monnok; }
         }
 
     }

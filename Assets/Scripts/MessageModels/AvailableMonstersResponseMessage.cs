@@ -2,18 +2,20 @@
 
 namespace Assets.Scripts.MessageModels
 {
-    public class SelectActionRequestMessage : MessageBase
+    public class AvailableMonstersResponseMessage : MessageBase
     {
         public int ActionNumber;
         public int SubActionNumber;
         public string Message;
         public short MessageTypeId;
 
-        public int SelectedNodeId;
+        public int[] AvailableMonsterNodeIds;
 
-        public SelectActionRequestMessage()
+
+        public AvailableMonstersResponseMessage()
         {
-            MessageTypeId = CustomMessageTypes.SelectActionRequest;
+            MessageTypeId = CustomMessageTypes.AvailableMovesResponse;
         }
+
     }
 }

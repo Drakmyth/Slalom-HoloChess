@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine.Networking;
+﻿using UnityEngine.Networking;
 
 namespace Assets.Scripts.MessageModels
 {
@@ -10,12 +9,12 @@ namespace Assets.Scripts.MessageModels
         public string Message;
         public short MessageTypeId;
 
-        public int DestinationNodeId { get; set; }
-        public List<int> MovementPathIds { get; set; }
+        public int DestinationNodeId;
+        public int[] MovementPathIds;
 
         public SelectMoveResponseMessage()
         {
-            MessageTypeId = CustomMessageTypes.SelectActionResponse;
+            MessageTypeId = CustomMessageTypes.SelectMoveActionResponse;
         }
     }
 }

@@ -9,11 +9,11 @@ namespace Assets.Scripts.MessageModels
         public string Message;
         public short MessageTypeId;
 
-        public int AttackNodeId { get; set; }
+        public int AttackNodeId;
 
         public SelectAttackResponseMessage()
         {
-            MessageTypeId = CustomMessageTypes.SelectActionResponse;
+            MessageTypeId = CustomMessageTypes.SelectAttackActionResponse;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine.Networking;
+﻿using UnityEngine.Networking;
 
 namespace Assets.Scripts.MessageModels
 {
@@ -10,7 +9,7 @@ namespace Assets.Scripts.MessageModels
         public string Message;
         public short MessageTypeId;
 
-        public List<int> AvailablePushDestinationIds { get; set; }
+        public int[] AvailablePushDestinationIds { get; set; }
         public int AttackingMonsterTypeId;
         public int DefendingMonsterTypeId;
         public int AttackResultId;
