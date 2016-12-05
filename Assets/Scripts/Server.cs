@@ -50,9 +50,9 @@ namespace Assets.Scripts
             }
         }
 
-        public void SendToAll(GameStateMessage msg)
+        public void SendToAll(short messageTypeId, MessageBase msg)
         {
-            NetworkServer.SendToAll(msg.MessageTypeId, msg);
+            NetworkServer.SendToAll(messageTypeId, msg);
         }
 
         public void SendToClient(string data, Client client, short messageTypeId = 0)
@@ -98,10 +98,10 @@ namespace Assets.Scripts
 
             _gameState.SelectMonster(message.SelectedMonsterTypeId);
 
-            SendToAll(new SelectMonsterResponseMessage
+            SendToAll(CustomMessageTypes.SelectMonsterResponse, new SelectMonsterResponseMessage
             {
                 ActionNumber = _gameState.ActionNumber,
-                SubActionNumber = 3,
+                SubActionNumber = _gameState.SubActionNumber,
                 SelectedMonsterTypeId = _gameState.SelectedMonster.MonsterTypeId,
                 Message = _gameState.SelectedMonster.Name,
                 MessageTypeId = CustomMessageTypes.SelectMonsterResponse
@@ -115,7 +115,7 @@ namespace Assets.Scripts
 
             if (_gameState.SelectedMonster == null)
             {
-                SendToAll(new GameStateMessage
+                SendToAll(CustomMessageTypes.GameState, new GameStateMessage
                 {
                     ActionNumber = _gameState.ActionNumber,
                     SubActionNumber = 2,
@@ -131,7 +131,7 @@ namespace Assets.Scripts
         {
             AttackRequestMessage message = msg.ReadMessage<AttackRequestMessage>();
 
-            _gameState.ProcessAttackAction(message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.XCoordinate, message.YCoordinate, message.ZCoordinate);
+            _gameState.ProcessAttackAction(message.AttackingMonsterTypeId, message.DefendingMonsterTypeId);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.MessageModels
 {
-    public class AttackRequestMessage : MessageBase
+    public class AttackKillResponseMessage : MessageBase
     {
         public int ActionNumber;
         public int SubActionNumber;
@@ -11,11 +11,11 @@ namespace Assets.Scripts.MessageModels
 
         public int AttackingMonsterTypeId;
         public int DefendingMonsterTypeId;
+        public int AttackResultId;
 
-        public AttackRequestMessage()
+        public AttackKillResponseMessage()
         {
-            MessageTypeId = CustomMessageTypes.AttackRequest;
+            MessageTypeId = CustomMessageTypes.AttackKillResponse;
         }
     }
 }
-

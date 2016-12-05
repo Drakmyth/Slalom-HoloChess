@@ -1,10 +1,17 @@
-﻿namespace Assets.Scripts.MessageModels
+﻿using UnityEngine.Networking;
+
+namespace Assets.Scripts.MessageModels
 {
-    public class ConnectRequestMessage : GameStateMessage
+    public class ConnectRequestMessage : MessageBase
     {
 
-        public string ClientName { get; set; }
-        public bool IsHost  { get; set; }
+        public int ActionNumber;
+        public int SubActionNumber;
+        public string Message;
+        public short MessageTypeId;
+
+        public string ClientName;
+        public bool IsHost;
 
         public ConnectRequestMessage()
         {

@@ -18,7 +18,7 @@ namespace Assets.Scripts
         //TODO: Net make this private and abstract necessary functionality out
         public NetworkClient NetClient;
         public string ClientName = "client";
-        private ClientGameState _gameState;
+        public ClientGameState GameState;
 
         public void Init(string hostAddress, int port)
         {
@@ -47,6 +47,10 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.SelectActionResponse, OnSelectAttackAction);
 
+                NetClient.RegisterHandler(CustomMessageTypes.AttackKillResponse, OnAttackKillResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.AttackPushResponse, OnAttackPushResponse);
+
                 NetClient.Connect(hostAddress, port);
 
                 Debug.Log("Client");
@@ -67,6 +71,7 @@ namespace Assets.Scripts
             {
                 Init("127.0.0.1", 1300);
                 Debug.Log("HostClient");
+                SetReady(true);
             }
             catch (Exception e)
             {
@@ -75,7 +80,7 @@ namespace Assets.Scripts
 
         }
 
-        public bool Send(short messageType, GameStateMessage message)
+        public bool Send(short messageType, MessageBase message)
         {
             return NetClient.Send(messageType, message);
         }
@@ -88,11 +93,13 @@ namespace Assets.Scripts
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Connected to server");
+            SetReady(true);
         }
 
         private void OnDisconnected(NetworkMessage msg)
         {
             Debug.Log("Disconnected from server");
+            SetReady(true);
         }
 
         private void OnError(NetworkMessage msg)
@@ -105,7 +112,7 @@ namespace Assets.Scripts
             Debug.Log("Monster selected");
             SelectMonsterResponseMessage message = msg.ReadMessage<SelectMonsterResponseMessage>();
 
-            _gameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionNumber, message.SubActionNumber);
 
         }
 
@@ -114,7 +121,7 @@ namespace Assets.Scripts
             Debug.Log("Available moves calculated");
             AvailableMovesResponseMessage message = msg.ReadMessage<AvailableMovesResponseMessage>();
 
-            _gameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionNumber, message.SubActionNumber);
 
         }
 
@@ -124,7 +131,7 @@ namespace Assets.Scripts
 
             SelectMoveResponseMessage message = msg.ReadMessage<SelectMoveResponseMessage>();
 
-            _gameState.ConfirmSelectMoveAction(message.MovementPathIds, message.DestinationNodeId, message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmSelectMoveAction(message.MovementPathIds, message.DestinationNodeId, message.ActionNumber, message.SubActionNumber);
         }
 
         private void OnSelectAttackAction(NetworkMessage msg)
@@ -133,16 +140,25 @@ namespace Assets.Scripts
 
             SelectAttackResponseMessage message = msg.ReadMessage<SelectAttackResponseMessage>();
 
-            _gameState.ConfirmSelectAttackAction(message.AttackNodeId, message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmSelectAttackAction(message.AttackNodeId, message.ActionNumber, message.SubActionNumber);
         }
 
-        private void OnAttackResult(NetworkMessage msg)
+        private void OnAttackKillResponse(NetworkMessage msg)
         {
-            Debug.Log("Attack Result");
+            Debug.Log("Kill Attack Result");
 
-            AttackResponseMessage message = msg.ReadMessage<AttackResponseMessage>();
+            AttackKillResponseMessage message = msg.ReadMessage<AttackKillResponseMessage>();
 
-            _gameState.ConfirmAttackResult((AttackResult)message.AttackResultId, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.XCoordinate, message.YCoordinate, message.ZCoordinate);
+            GameState.ConfirmAttackResult((AttackResult)message.AttackResultId, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
+        }
+
+        private void OnAttackPushResponse(NetworkMessage msg)
+        {
+            Debug.Log("Push Attack Result");
+
+            AttackPushResponseMessage message = msg.ReadMessage<AttackPushResponseMessage>();
+
+            GameState.ConfirmAttackPushResult((AttackResult)message.AttackResultId, message.AvailablePushDestinationIds, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
         }
 
         private void OnGameStart(NetworkMessage netMsg)

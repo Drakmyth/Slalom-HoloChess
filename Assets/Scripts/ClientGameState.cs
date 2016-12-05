@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 using Assets.Scripts.MessageModels;
@@ -75,6 +74,8 @@ namespace Assets.Scripts
             DisplayBoardSpaces();
 
             Client = GameManager.Instance.Client;
+
+            Client.GameState = this;
 
             _actionNumber = 1;
 
@@ -349,16 +350,8 @@ namespace Assets.Scripts
             {
                 AttackingMonsterTypeId = attacker.MonsterTypeId,
                 DefendingMonsterTypeId = defender.MonsterTypeId,
-                XCoordinate = battleSmokePosition.x,
-                YCoordinate = battleSmokePosition.y,
-                ZCoordinate = battleSmokePosition.z
             });
 
-        }
-
-        public void ConfirmAttackResult()
-        {
-            
         }
 
         private void ProcessKill(Monster killed, bool isFriendlyMonster, GameObject battleSmokeInstance)
@@ -376,6 +369,7 @@ namespace Assets.Scripts
             _isAnimationRunning = true;
             killed.SendMessage("OnLoseBattle", battleSmokeInstance);
             _subActionNumber = 0;
+            Client.SetReady(true);
         }
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
@@ -403,6 +397,7 @@ namespace Assets.Scripts
             }
 
             _subActionNumber = 2;
+            Client.SetReady(true);
         }
 
         /*
@@ -453,7 +448,7 @@ namespace Assets.Scripts
                     space.SendMessage("OnMonsterSelected", SelectedMonster.CurrentNode.Id);
                 }
             }
-
+            Client.SetReady(true);
         }
 
         public void ConfirmSubActionThree(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
@@ -467,6 +462,7 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
+            Client.SetReady(true);
         }
 
         private void AwaitSubActionFourSelection()
@@ -524,6 +520,7 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
+            Client.SetReady(true);
         }
 
 
@@ -534,6 +531,7 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
+            Client.SetReady(true);
         }
 
         private void SubActionFive()
@@ -553,105 +551,119 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAttackResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, float xCoordinate, float yCoordinate, float zCoordinate)
+        public void ConfirmAttackResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
             bool isFriendlyMonster = _actionNumber == 1 || _actionNumber == 2;
 
-            Vector3 battlePosition = new Vector3(xCoordinate, yCoordinate);
+            Monster attacker = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == attackingMonsterTypeId) ??
+                               EnemyMonsters.SingleOrDefault(m => m.MonsterTypeId == attackingMonsterTypeId);
 
-            switch (attackResult)
+            Monster defender = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == defendingMonsterTypeId) ??
+                   EnemyMonsters.SingleOrDefault(m => m.MonsterTypeId == defendingMonsterTypeId);
+
+            GameObject battleSmokeInstance = GameObject.Find("BattleSmoke");
+            Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
+            Vector3 battlePosition = BattleSmoke.transform.position;
+
+            if (attackResult == AttackResult.Kill)
             {
-                case AttackResult.Kill:
-                    AttackResultText attackKillResultText = Instantiate(KillResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
+                AttackResultText attackKillResultText = Instantiate(KillResultTextPrefab as UnityEngine.Object, battlePosition,
+                    battleSmokeQuaternion) as AttackResultText;
 
-                    if (attackKillResultText != null)
-                    {
-                        attackKillResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
+                if (attackKillResultText != null)
+                {
+                    attackKillResultText.SendMessage("OnActivate", battlePosition);
+                }
 
-                    ProcessKill(defender, !isFriendlyMonster, battleSmokeInstance);
-                    break;
-                case AttackResult.CounterKill:
-                    AttackResultText attackCounterKillResultText = Instantiate(CounterKillResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
+                ProcessKill(defender, !isFriendlyMonster, battleSmokeInstance);
+            } else if (attackResult == AttackResult.CounterKill)
+            {
+                AttackResultText attackCounterKillResultText = Instantiate(CounterKillResultTextPrefab as UnityEngine.Object, battlePosition,
+                    battleSmokeQuaternion) as AttackResultText;
 
+                if (attackCounterKillResultText != null)
+                {
+                    attackCounterKillResultText.LerpDestination = attackCounterKillResultText.transform.position + Vector3.up;
+                    attackCounterKillResultText.SendMessage("OnActivate", battlePosition);
+                }
 
-                    if (attackCounterKillResultText != null)
-                    {
-                        attackCounterKillResultText.LerpDestination = attackCounterKillResultText.transform.position + Vector3.up;
-                        attackCounterKillResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
-                    ProcessKill(attacker, isFriendlyMonster, battleSmokeInstance);
-                    SelectedMonster = null;
-                    break;
-                case AttackResult.Push:
-
-                    AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
-                        friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
-
-                    AttackResultText attackPushResultText = Instantiate(PushResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
-
-
-                    if (attackPushResultText != null)
-                    {
-                        attackPushResultText.LerpDestination = attackPushResultText.transform.position + Vector3.up;
-                        attackPushResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
-                    foreach (BoardSpace space in BoardSpaces.Values)
-                    {
-                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
-                    }
-
-                    Destroy(battleSmokeInstance);
-
-                    _subActionNumber = 6;
-
-                    if (!AvailablePushDestinations.Any())
-                    {
-                        _subActionNumber = 0;
-                    }
-
-                    break;
-                case AttackResult.CounterPush:
-
-                    AttackResultText attackCounterPushResultText = Instantiate(CounterPushResultTextPrefab as UnityEngine.Object, battleSmokePosition,
-                        battleSmokeQuaternion) as AttackResultText;
-
-                    if (attackCounterPushResultText != null)
-                    {
-                        attackCounterPushResultText.LerpDestination = attackCounterPushResultText.transform.position + Vector3.up;
-                        attackCounterPushResultText.SendMessage("OnActivate", battleSmokePosition);
-                    }
-
-                    AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
-                        friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
-
-                    foreach (BoardSpace space in BoardSpaces.Values)
-                    {
-                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
-                    }
-
-                    //TODO: wait until push action is complete
-                    Destroy(battleSmokeInstance);
-
-                    _subActionNumber = 7;
-                    //send network message with available push nodes
-
-                    if (!AvailablePushDestinations.Any())
-                    {
-                        _subActionNumber = 0;
-                    }
-
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                ProcessKill(attacker, isFriendlyMonster, battleSmokeInstance);
+                SelectedMonster = null;
             }
+
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
+            Client.SetReady(true);
+
         }
+
+        public void ConfirmAttackPushResult(AttackResult attackResult, IEnumerable<int> availablePushDestinationIds, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
+        {
+
+            GameObject battleSmokeInstance = GameObject.Find("BattleSmoke");
+            Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
+            Vector3 battlePosition = BattleSmoke.transform.position;
+
+            AvailablePushDestinations = availablePushDestinationIds.Select(n => GameGraph.Nodes[n]);
+
+            if (attackResult == AttackResult.Push)
+            {
+                AttackResultText attackPushResultText = Instantiate(PushResultTextPrefab as UnityEngine.Object, battlePosition,
+                    battleSmokeQuaternion) as AttackResultText;
+
+                if (attackPushResultText != null)
+                {
+                    attackPushResultText.LerpDestination = attackPushResultText.transform.position + Vector3.up;
+                    attackPushResultText.SendMessage("OnActivate", battlePosition);
+                }
+
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                }
+
+                Destroy(battleSmokeInstance);
+
+                _subActionNumber = 6;
+
+                if (!AvailablePushDestinations.Any())
+                {
+                    _subActionNumber = 0;
+                }
+
+            }
+            else if (attackResult == AttackResult.CounterPush)
+            {
+                AttackResultText attackCounterPushResultText = Instantiate(CounterPushResultTextPrefab as UnityEngine.Object, battlePosition,
+                    battleSmokeQuaternion) as AttackResultText;
+
+                if (attackCounterPushResultText != null)
+                {
+                    attackCounterPushResultText.LerpDestination = attackCounterPushResultText.transform.position + Vector3.up;
+                    attackCounterPushResultText.SendMessage("OnActivate", battlePosition);
+                }
+
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                }
+
+                Destroy(battleSmokeInstance);
+
+                _subActionNumber = 7;
+                //send network message with available push nodes
+
+                if (!AvailablePushDestinations.Any())
+                {
+                    _subActionNumber = 0;
+                }
+            }
+
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
+            Client.SetReady(true);
+        }
+
 
         private void AwaitSubActionSixSelection()
         {
