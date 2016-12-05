@@ -1,8 +1,15 @@
-﻿namespace Assets.Scripts.MessageModels
+﻿using UnityEngine.Networking;
+
+namespace Assets.Scripts.MessageModels
 {
-    public class SelectMonsterResponseMessage : GameStateMessage
+    public class SelectMonsterResponseMessage : MessageBase
     {
-        public int SelectedMonsterTypeId { get; set; }
+        public int ActionNumber;
+        public int SubActionNumber;
+        public string Message;
+        public short MessageTypeId;
+
+        public int SelectedMonsterTypeId;
 
         public SelectMonsterResponseMessage()
         {

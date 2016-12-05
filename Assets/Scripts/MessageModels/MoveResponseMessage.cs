@@ -1,9 +1,16 @@
-﻿namespace Assets.Scripts.MessageModels
+﻿using UnityEngine.Networking;
+
+namespace Assets.Scripts.MessageModels
 {
-    public class MoveResponseMessage : GameStateMessage
+    public class MoveResponseMessage : MessageBase
     {
-        public int SelectedMonsterTypeId { get; set; }
-        public string NodePath { get; set; } //TODO: Net Serialize
+        public int ActionNumber;
+        public int SubActionNumber;
+        public string Message;
+        public short MessageTypeId;
+
+        public int SelectedMonsterTypeId;
+        public string NodePath;
 
         public MoveResponseMessage()
         {

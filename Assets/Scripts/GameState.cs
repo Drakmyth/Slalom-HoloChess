@@ -101,14 +101,14 @@ namespace Assets.Scripts
                 SubActionNumber = 1
             };
 
-            _hostServer.SendToAll(gameStartMessage);
+            _hostServer.SendToAll(gameStartMessage.MessageTypeId, gameStartMessage);
 
         }
 
         void Update()
         {
-
-            if (_hostServer == null || !_hostServer.ClientsAreReady() || ActionNumber < 1)
+            //TODO: Net !_hostServer.ClientsAreReady()?
+            if (_hostServer == null || ActionNumber < 1)
             {
                 //The game should end at this point
                 return;
@@ -271,6 +271,8 @@ namespace Assets.Scripts
             {
                 SelectedMonster = GuestMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterTypeId);
             }
+
+            SubActionNumber = 3;
         }
 
 
@@ -301,7 +303,7 @@ namespace Assets.Scripts
 
                 SubActionNumber = 3;
 
-                _hostServer.SendToAll(new SelectMonsterResponseMessage
+                _hostServer.SendToAll(CustomMessageTypes.SelectMonsterResponse, new SelectMonsterResponseMessage
                 {
                     ActionNumber = ActionNumber,
                     SubActionNumber = SubActionNumber,
@@ -316,7 +318,7 @@ namespace Assets.Scripts
                 SelectedMovementPath = null;
                 SubActionNumber = 5;
 
-                _hostServer.SendToAll(new SelectAttackResponseMessage
+                _hostServer.SendToAll(CustomMessageTypes.SelectActionResponse, new SelectAttackResponseMessage
                 {
                     ActionNumber = ActionNumber,
                     SubActionNumber = SubActionNumber,
@@ -331,7 +333,7 @@ namespace Assets.Scripts
                 SelectedAttackNode = null;
                 SubActionNumber = 5;
 
-                _hostServer.SendToAll(new SelectMoveResponseMessage
+                _hostServer.SendToAll(CustomMessageTypes.SelectActionResponse, new SelectMoveResponseMessage
                 {
                     ActionNumber = ActionNumber,
                     SubActionNumber = SubActionNumber,
@@ -343,8 +345,8 @@ namespace Assets.Scripts
             }
         }
 
-
-        public void ProcessAttackAction(int attackingMonsterTypeId, int defendingMonsterTypeId, float xCoordinate, float yCoordinate, float zCoordinate)
+        //TODO: Net are coordinates necessary?
+        public void ProcessAttackAction(int attackingMonsterTypeId, int defendingMonsterTypeId)
         {
             Monster attacker;
             Monster defender;
@@ -378,15 +380,12 @@ namespace Assets.Scripts
                     SelectedMonster = null;
                     SubActionNumber = 0;
 
-                    _hostServer.SendToAll(new AttackResponseMessage
+                    _hostServer.SendToAll(CustomMessageTypes.AttackKillResponse, new AttackKillResponseMessage
                     {
                         ActionNumber = ActionNumber,
                         SubActionNumber = SubActionNumber,
                         AttackingMonsterTypeId = attackingMonsterTypeId,
                         DefendingMonsterTypeId = defendingMonsterTypeId,
-                        XCoordinate = xCoordinate,
-                        YCoordinate = yCoordinate,
-                        ZCoordinate = zCoordinate,
                         AttackResultId = (int)AttackResult.Kill,
                         Message = "Kill"
                     });
@@ -403,15 +402,12 @@ namespace Assets.Scripts
                     SelectedMonster = null;
                     SubActionNumber = 0;
 
-                    _hostServer.SendToAll(new AttackResponseMessage
+                    _hostServer.SendToAll(CustomMessageTypes.AttackPushResponse, new AttackKillResponseMessage
                     {
                         ActionNumber = ActionNumber,
                         SubActionNumber = SubActionNumber,
                         AttackingMonsterTypeId = attackingMonsterTypeId,
                         DefendingMonsterTypeId = defendingMonsterTypeId,
-                        XCoordinate = xCoordinate,
-                        YCoordinate = yCoordinate,
-                        ZCoordinate = zCoordinate,
                         AttackResultId = (int)AttackResult.CounterKill,
                         Message = "Counter Kill"
                     });
@@ -422,25 +418,31 @@ namespace Assets.Scripts
                     AvailablePushDestinations = MoveCalculator.FindMoves(defender.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
-                    SubActionNumber = 6;
-
                     if (!AvailablePushDestinations.Any())
                     {
                         SubActionNumber = 0;
+                        _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                        {
+                            ActionNumber = ActionNumber,
+                            SubActionNumber = SubActionNumber,
+                            Message = "No available push destinations."
+                        });
                     }
-                    _hostServer.SendToAll(new AttackPushResponseMessage
+                    else
                     {
-                        ActionNumber = ActionNumber,
-                        SubActionNumber = SubActionNumber,
-                        AttackingMonsterTypeId = attackingMonsterTypeId,
-                        DefendingMonsterTypeId = defendingMonsterTypeId,
-                        XCoordinate = xCoordinate,
-                        YCoordinate = yCoordinate,
-                        ZCoordinate = zCoordinate,
-                        AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
-                        AttackResultId = (int)AttackResult.Push,
-                        Message = "Push"
-                    });
+                        SubActionNumber = 6;
+                        _hostServer.SendToAll(CustomMessageTypes.AttackPushResponse, new AttackPushResponseMessage
+                        {
+                            ActionNumber = ActionNumber,
+                            SubActionNumber = SubActionNumber,
+                            AttackingMonsterTypeId = attackingMonsterTypeId,
+                            DefendingMonsterTypeId = defendingMonsterTypeId,
+                            AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
+                            AttackResultId = (int)AttackResult.Push,
+                            Message = "Push"
+                        });
+
+                    }
 
                     break;
                 case AttackResult.CounterPush:
@@ -448,26 +450,30 @@ namespace Assets.Scripts
                     AvailablePushDestinations = MoveCalculator.FindMoves(attacker.CurrentNode, 1,
                         friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(m => m.DestinationNode);
 
-                    SubActionNumber = 7;
-                    //send network message with available push nodes
-
                     if (!AvailablePushDestinations.Any())
                     {
                         SubActionNumber = 0;
+                        _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                        {
+                            ActionNumber = ActionNumber,
+                            SubActionNumber = SubActionNumber,
+                            Message = "No available push destinations."
+                        });
                     }
-                    _hostServer.SendToAll(new AttackPushResponseMessage
+                    else
                     {
-                        ActionNumber = ActionNumber,
-                        SubActionNumber = SubActionNumber,
-                        AttackingMonsterTypeId = attackingMonsterTypeId,
-                        DefendingMonsterTypeId = defendingMonsterTypeId,
-                        XCoordinate = xCoordinate,
-                        YCoordinate = yCoordinate,
-                        ZCoordinate = zCoordinate,
-                        AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
-                        AttackResultId = (int)AttackResult.CounterPush,
-                        Message = "Counter Push"
-                    });
+                        SubActionNumber = 7;
+                        _hostServer.SendToAll(CustomMessageTypes.AttackPushResponse, new AttackPushResponseMessage
+                        {
+                            ActionNumber = ActionNumber,
+                            SubActionNumber = SubActionNumber,
+                            AttackingMonsterTypeId = attackingMonsterTypeId,
+                            DefendingMonsterTypeId = defendingMonsterTypeId,
+                            AvailablePushDestinationIds = AvailablePushDestinations.Select(d => d.Id).ToList(),
+                            AttackResultId = (int)AttackResult.CounterPush,
+                            Message = "Counter Push"
+                        });
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -596,7 +602,7 @@ namespace Assets.Scripts
             {
                 Monster opponent = GetEnemyAtNode(SelectedAttackNode, isHostPlayer);
 
-                ProcessAttackAction(SelectedMonster, opponent, isHostPlayer);
+                ProcessAttackAction(SelectedMonster.MonsterTypeId, opponent.MonsterTypeId);
             }
             else if (SelectedMovementPath != null)
             {
