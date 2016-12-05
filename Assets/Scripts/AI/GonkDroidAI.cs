@@ -50,6 +50,11 @@ namespace Assets.Scripts.AI
         {
             AvailableMonstersResponseMessage message = msg.ReadMessage<AvailableMonstersResponseMessage>();
 
+            if (message.ActionNumber != 3 && message.ActionNumber != 4)
+            {
+                return;
+            }
+
             int randInt = _random.Next(0, message.AvailableMonsterNodeIds.Length - 1);
 
             NetClient.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
@@ -64,6 +69,10 @@ namespace Assets.Scripts.AI
         {
             AvailableMovesResponseMessage message = msg.ReadMessage<AvailableMovesResponseMessage>();
 
+            if (message.ActionNumber != 3 && message.ActionNumber != 4)
+            {
+                return;
+            }
 
             if (message.AvailableAttackNodeIds.Any())
             {

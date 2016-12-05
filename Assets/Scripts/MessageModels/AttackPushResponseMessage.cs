@@ -9,7 +9,7 @@ namespace Assets.Scripts.MessageModels
         public string Message;
         public short MessageTypeId;
 
-        public int[] AvailablePushDestinationIds { get; set; }
+        public int[] AvailablePushDestinationIds;
         public int AttackingMonsterTypeId;
         public int DefendingMonsterTypeId;
         public int AttackResultId;

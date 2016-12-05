@@ -116,6 +116,8 @@ namespace Assets.Scripts
             Debug.Log("Available monsters");
             AvailableMonstersResponseMessage message = msg.ReadMessage<AvailableMonstersResponseMessage>();
 
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
             GameState.ConfirmAvailableMonsters(message.AvailableMonsterNodeIds.ToList(), message.ActionNumber,
                 message.SubActionNumber);
         }
@@ -125,6 +127,8 @@ namespace Assets.Scripts
             Debug.Log("Monster selected");
             SelectMonsterResponseMessage message = msg.ReadMessage<SelectMonsterResponseMessage>();
 
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
             GameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionNumber, message.SubActionNumber);
 
         }
@@ -133,6 +137,8 @@ namespace Assets.Scripts
         {
             Debug.Log("Available moves calculated");
             AvailableMovesResponseMessage message = msg.ReadMessage<AvailableMovesResponseMessage>();
+
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
 
             GameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionNumber, message.SubActionNumber);
 
@@ -144,6 +150,8 @@ namespace Assets.Scripts
 
             SelectMoveResponseMessage message = msg.ReadMessage<SelectMoveResponseMessage>();
 
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
             GameState.ConfirmSelectMoveAction(message.MovementPathIds.ToList(), message.DestinationNodeId, message.ActionNumber, message.SubActionNumber);
         }
 
@@ -152,6 +160,8 @@ namespace Assets.Scripts
             Debug.Log("Action selected");
 
             SelectAttackResponseMessage message = msg.ReadMessage<SelectAttackResponseMessage>();
+
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
 
             GameState.ConfirmSelectAttackAction(message.AttackNodeId, message.ActionNumber, message.SubActionNumber);
         }
@@ -162,6 +172,8 @@ namespace Assets.Scripts
 
             AttackKillResponseMessage message = msg.ReadMessage<AttackKillResponseMessage>();
 
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
             GameState.ConfirmAttackResult((AttackResult)message.AttackResultId, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
         }
 
@@ -171,6 +183,8 @@ namespace Assets.Scripts
 
             AttackPushResponseMessage message = msg.ReadMessage<AttackPushResponseMessage>();
 
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
             GameState.ConfirmAttackPushResult((AttackResult)message.AttackResultId, message.AvailablePushDestinationIds, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
         }
 
@@ -179,6 +193,8 @@ namespace Assets.Scripts
             Debug.Log("Push destination received");
 
             PushDestinationResponseMessage message = msg.ReadMessage<PushDestinationResponseMessage>();
+
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
 
             GameState.ConfirmPushDestination(message.PathToDestinationNodeIds, message.DestinationNodeId,
                 message.ActionNumber, message.SubActionNumber);
@@ -209,6 +225,16 @@ namespace Assets.Scripts
                 yield return null;
             }
 
+        }
+
+        private int AdjustActionNumber(int actionNumber)
+        {
+            if (!IsHost)
+            {
+                return (actionNumber + 1) % 4 + 1;
+            }
+
+            return actionNumber;
         }
 
 
