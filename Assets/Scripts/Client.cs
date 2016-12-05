@@ -41,6 +41,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameStart, OnGameStart);
 
+                NetClient.RegisterHandler(CustomMessageTypes.AvailableMonstersResponse, OnAvailableMonsters);
+
                 NetClient.RegisterHandler(CustomMessageTypes.SelectMonsterResponse, OnSelectMonster);
 
                 NetClient.RegisterHandler(CustomMessageTypes.AvailableMovesResponse, OnAvailableMoves);
@@ -109,6 +111,15 @@ namespace Assets.Scripts
             Debug.Log("Error connecting with code " + msg.reader.ReadString());
         }
 
+        private void OnAvailableMonsters(NetworkMessage msg)
+        {
+            Debug.Log("Available monsters");
+            AvailableMonstersResponseMessage message = msg.ReadMessage<AvailableMonstersResponseMessage>();
+
+            GameState.ConfirmAvailableMonsters(message.AvailableMonsterNodeIds.ToList(), message.ActionNumber,
+                message.SubActionNumber);
+        }
+
         private void OnSelectMonster(NetworkMessage msg)
         {
             Debug.Log("Monster selected");
@@ -161,6 +172,16 @@ namespace Assets.Scripts
             AttackPushResponseMessage message = msg.ReadMessage<AttackPushResponseMessage>();
 
             GameState.ConfirmAttackPushResult((AttackResult)message.AttackResultId, message.AvailablePushDestinationIds, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
+        }
+
+        private void OnPushDestinationResponse(NetworkMessage msg)
+        {
+            Debug.Log("Push destination received");
+
+            PushDestinationResponseMessage message = msg.ReadMessage<PushDestinationResponseMessage>();
+
+            GameState.ConfirmPushDestination(message.PathToDestinationNodeIds, message.DestinationNodeId,
+                message.ActionNumber, message.SubActionNumber);
         }
 
         private void OnGameStart(NetworkMessage netMsg)
