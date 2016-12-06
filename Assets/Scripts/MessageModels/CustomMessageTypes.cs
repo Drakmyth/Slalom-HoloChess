@@ -20,6 +20,7 @@
         public static readonly short SelectAttackActionResponse = 114;
         public static readonly short AvailableMonstersResponse = 115;
         public static readonly short PushDestinationRequest = 116;
-        public static readonly short PushDestinationResponse = 116;
+        public static readonly short PushDestinationResponse = 117;
+        public static readonly short StateAck = 118;
     }
 }

@@ -75,7 +75,6 @@ namespace Assets.Scripts
             {
                 Init("127.0.0.1", 1300);
                 Debug.Log("HostClient");
-                SetReady(true);
             }
             catch (Exception e)
             {
@@ -89,21 +88,14 @@ namespace Assets.Scripts
             return NetClient.Send(messageType, message);
         }
 
-        public void SetReady(bool isReady)
-        {
-            NetClient.connection.isReady = isReady;
-        }
-
         private void OnConnected(NetworkMessage netMsg)
         {
             Debug.Log("Connected to server");
-            SetReady(true);
         }
 
         private void OnDisconnected(NetworkMessage msg)
         {
             Debug.Log("Disconnected from server");
-            SetReady(true);
         }
 
         private void OnError(NetworkMessage msg)
@@ -198,6 +190,17 @@ namespace Assets.Scripts
 
             GameState.ConfirmPushDestination(message.PathToDestinationNodeIds, message.DestinationNodeId,
                 message.ActionNumber, message.SubActionNumber);
+        }
+
+        public void SendStateAck(int actionNumber, int subActionNumber)
+        {
+            Send(CustomMessageTypes.StateAck, new StateAckMessage
+            {
+                ActionNumber = actionNumber,
+                SubActionNumber = subActionNumber,
+                Message = IsHost? "HostClient up to date" : "GuestClient up to date",
+                IsHost = IsHost
+            });
         }
 
         private void OnGameStart(NetworkMessage netMsg)
