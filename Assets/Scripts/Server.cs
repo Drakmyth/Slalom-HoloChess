@@ -62,6 +62,8 @@ namespace Assets.Scripts
 
         public void SendToAll(short messageTypeId, MessageBase msg)
         {
+            _isHostReady = false;
+            _isGuestReady = false;
             NetworkServer.SendToAll(messageTypeId, msg);
         }
 
@@ -122,6 +124,9 @@ namespace Assets.Scripts
 
         public void OnSelectAction(NetworkMessage msg)
         {
+            _isHostReady = false;
+            _isGuestReady = false;
+
             SelectActionRequestMessage message = msg.ReadMessage<SelectActionRequestMessage>();
 
             if (_gameState.SelectedMonster == null)

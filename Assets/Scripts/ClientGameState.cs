@@ -111,37 +111,23 @@ namespace Assets.Scripts
 
         void Update()
         {      
-            if (Client == null || _actionNumber < 1 || _isAnimationRunning)
+            if (Client == null || _actionNumber < 1)
             {
                 return;
+            }
+
+            if (_isAnimationRunning)
+            {
+                if (_subActionNumber == 5 && SelectedMonster != null && FriendlyMonsters.Contains(SelectedMonster))
+                {
+                    BoardSpaces[SelectedMonster.CurrentNode.Id].SendMessage("OnClearHighlightingWithSelection", SelectedMonster.CurrentNode);
+                }
+
             }
 
             if (!FriendlyMonsters.Any() || !EnemyMonsters.Any())
             {
                 _actionNumber = 0;
-            }
-
-            switch (_subActionNumber)
-            {
-                case 1:
-                    SubActionOne();
-                    break;
-                case 2:
-                    //Wait for user to select from available actions
-                    return;
-                case 3:
-                    UpdateSelectionMenu();
-                    break;
-                case 4:
-                    //Wait for user to select from available actions
-                    return;
-                case 5:
-                    return;
-                case 6:
-                    break;
-                case 7:
-                    break;
-
             }
 
             if (_actionNumber == 4 && _subActionNumber == 0)
@@ -211,6 +197,8 @@ namespace Assets.Scripts
                 SelectedMovementPath = null;
 
                 _actionNumber++;
+
+                //TODO: Net SendAck
 
             }
         }
@@ -366,7 +354,6 @@ namespace Assets.Scripts
 
             _isAnimationRunning = true;
             killed.SendMessage("OnLoseBattle", battleSmokeInstance);
-            _subActionNumber = 0;
         }
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
@@ -380,7 +367,6 @@ namespace Assets.Scripts
 
             selectedMonster.SendMessage("OnBeginMoveAnimation", path);
 
-            _subActionNumber = 0;
         }
 
         public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
@@ -398,19 +384,6 @@ namespace Assets.Scripts
 
             Client.SendStateAck(_actionNumber, _subActionNumber);
 
-        }
-
-        private void SubActionOne()
-        {
-            IEnumerable<BoardSpace> availableSpaces =
-            BoardSpaces.Values.Where(s => FriendlyMonsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
-
-            foreach (BoardSpace space in availableSpaces)
-            {
-                space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
-            }
-
-            _subActionNumber = 2;
         }
 
         private void SubActionTwo(int nodeId)
@@ -444,7 +417,9 @@ namespace Assets.Scripts
         }
 
         public void ConfirmSubActionThree(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
-        {              
+        {
+
+            UpdateSelectionMenu();
             //Update board highlighting
             foreach (BoardSpace space in BoardSpaces.Values)
             {
@@ -457,8 +432,6 @@ namespace Assets.Scripts
             Client.SendStateAck(_actionNumber, _subActionNumber);
 
         }
-
-
 
         private void SubActionFour(Node selectedNode)
         {
@@ -574,13 +547,6 @@ namespace Assets.Scripts
 
                 Destroy(battleSmokeInstance);
 
-                _subActionNumber = 6;
-
-                if (!AvailablePushDestinations.Any())
-                {
-                    _subActionNumber = 0;
-                }
-
             }
             else if (attackResult == AttackResult.CounterPush)
             {
@@ -600,13 +566,6 @@ namespace Assets.Scripts
 
                 Destroy(battleSmokeInstance);
 
-                _subActionNumber = 7;
-                //send network message with available push nodes
-
-                if (!AvailablePushDestinations.Any())
-                {
-                    _subActionNumber = 0;
-                }
             }
 
             _actionNumber = actionNumber;
@@ -646,7 +605,6 @@ namespace Assets.Scripts
             }
             else
             {
-                _subActionNumber = 0;
                 return;
             }
             Node selectedNode = GameGraph.Nodes[destinationNodeId];
@@ -656,9 +614,6 @@ namespace Assets.Scripts
             pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
 
             pushedMonster.CurrentNode = selectedNode;
-
-            _subActionNumber = 0;
-
 
         }
 
