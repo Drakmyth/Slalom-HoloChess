@@ -13,14 +13,21 @@ namespace Assets.Scripts
         public int Port = 1300;
         public bool IsServerStarted;
         private GameState _gameState;
-        private Client _hostClient;
-        private Client _guestClient;
-        
+        private bool _isGuestReady = false;
+        private bool _isHostReady = false;
+//        private GameMode _gameMode;
+        private bool _isLocalSinglePlayer = true;
+
         void Update()
         {
             if (!IsServerStarted)
             {
                 return;
+            }
+
+            if (!_isGuestReady && _isLocalSinglePlayer)
+            {
+                _isGuestReady = true;
             }
         }
 
@@ -33,6 +40,8 @@ namespace Assets.Scripts
 
                 NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnected);
                 
+                NetworkServer.RegisterHandler(CustomMessageTypes.StateAck, OnStateAck);
+
                 NetworkServer.RegisterHandler(CustomMessageTypes.SelectMonsterRequest, OnSelectMonster);
 
                 NetworkServer.RegisterHandler(CustomMessageTypes.SelectActionRequest, OnSelectAction);
@@ -81,7 +90,7 @@ namespace Assets.Scripts
 
         public bool ClientsAreReady()
         {
-            return NetworkServer.connections.Where(c => c != null).All(c => c.isReady);
+            return _isHostReady && _isGuestReady;
         }
 
         private void OnClientConnected(NetworkMessage netMsg)
@@ -141,6 +150,37 @@ namespace Assets.Scripts
             PushDestinationRequestMessage message = msg.ReadMessage<PushDestinationRequestMessage>();
 
             _gameState.ProcessPushDestination(message.SelectedNodeId);
+        }
+
+        public void OnStateAck(NetworkMessage msg)
+        {
+            StateAckMessage message = msg.ReadMessage<StateAckMessage>();
+
+            if (message.IsHost)
+            {
+                if (message.ActionNumber == _gameState.ActionNumber && message.SubActionNumber == _gameState.SubActionNumber)
+                {
+                    _isHostReady = true;
+                }
+                else
+                {
+                    _isHostReady = false;
+                    //TODO: Net push game state to client
+                }
+            }
+            else
+            {
+                if (message.ActionNumber == _gameState.ActionNumber && message.SubActionNumber == _gameState.SubActionNumber)
+                {
+                    _isGuestReady = true;
+                }
+                else
+                {
+                    _isGuestReady = false;
+                    //TODO: Net push game state to client
+                }
+
+            }
         }
     }
 }

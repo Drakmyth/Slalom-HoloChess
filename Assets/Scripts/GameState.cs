@@ -105,8 +105,7 @@ namespace Assets.Scripts
 
         void Update()
         {
-            //TODO: Net !_hostServer.ClientsAreReady()?
-            if (_hostServer == null || ActionNumber < 1)
+            if (_hostServer == null || ActionNumber < 1 || !_hostServer.ClientsAreReady())
             {
                 //The game should end at this point
                 return;

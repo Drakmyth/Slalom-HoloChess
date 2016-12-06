@@ -105,6 +105,8 @@ namespace Assets.Scripts
 
             DisplayMonsters(friendlyMonsters, enemyMonsters);
 
+            Client.SendStateAck(_actionNumber, _subActionNumber);
+
         }
 
         void Update()
@@ -219,7 +221,6 @@ namespace Assets.Scripts
 
             if (_actionNumber == 1 || _actionNumber == 2)
             {
-
                 if (_subActionNumber == 2)
                 {
                     SubActionTwo(nodeId);
@@ -264,7 +265,7 @@ namespace Assets.Scripts
         void OnAnimationComplete()
         {
             _isAnimationRunning = false;
-            Client.SetReady(true);
+            Client.SendStateAck(_actionNumber, _subActionNumber);
         }
 
         private void DisplayBoardSpaces()
@@ -366,7 +367,6 @@ namespace Assets.Scripts
             _isAnimationRunning = true;
             killed.SendMessage("OnLoseBattle", battleSmokeInstance);
             _subActionNumber = 0;
-            Client.SetReady(true);
         }
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
@@ -396,7 +396,7 @@ namespace Assets.Scripts
                 space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
             }
 
-            Client.SetReady(true);
+            Client.SendStateAck(_actionNumber, _subActionNumber);
 
         }
 
@@ -411,7 +411,6 @@ namespace Assets.Scripts
             }
 
             _subActionNumber = 2;
-            Client.SetReady(true);
         }
 
         private void SubActionTwo(int nodeId)
@@ -440,7 +439,8 @@ namespace Assets.Scripts
                     space.SendMessage("OnMonsterSelected", SelectedMonster.CurrentNode.Id);
                 }
             }
-            Client.SetReady(true);
+            Client.SendStateAck(_actionNumber, _subActionNumber);
+
         }
 
         public void ConfirmSubActionThree(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
@@ -454,7 +454,8 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SetReady(true);
+            Client.SendStateAck(_actionNumber, _subActionNumber);
+
         }
 
 
@@ -479,7 +480,6 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SetReady(true);
 
             ProcessMoveAction(SelectedMonster, SelectedMovementPath);
 
@@ -493,11 +493,13 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SetReady(true);
 
             Monster opponent = EnemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(SelectedAttackNode));
 
             ProcessAttackAction(SelectedMonster, opponent);
+
+            Client.SendStateAck(_actionNumber, _subActionNumber);
+
         }
 
         public void ConfirmAttackResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
@@ -542,7 +544,6 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SetReady(true);
 
         }
 
@@ -610,7 +611,6 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SetReady(true);
         }
 
         private void SelectPushDestination(Node selectedNode)

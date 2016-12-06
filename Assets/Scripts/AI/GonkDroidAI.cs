@@ -32,6 +32,7 @@ namespace Assets.Scripts.AI
                 NetClient.Connect("127.0.0.1", 1300);
 
                 Debug.Log("Gonk Droid AI");
+
             }
             catch (Exception e)
             {
@@ -42,7 +43,6 @@ namespace Assets.Scripts.AI
         // Update is called once per frame
         void Update()
         {
-            
 
         }
 
@@ -94,8 +94,6 @@ namespace Assets.Scripts.AI
                     SelectedMonsterTypeId = message.AvailableMoveNodeIds[randInt]
                 });
             }
-
-
         }
 
         private void OnAttackPushResponse(NetworkMessage msg)
