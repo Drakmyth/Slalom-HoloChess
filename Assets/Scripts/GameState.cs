@@ -124,9 +124,11 @@ namespace Assets.Scripts
 
             }
 
-
             switch (SubActionNumber)
             {
+                case 0:
+                    IncrementActionNumber();
+                    break;
                 case 1:
                     SubActionOne();
                     break;
@@ -153,43 +155,6 @@ namespace Assets.Scripts
 
             }
 
-            if (ActionNumber == 4 && SubActionNumber == 0)
-            {
-                ActionNumber = 1;
-                SubActionNumber = 1;
-                SelectedMonster = null;
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-
-            }
-            else if (ActionNumber == 3 && SubActionNumber == 0)
-            {
-                ActionNumber ++;
-                SubActionNumber = 1;
-               
-                SelectedMonster = null;
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-            }
-            else if(ActionNumber == 2 && SubActionNumber == 0)
-            {
-                ActionNumber++;
-                SubActionNumber = 1;
-                SelectedMonster = null;
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-            }
-            else if (ActionNumber == 1 && SubActionNumber == 0)
-            {
-
-                SubActionNumber = SelectedMonster != null ? 3 : 1;
-
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-
-                ActionNumber++;
-
-            }
         }
 
         private Monster GetEnemyAtNode(Node node, bool isHostPlayer)
@@ -614,6 +579,42 @@ namespace Assets.Scripts
                 PathToDestinationNodeIds = pathToDestination
             });
 
+        }
+
+        private void IncrementActionNumber()
+        {
+            SubActionNumber = 1;
+            SelectedAttackNode = null;
+            SelectedMovementPath = null;
+
+            if (ActionNumber == 4)
+            {
+                ActionNumber = 1;
+                SelectedMonster = null;
+               
+            }
+            else if (ActionNumber == 3)
+            {
+                ActionNumber++;
+                SelectedMonster = null;
+            }
+            else if (ActionNumber == 2)
+            {
+                ActionNumber++;
+                SelectedMonster = null;
+            }
+            else if (ActionNumber == 1)
+            {
+                ActionNumber++;
+                SubActionNumber = SelectedMonster != null ? 3 : 1;
+            }
+
+            _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+            {
+                ActionNumber = ActionNumber,
+                SubActionNumber = SubActionNumber,
+                Message = "New action started"
+            });
         }
     }
 

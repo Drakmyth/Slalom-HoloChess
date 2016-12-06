@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Assets.Scripts.MessageModels;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
-using UnityEngine.SceneManagement;
 using Random = System.Random;
 
 namespace Assets.Scripts
@@ -120,6 +119,12 @@ namespace Assets.Scripts
             {
                 if (_subActionNumber == 5 && SelectedMonster != null && FriendlyMonsters.Contains(SelectedMonster))
                 {
+                    IEnumerable<BoardSpace> availableSpaces =
+                        BoardSpaces.Values.Where(b => FriendlyMonsters.Select(f => f.CurrentNode.Id).Contains(b.Node.Id));
+                    foreach (BoardSpace space in availableSpaces)
+                    {
+                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                    }
                     BoardSpaces[SelectedMonster.CurrentNode.Id].SendMessage("OnClearHighlightingWithSelection", SelectedMonster.CurrentNode);
                 }
 
@@ -211,12 +216,12 @@ namespace Assets.Scripts
             {
                 if (_subActionNumber == 2)
                 {
-                    SubActionTwo(nodeId);
+                    SelectMonster(nodeId);
                 }
 
                 if (_subActionNumber == 4)
                 {
-                    SubActionFour(selectedNode);
+                    SelectAction(selectedNode);
                 }
 
                 if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
@@ -256,119 +261,6 @@ namespace Assets.Scripts
             Client.SendStateAck(_actionNumber, _subActionNumber);
         }
 
-        private void DisplayBoardSpaces()
-        {
-
-            for(int i = 0; i < SpacePrefabs.Count; i ++)
-            {
-                BoardSpace spacePrefab = SpacePrefabs[i];
-                float yAngleOffset = 30 * ((i - 1) % 12);
-                Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y + yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
-                if (!BoardSpaces.ContainsKey(i))
-                {
-                    BoardSpace space =
-                        Instantiate(spacePrefab,
-                            new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y -.005f,
-                                spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace;
-                    if (space != null)
-                    {
-                        space.Node = GameGraph.Nodes[i];
-
-                        BoardSpaces.Add(i, space);
-                    }
-                }
-            }
-
-        }
-
-        //TODO: do we even need to instantiate here? We could just as well reposition them.
-        private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
-        {
-            foreach (Monster monster in friendlyMonsters)
-            {
-                var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + 180, monster.transform.rotation.eulerAngles.z);
-                Monster monsterInstance =
-                    Instantiate(monster,
-                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
-                        monsterQuaternion) as Monster;
-                if (monsterInstance != null)
-                {
-                    monsterInstance.BelongsToHost = true;
-                    monsterInstance.CurrentNode = monster.CurrentNode;
-                    FriendlyMonsters.Add(monsterInstance);
-                }
-            }
-
-            foreach (Monster monster in enemyMonsters)
-            {
-                Monster monsterInstance =
-                    Instantiate(monster,
-                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
-                        monster.transform.rotation) as Monster;
-                if (monsterInstance != null)
-                {
-                    monsterInstance.BelongsToHost = false;
-                    monsterInstance.CurrentNode = monster.CurrentNode;
-                    EnemyMonsters.Add(monsterInstance);
-                }
-            }
-
-
-        }
-
-        private void ProcessAttackAction(Monster attacker, Monster defender)
-        {
-            Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
-            Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition)/2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
-            GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, battleSmokeQuaternion);
-            battleSmokeInstance.name = "BattleSmoke";
-
-            attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
-            defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
-
-            int number = _random.Next(0, AttackSounds.Count);
-            int number2 = _random.Next(0, AttackSounds.Count);
-            attacker.PlaySound(AttackSounds[number]);
-            defender.PlaySound(AttackSounds[number2]);
-
-            Client.Send(CustomMessageTypes.AttackRequest, new AttackRequestMessage
-            {
-                AttackingMonsterTypeId = attacker.MonsterTypeId,
-                DefendingMonsterTypeId = defender.MonsterTypeId,
-            });
-
-        }
-
-        private void ProcessKill(Monster killed, bool isFriendlyMonster, GameObject battleSmokeInstance)
-        {
-            MonsterPrefabs.Remove(killed);
-
-            if (isFriendlyMonster)
-            {
-                FriendlyMonsters.Remove(killed);
-            }
-            else
-            {
-                EnemyMonsters.Remove(killed);
-            }
-
-            _isAnimationRunning = true;
-            killed.SendMessage("OnLoseBattle", battleSmokeInstance);
-        }
-
-        private void ProcessMoveAction(Monster selectedMonster, NodePath path)
-        {
-            int number = _random.Next(0, MovementSounds.Count);
-            selectedMonster.PlaySound(MovementSounds[number]);
-
-            selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
-
-            _isAnimationRunning = true;
-
-            selectedMonster.SendMessage("OnBeginMoveAnimation", path);
-
-        }
-
         public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
                 int subActionNumber)
         {
@@ -386,7 +278,7 @@ namespace Assets.Scripts
 
         }
 
-        private void SubActionTwo(int nodeId)
+        private void SelectMonster(int nodeId)
         {
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
             Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
@@ -399,7 +291,7 @@ namespace Assets.Scripts
             });
         }
 
-        public void ConfirmSubActionTwo(int selectedMonsterId, int actionNumber, int subActionNumber)
+        public void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId);
             _actionNumber = actionNumber;
@@ -416,7 +308,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmSubActionThree(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
+        public void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
         {
 
             UpdateSelectionMenu();
@@ -433,7 +325,7 @@ namespace Assets.Scripts
 
         }
 
-        private void SubActionFour(Node selectedNode)
+        private void SelectAction(Node selectedNode)
         {
             Client.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
             {
@@ -458,7 +350,6 @@ namespace Assets.Scripts
 
         }
 
-
         public void ConfirmSelectAttackAction(int attackNodeId, int actionNumber, int subActionNumber)
         {
             SelectedAttackNode = GameGraph.Nodes[attackNodeId];
@@ -475,7 +366,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAttackResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
+        public void ConfirmAttackKillResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
             bool isFriendlyMonster = _actionNumber == 1 || _actionNumber == 2;
 
@@ -617,6 +508,72 @@ namespace Assets.Scripts
 
         }
 
+        private void ProcessAttackAction(Monster attacker, Monster defender)
+        {
+            Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
+            Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition) / 2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
+            GameObject battleSmokeInstance = Instantiate(BattleSmoke, battleSmokePosition, battleSmokeQuaternion);
+            battleSmokeInstance.name = "BattleSmoke";
+
+            attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
+            defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
+
+            int number = _random.Next(0, AttackSounds.Count);
+            int number2 = _random.Next(0, AttackSounds.Count);
+            attacker.PlaySound(AttackSounds[number]);
+            defender.PlaySound(AttackSounds[number2]);
+
+            Client.Send(CustomMessageTypes.AttackRequest, new AttackRequestMessage
+            {
+                AttackingMonsterTypeId = attacker.MonsterTypeId,
+                DefendingMonsterTypeId = defender.MonsterTypeId,
+            });
+
+        }
+
+        private void ProcessKill(Monster killed, bool isFriendlyMonster, GameObject battleSmokeInstance)
+        {
+            MonsterPrefabs.Remove(killed);
+
+            if (isFriendlyMonster)
+            {
+                FriendlyMonsters.Remove(killed);
+            }
+            else
+            {
+                EnemyMonsters.Remove(killed);
+            }
+
+            _isAnimationRunning = true;
+            killed.SendMessage("OnLoseBattle", battleSmokeInstance);
+        }
+
+        private void ProcessMoveAction(Monster selectedMonster, NodePath path)
+        {
+            int number = _random.Next(0, MovementSounds.Count);
+            selectedMonster.PlaySound(MovementSounds[number]);
+
+            selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
+
+            _isAnimationRunning = true;
+
+            foreach (BoardSpace space in BoardSpaces.Values)
+            {
+                space.SendMessage("OnClearHighlighting");
+            }
+
+            selectedMonster.SendMessage("OnBeginMoveAnimation", path);
+
+        }
+
+        public void UpdateGameState(int actionNumber, int subActionNumber)
+        {
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
+
+            Client.SendStateAck(_actionNumber, _subActionNumber);
+        }
+
         private void UpdateAttackResultPreview()
         {
             IDictionary<AttackResult, decimal> attackResultPercentages = AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating, PreviewMonster.DefenseRating);
@@ -667,15 +624,64 @@ namespace Assets.Scripts
 
 
 
-        private void EndGameWin()
+        private void DisplayBoardSpaces()
         {
-            SceneManager.LoadScene("wingame");
+
+            for (int i = 0; i < SpacePrefabs.Count; i++)
+            {
+                BoardSpace spacePrefab = SpacePrefabs[i];
+                float yAngleOffset = 30 * ((i - 1) % 12);
+                Quaternion spaceQuaternion = Quaternion.Euler(spacePrefab.transform.rotation.eulerAngles.x, spacePrefab.transform.rotation.eulerAngles.y + yAngleOffset, spacePrefab.transform.rotation.eulerAngles.z);
+                if (!BoardSpaces.ContainsKey(i))
+                {
+                    BoardSpace space =
+                        Instantiate(spacePrefab,
+                            new Vector3(spacePrefab.transform.position.x, spacePrefab.transform.position.y - .005f,
+                                spacePrefab.transform.position.z), spaceQuaternion) as BoardSpace;
+                    if (space != null)
+                    {
+                        space.Node = GameGraph.Nodes[i];
+
+                        BoardSpaces.Add(i, space);
+                    }
+                }
+            }
+
         }
 
-        private void EndGameLose()
+        //TODO: do we even need to instantiate here? We could just as well reposition them.
+        private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {
-            SceneManager.LoadScene("losegame");
+            foreach (Monster monster in friendlyMonsters)
+            {
+                var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + 180, monster.transform.rotation.eulerAngles.z);
+                Monster monsterInstance =
+                    Instantiate(monster,
+                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
+                        monsterQuaternion) as Monster;
+                if (monsterInstance != null)
+                {
+                    monsterInstance.BelongsToHost = true;
+                    monsterInstance.CurrentNode = monster.CurrentNode;
+                    FriendlyMonsters.Add(monsterInstance);
+                }
+            }
+
+            foreach (Monster monster in enemyMonsters)
+            {
+                Monster monsterInstance =
+                    Instantiate(monster,
+                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
+                        monster.transform.rotation) as Monster;
+                if (monsterInstance != null)
+                {
+                    monsterInstance.BelongsToHost = false;
+                    monsterInstance.CurrentNode = monster.CurrentNode;
+                    EnemyMonsters.Add(monsterInstance);
+                }
+            }
+
+
         }
     }
-
 }

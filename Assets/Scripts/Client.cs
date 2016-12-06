@@ -57,6 +57,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.PushDestinationResponse, OnPushDestinationResponse);
 
+                NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
+
                 NetClient.Connect(hostAddress, port);
 
                 Debug.Log("Client");
@@ -123,7 +125,7 @@ namespace Assets.Scripts
 
             message.ActionNumber = AdjustActionNumber(message.ActionNumber);
 
-            GameState.ConfirmSubActionTwo(message.SelectedMonsterTypeId, message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmSelectMonster(message.SelectedMonsterTypeId, message.ActionNumber, message.SubActionNumber);
 
         }
 
@@ -134,7 +136,7 @@ namespace Assets.Scripts
 
             message.ActionNumber = AdjustActionNumber(message.ActionNumber);
 
-            GameState.ConfirmSubActionThree(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmAvailableActions(message.AvailableMoveNodeIds.ToList(), message.AvailableAttackNodeIds.ToList(), message.ActionNumber, message.SubActionNumber);
 
         }
 
@@ -168,7 +170,7 @@ namespace Assets.Scripts
 
             message.ActionNumber = AdjustActionNumber(message.ActionNumber);
 
-            GameState.ConfirmAttackResult((AttackResult)message.AttackResultId, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
+            GameState.ConfirmAttackKillResult((AttackResult)message.AttackResultId, message.AttackingMonsterTypeId, message.DefendingMonsterTypeId, message.ActionNumber, message.SubActionNumber);
         }
 
         private void OnAttackPushResponse(NetworkMessage msg)
@@ -193,6 +195,13 @@ namespace Assets.Scripts
             GameState.ConfirmPushDestination(message.PathToDestinationNodeIds, message.DestinationNodeId,
                 message.ActionNumber, message.SubActionNumber);
         }
+
+        public void OnGameStateResponse(NetworkMessage msg)
+        {
+            GameStateMessage message = msg.ReadMessage<GameStateMessage>();
+            GameState.UpdateGameState(message.ActionNumber, message.SubActionNumber);
+        }
+
 
         public void SendStateAck(int actionNumber, int subActionNumber)
         {
