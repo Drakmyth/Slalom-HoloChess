@@ -539,62 +539,7 @@ namespace Assets.Scripts
 
         }
 
-
-        /*
-        //TODO: Net remove?
-        private void SubActionFour(Node selectedNode, bool isHostPlayer)
-        {
-            if (SelectedMonster == null)
-            {
-                SubActionNumber = 2;
-                return;
-            }
-
-            IEnumerable<Node> friendlyOccupiedNodes;
-            IEnumerable<Node> enemyOccupiedNodes;
-            if (isHostPlayer)
-            {
-                friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
-                enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
-            }
-            else
-            {
-                friendlyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
-                enemyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
-            }
-
-            IEnumerable<NodePath> movementPaths = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
-                SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes));
-
-            IEnumerable<Node> availableMoveActions = movementPaths.Select(p => p.DestinationNode);
-
-            IEnumerable<Node> availableAttackActions = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
-                enemyOccupiedNodes);
-
-            if (friendlyOccupiedNodes.Contains(selectedNode))
-            {
-                SelectedMonster = HostMonsters.Single(m => m.CurrentNode.Equals(selectedNode));
-                SelectedAttackNode = null;
-                
-                SubActionNumber = 3;
-
-            }
-            else if (availableAttackActions.Contains(selectedNode))
-            {
-                SelectedAttackNode = selectedNode;
-                SelectedMovementPath = null;
-                SubActionNumber = 5;
-            }
-            else if (availableMoveActions.Contains(selectedNode))
-            {
-                SelectedMovementPath = movementPaths.Single(m => m.DestinationNode.Equals(selectedNode));
-                SelectedAttackNode = null;
-                SubActionNumber = 5;
-            }
-
-        }
-        */
-
+    
         private void SubActionFive()
         {
             bool isHostPlayer = ActionNumber == 1 || ActionNumber == 2;
@@ -630,13 +575,21 @@ namespace Assets.Scripts
             
             Monster pushedMonster;
 
-            if (hostPush || hostCounterPush)
+            if (hostPush)
             {
                 pushedMonster = GuestMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
             }
-            else if (guestPush || guestCounterPush)
+            else if (hostCounterPush)
+            {
+                pushedMonster = GuestMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
+            }
+            else if (guestPush)
             {
                 pushedMonster = HostMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            }
+            else if (guestCounterPush)
+            {
+                pushedMonster = HostMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
             }
             else
             {

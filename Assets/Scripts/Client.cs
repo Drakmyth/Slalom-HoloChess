@@ -55,6 +55,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.AttackPushResponse, OnAttackPushResponse);
 
+                NetClient.RegisterHandler(CustomMessageTypes.PushDestinationResponse, OnPushDestinationResponse);
+
                 NetClient.Connect(hostAddress, port);
 
                 Debug.Log("Client");
