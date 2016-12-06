@@ -77,7 +77,7 @@ namespace Assets.Scripts
             ClientName = "host";
             try
             {
-                Init("127.0.0.1", 1300);
+                Init("192.168.1.102", 1300);
                 Debug.Log("HostClient");
             }
             catch (Exception e)
