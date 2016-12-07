@@ -72,7 +72,7 @@ namespace Assets.Scripts
                 Server.Init();
                 
                 //TODO: AI should have its own option
-                //Server.gameObject.AddComponent<GonkDroidAI>();
+                Server.gameObject.AddComponent<GonkDroidAI>();
 
                 Client = gameObject.AddComponent<Client>();
                 Client.InitHost();
@@ -94,7 +94,7 @@ namespace Assets.Scripts
 
             if (string.IsNullOrEmpty(hostAddress))
             {
-                hostAddress = "192.168.1.102";
+                hostAddress = "127.0.0.1";
             }
 
             try

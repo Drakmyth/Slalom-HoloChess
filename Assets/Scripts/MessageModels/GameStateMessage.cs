@@ -8,7 +8,8 @@ namespace Assets.Scripts.MessageModels
         public int SubActionNumber;
         public string Message;
         public short MessageTypeId;
-
+        public string HostMonsterState;
+        public string GuestMonsterState;
 
         public GameStateMessage()
         {
