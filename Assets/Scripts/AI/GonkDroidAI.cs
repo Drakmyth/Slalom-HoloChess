@@ -22,7 +22,17 @@ namespace Assets.Scripts.AI
 
             IsHost = false;
             ClientName = "Gonk Droid AI";
+           
+        }
 
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        public void Init(string ipAddress)
+        {
             try
             {
                 NetClient = new NetworkClient();
@@ -37,7 +47,7 @@ namespace Assets.Scripts.AI
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
 
-                NetClient.Connect("127.0.0.1", 1300);
+                NetClient.Connect(ipAddress, 1300);
 
                 Debug.Log("Gonk Droid AI");
 
@@ -48,11 +58,6 @@ namespace Assets.Scripts.AI
             }
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
 
         private void OnGameStart(NetworkMessage netMsg)
         {
@@ -138,7 +143,7 @@ namespace Assets.Scripts.AI
             }
         }
 
-        public void OnGameStateResponse(NetworkMessage msg)
+        private void OnGameStateResponse(NetworkMessage msg)
         {
             GameStateMessage message = msg.ReadMessage<GameStateMessage>();
 
