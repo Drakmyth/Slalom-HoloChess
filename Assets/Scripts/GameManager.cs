@@ -56,20 +56,22 @@ namespace Assets.Scripts
 
         }
 
-        public void ConnectButton()
+        public void MultiplayerButton()
         {
             LobbyMenu.SetActive(false);
             ConnectMenu.SetActive(true);
             HostMenu.SetActive(false);
-            Debug.Log("Connect");
+            Debug.Log("Multiplayer");
         }
 
         public void HostButton()
         {
+
             try
             {
                 Server = gameObject.AddComponent<Server>();
-                Server.Init();
+                string ipAddress = GameObject.Find("HostInput").GetComponent<InputField>().text;
+                Server.Init(ipAddress);
 
                 Client = gameObject.AddComponent<Client>();
                 Client.InitHost(Server.IpAddress);
