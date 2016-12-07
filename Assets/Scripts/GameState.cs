@@ -190,7 +190,7 @@ namespace Assets.Scripts
 
             while (availableMonsters.Any())
             {
-                int monsterIndex = _random.Next(0, availableMonsters.Count);
+                int monsterIndex = _random.Next(0, availableMonsters.Count - 1);
                    
                 Monster currentMonster = availableMonsters[monsterIndex];
 
@@ -361,7 +361,7 @@ namespace Assets.Scripts
                     SelectedMonster = null;
                     SubActionNumber = 0;
 
-                    _hostServer.SendToAll(CustomMessageTypes.AttackPushResponse, new AttackKillResponseMessage
+                    _hostServer.SendToAll(CustomMessageTypes.AttackKillResponse, new AttackKillResponseMessage
                     {
                         ActionNumber = ActionNumber,
                         SubActionNumber = SubActionNumber,
