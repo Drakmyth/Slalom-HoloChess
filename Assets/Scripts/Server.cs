@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+
+
 using Assets.Scripts.MessageModels;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -31,18 +33,19 @@ namespace Assets.Scripts
             }
         }
 
-        public void InitSinglePlayer()
+        public void InitSinglePlayer(string ipAddress = "127.0.0.1")
         {
             _isLocalSinglePlayer = true;
-            Init();
+            Init(ipAddress);
         }
 
-        public void Init()
+        public void Init(string ipAddress)
         {
             DontDestroyOnLoad(this);
 
-            //TODO: Net this is a work around until we can spin up a matchmaking service
-            SetIpAddress();
+            IpAddress = ipAddress;
+
+            //TODO: Net this is a work around until we can get IP through code or spin up a matchmaking service
 
             try
             {
@@ -195,14 +198,6 @@ namespace Assets.Scripts
                 }
 
             }
-        }
-
-        public void SetIpAddress()
-        {
-            //Network.Connect("http://www.google.com");
-            //Network.Disconnect();
-            IpAddress = NetworkManager.singleton.networkAddress; //TODO: Net internal or external IP?
-            //IpAddress = Network.player.externalIP;
         }
     }
 }
