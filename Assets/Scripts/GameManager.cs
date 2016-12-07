@@ -70,12 +70,9 @@ namespace Assets.Scripts
             {
                 Server = gameObject.AddComponent<Server>();
                 Server.Init();
-                
-                //TODO: AI should have its own option
-                Server.gameObject.AddComponent<GonkDroidAI>();
 
                 Client = gameObject.AddComponent<Client>();
-                Client.InitHost();
+                Client.InitHost(Server.IpAddress);
             }
             catch (Exception e)
             {
@@ -84,9 +81,39 @@ namespace Assets.Scripts
 
             LobbyMenu.SetActive(false);
             HostMenu.SetActive(true);
+
+            HostMenu.transform.FindChild("IpAddress").GetComponent<Text>().text = Server.IpAddress;
+
             ConnectMenu.SetActive(false);
             Debug.Log("Host");
         }
+
+        public void SinglePlayerButton(int difficulty)
+        {
+            try
+            {
+                Server = gameObject.AddComponent<Server>();
+                Server.InitSinglePlayer();
+
+                GonkDroidAI gonkDroidAI = Server.gameObject.AddComponent<GonkDroidAI>();
+                gonkDroidAI.Init(Server.IpAddress);
+
+                Client = gameObject.AddComponent<Client>();
+                Client.InitHost(Server.IpAddress);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
+            LobbyMenu.SetActive(false);
+            HostMenu.SetActive(true);
+
+            HostMenu.transform.FindChild("IpAddress").GetComponent<Text>().text = Server.IpAddress;
+
+            ConnectMenu.SetActive(false);
+            Debug.Log("Host");
+    }
 
         public void ConnectToServerButton()
         {

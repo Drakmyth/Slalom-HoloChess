@@ -11,11 +11,12 @@ namespace Assets.Scripts
     {
 
         public int Port = 1300;
+        public string IpAddress = "";
         public bool IsServerStarted;
         private GameState _gameState;
         private bool _isGuestReady = false;
         private bool _isHostReady = false;
-        private bool _isLocalSinglePlayer = true;
+        private bool _isLocalSinglePlayer = false;
 
         void Update()
         {
@@ -30,9 +31,18 @@ namespace Assets.Scripts
             }
         }
 
-        public void Init(string ipAddress = "127.0.0.1")
+        public void InitSinglePlayer()
+        {
+            _isLocalSinglePlayer = true;
+            Init();
+        }
+
+        public void Init()
         {
             DontDestroyOnLoad(this);
+
+            //TODO: Net this is a work around until we can spin up a matchmaking service
+            SetIpAddress();
 
             try
             {
@@ -49,7 +59,7 @@ namespace Assets.Scripts
 
                 NetworkServer.RegisterHandler(CustomMessageTypes.PushDestinationRequest, OnProcessPushDestination);
 
-                NetworkServer.Listen(ipAddress, Port);
+                NetworkServer.Listen(IpAddress, Port);
 
                 IsServerStarted = true;
             }
@@ -185,6 +195,14 @@ namespace Assets.Scripts
                 }
 
             }
+        }
+
+        public void SetIpAddress()
+        {
+            //Network.Connect("http://www.google.com");
+            //Network.Disconnect();
+            IpAddress = NetworkManager.singleton.networkAddress; //TODO: Net internal or external IP?
+            //IpAddress = Network.player.externalIP;
         }
     }
 }

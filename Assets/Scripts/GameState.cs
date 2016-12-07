@@ -108,14 +108,18 @@ namespace Assets.Scripts
             if (HostMonsters.Count == 0)
             {
                 ActionNumber = 0;
-                //TODO: Net sendResponse EndGame
-
+                _hostServer.SendToAll(CustomMessageTypes.GameEnd, new GameEndMessage
+                {
+                    IsHostWinner = false
+                });
             }
             else if (GuestMonsters.Count == 0)
             {
                 ActionNumber = 0;
-                //TODO: Net sendResponse EndGame
-
+                _hostServer.SendToAll(CustomMessageTypes.GameEnd, new GameEndMessage
+                {
+                    IsHostWinner = true
+                });
             }
 
             switch (SubActionNumber)
@@ -469,7 +473,7 @@ namespace Assets.Scripts
             }
 
             SubActionNumber = 2;
-            //TODO: Net sendResponse AvailableSpaces | subActionOneResponse
+
             _hostServer.SendToAll(CustomMessageTypes.AvailableMonstersResponse, new AvailableMonstersResponseMessage
             {
                 ActionNumber = ActionNumber,

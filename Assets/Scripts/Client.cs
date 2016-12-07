@@ -59,6 +59,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
 
+                NetClient.RegisterHandler(CustomMessageTypes.GameEnd, OnGameEnd);
+
                 NetClient.Connect(hostAddress, port);
 
                 Debug.Log("Client");
@@ -70,14 +72,14 @@ namespace Assets.Scripts
 
         }
 
-        public void InitHost()
+        public void InitHost(string ipAddress)
         {
 
             IsHost = true;
             ClientName = "host";
             try
             {
-                Init("127.0.0.1", 1300);
+                Init(ipAddress, 1300);
                 Debug.Log("HostClient");
             }
             catch (Exception e)
@@ -196,7 +198,7 @@ namespace Assets.Scripts
                 message.ActionNumber, message.SubActionNumber);
         }
 
-        public void OnGameStateResponse(NetworkMessage msg)
+        private void OnGameStateResponse(NetworkMessage msg)
         {
             GameStateMessage message = msg.ReadMessage<GameStateMessage>();
 
@@ -218,6 +220,21 @@ namespace Assets.Scripts
                 Message = IsHost? "HostClient up to date" : "GuestClient up to date",
                 IsHost = IsHost
             });
+        }
+
+        private void OnGameEnd(NetworkMessage msg)
+        {
+            GameEndMessage message = msg.ReadMessage<GameEndMessage>();
+            bool isWinResult = IsHost ? message.IsHostWinner : !message.IsHostWinner;
+
+            if (isWinResult)
+            {
+                SceneManager.LoadSceneAsync("wingame");
+            }
+            else
+            {
+                SceneManager.LoadSceneAsync("losegame");
+            }
         }
 
         private void OnGameStart(NetworkMessage netMsg)

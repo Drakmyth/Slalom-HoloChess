@@ -541,7 +541,6 @@ namespace Assets.Scripts
                     if (SelectedMonster != null)
                     {
                         selectedNode = SelectedMonster.CurrentNode;
-//                        _subActionNumber = 3;
                         IEnumerable<BoardSpace> availableSpaces =
                             BoardSpaces.Values.Where(
                                 s => FriendlyMonsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
@@ -551,7 +550,6 @@ namespace Assets.Scripts
                     {
                         ClearSelectionMenu();
                         space.SendMessage("OnClearHighlighting");
-//                        _subActionNumber = 1;
                     }
 
                     space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
@@ -654,9 +652,12 @@ namespace Assets.Scripts
         //TODO: do we even need to instantiate here? We could just as well reposition them.
         private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {
+            float yRotationAdjustment = Client.IsHost ? 180 : 0;
+
             foreach (Monster monster in friendlyMonsters)
             {
-                var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + 180, monster.transform.rotation.eulerAngles.z);
+
+                var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
                 Monster monsterInstance =
                     Instantiate(monster,
                         new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
@@ -673,8 +674,8 @@ namespace Assets.Scripts
             {
                 Monster monsterInstance =
                     Instantiate(monster,
-                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
-                        monster.transform.rotation) as Monster;
+                        new Vector3(monster.CurrentNode.XPosition, 180 - yRotationAdjustment, monster.CurrentNode.YPosition),
+                        monster.transform.rotation);
                 if (monsterInstance != null)
                 {
                     monsterInstance.BelongsToHost = false;
@@ -682,8 +683,6 @@ namespace Assets.Scripts
                     EnemyMonsters.Add(monsterInstance);
                 }
             }
-
-
         }
     }
 }
