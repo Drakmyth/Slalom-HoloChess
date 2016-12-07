@@ -134,78 +134,6 @@ namespace Assets.Scripts
             {
                 _actionNumber = 0;
             }
-
-            if (_actionNumber == 4 && _subActionNumber == 0)
-            {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnClearHighlighting");
-                }
-                _actionNumber = 1;
-                _subActionNumber = 1;
-                SelectedMonster = null;
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-
-            }
-            else if (_actionNumber == 3 && _subActionNumber == 0)
-            {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnClearHighlighting");
-                }
-                _actionNumber ++;
-                _subActionNumber = 1;
-               
-                SelectedMonster = null;
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-            }
-            else if(_actionNumber == 2 && _subActionNumber == 0)
-            {
-                ClearSelectionMenu();
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    space.SendMessage("OnClearHighlighting");
-                }
-                _actionNumber++;
-                _subActionNumber = 1;
-                SelectedMonster = null;
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-            }
-            else if (_actionNumber == 1 && _subActionNumber == 0)
-            {
-                foreach (BoardSpace space in BoardSpaces.Values)
-                {
-                    Node selectedNode = null;
-
-                    if (SelectedMonster != null)
-                    {
-                        selectedNode = SelectedMonster.CurrentNode;
-                        _subActionNumber = 3;
-                        IEnumerable<BoardSpace> availableSpaces =
-                            BoardSpaces.Values.Where(s => FriendlyMonsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
-                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
-                    }
-                    else
-                    {
-                        ClearSelectionMenu();
-                        space.SendMessage("OnClearHighlighting");
-                        _subActionNumber = 1;
-                    }
-
-                    space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
-                }
-
-                SelectedAttackNode = null;
-                SelectedMovementPath = null;
-
-                _actionNumber++;
-
-                //TODO: Net SendAck
-
-            }
         }
 
         void OnSpaceSelected(int nodeId)
@@ -475,9 +403,6 @@ namespace Assets.Scripts
 
         public void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
         {
-            _actionNumber = actionNumber;
-            _subActionNumber = subActionNumber;
-
             bool enemyPush = (_actionNumber == 3 || _actionNumber == 4) && _subActionNumber == 6;
             bool enemyCounterPush = (_actionNumber == 1 || _actionNumber == 2) && _subActionNumber == 7;
 
@@ -505,6 +430,9 @@ namespace Assets.Scripts
             pushedMonster.SendMessage("OnBeginMoveAnimation", movementPath);
 
             pushedMonster.CurrentNode = selectedNode;
+
+            _actionNumber = actionNumber;
+            _subActionNumber = subActionNumber;
 
         }
 
@@ -566,10 +494,78 @@ namespace Assets.Scripts
 
         }
 
-        public void UpdateGameState(int actionNumber, int subActionNumber)
+        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState)
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
+
+            foreach (Monster monster in FriendlyMonsters)
+            {
+                if (!friendlyMonsterState.ContainsKey(monster.MonsterTypeId))
+                {
+                    FriendlyMonsters.Remove(monster);
+                    MonsterPrefabs.Remove(monster);
+                }
+                else if (monster.CurrentNode.Id != friendlyMonsterState[monster.MonsterTypeId])
+                {
+                    monster.CurrentNode = GameGraph.Nodes[friendlyMonsterState[monster.MonsterTypeId]];
+                }
+            }
+
+            foreach (Monster monster in EnemyMonsters)
+            {
+                if (!enemyMonsterState.ContainsKey(monster.MonsterTypeId))
+                {
+                    EnemyMonsters.Remove(monster);
+                    MonsterPrefabs.Remove(monster);
+                }
+                else if (monster.CurrentNode.Id != enemyMonsterState[monster.MonsterTypeId])
+                {
+                    monster.CurrentNode = GameGraph.Nodes[enemyMonsterState[monster.MonsterTypeId]];
+                }
+            }
+
+
+            if (_actionNumber == 2)
+            {
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    Node selectedNode = null;
+
+                    if (SelectedMonster != null)
+                    {
+                        selectedNode = SelectedMonster.CurrentNode;
+                        _subActionNumber = 3;
+                        IEnumerable<BoardSpace> availableSpaces =
+                            BoardSpaces.Values.Where(
+                                s => FriendlyMonsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
+                        space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                    }
+                    else
+                    {
+                        ClearSelectionMenu();
+                        space.SendMessage("OnClearHighlighting");
+                        _subActionNumber = 1;
+                    }
+
+                    space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
+                }
+            }
+            else
+            {
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    space.SendMessage("OnClearHighlighting");
+                }
+                SelectedMonster = null;
+                SelectedAttackNode = null;
+                SelectedMovementPath = null;
+            }
+
+            if (_actionNumber == 3 || _actionNumber == 4)
+            {
+                ClearSelectionMenu();
+            }
 
             Client.SendStateAck(_actionNumber, _subActionNumber);
         }

@@ -77,7 +77,7 @@ namespace Assets.Scripts
             ClientName = "host";
             try
             {
-                Init("192.168.1.102", 1300);
+                Init("127.0.0.1", 1300);
                 Debug.Log("HostClient");
             }
             catch (Exception e)
@@ -199,7 +199,13 @@ namespace Assets.Scripts
         public void OnGameStateResponse(NetworkMessage msg)
         {
             GameStateMessage message = msg.ReadMessage<GameStateMessage>();
-            GameState.UpdateGameState(message.ActionNumber, message.SubActionNumber);
+
+            //Convert json strings to objects
+            Dictionary<int, int> friendlyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
+            Dictionary<int, int> enemyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
+
+
+            GameState.UpdateGameState(message.ActionNumber, message.SubActionNumber, friendlyMonsterState, enemyMonsterState);
         }
 
 

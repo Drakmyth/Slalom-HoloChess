@@ -16,7 +16,7 @@ namespace Assets.Scripts
         private bool _isGuestReady = false;
         private bool _isHostReady = false;
 //        private GameMode _gameMode;
-        private bool _isLocalSinglePlayer = false;
+        private bool _isLocalSinglePlayer = true;
 
         void Update()
         {
@@ -31,7 +31,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void Init(string ipAddress = "192.168.1.102")
+        public void Init(string ipAddress = "127.0.0.1")
         {
             DontDestroyOnLoad(this);
 

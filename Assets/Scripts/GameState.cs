@@ -20,7 +20,7 @@ namespace Assets.Scripts
         public List<Monster> HostMonsters { get; set; }
         public List<Monster> GuestMonsters { get; set; } 
 
-        private readonly Random _random;
+        private readonly Random _random = new Random();
 
         private Server _hostServer;
 
@@ -48,12 +48,6 @@ namespace Assets.Scripts
 
         //TODO: we can probably do better than this
         private IEnumerable<Node> AvailablePushDestinations { get; set; }
-
-        public GameState()
-        {
-            _random = new Random();
-
-        }
 
         void Start()
         {
@@ -230,7 +224,14 @@ namespace Assets.Scripts
                 SelectedMonster = GuestMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterTypeId);
             }
 
-            SubActionNumber = 3;
+            if (SelectedMonster == null)
+            {
+                SubActionNumber = 1;
+            }
+            else
+            {
+                SubActionNumber = 3;
+            }
         }
 
 
@@ -383,7 +384,9 @@ namespace Assets.Scripts
                         {
                             ActionNumber = ActionNumber,
                             SubActionNumber = SubActionNumber,
-                            Message = "No available push destinations."
+                            Message = "No available push destinations.",
+                            HostMonsterState = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                            GuestMonsterState = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
                         });
                     }
                     else
@@ -415,7 +418,9 @@ namespace Assets.Scripts
                         {
                             ActionNumber = ActionNumber,
                             SubActionNumber = SubActionNumber,
-                            Message = "No available push destinations."
+                            Message = "No available push destinations.",
+                            HostMonsterState = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                            GuestMonsterState = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
                         });
                     }
                     else
@@ -449,8 +454,19 @@ namespace Assets.Scripts
 
         private void SubActionOne()
         {
-            IEnumerable<int> availableNodeIds =
-            GameGraph.Nodes.Where(n => HostMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id)).Select(n => n.Id);
+            IEnumerable<int> availableNodeIds;
+            if (ActionNumber == 1 || ActionNumber == 2)
+            {
+                availableNodeIds =
+                    GameGraph.Nodes.Where(n => HostMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id))
+                        .Select(n => n.Id);
+            }
+            else
+            {
+                availableNodeIds =
+                    GameGraph.Nodes.Where(n => GuestMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id))
+                        .Select(n => n.Id);
+            }
 
             SubActionNumber = 2;
             //TODO: Net sendResponse AvailableSpaces | subActionOneResponse
@@ -613,7 +629,9 @@ namespace Assets.Scripts
             {
                 ActionNumber = ActionNumber,
                 SubActionNumber = SubActionNumber,
-                Message = "New action started"
+                Message = "New action started",
+                HostMonsterState = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                GuestMonsterState = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
             });
         }
     }
