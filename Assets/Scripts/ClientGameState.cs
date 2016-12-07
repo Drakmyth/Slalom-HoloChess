@@ -129,11 +129,6 @@ namespace Assets.Scripts
                 }
 
             }
-
-            if (!FriendlyMonsters.Any() || !EnemyMonsters.Any())
-            {
-                _actionNumber = 0;
-            }
         }
 
         void OnSpaceSelected(int nodeId)
@@ -209,19 +204,22 @@ namespace Assets.Scripts
         private void SelectMonster(int nodeId)
         {
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
-            Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
+            if (SelectedMonster != null)
             {
-                ActionNumber = _actionNumber,
-                SubActionNumber = _subActionNumber,
-                Message = SelectedMonster.Name,
-                MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
-                SelectedMonsterTypeId = SelectedMonster.MonsterTypeId
-            });
+                Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
+                {
+                    ActionNumber = _actionNumber,
+                    SubActionNumber = _subActionNumber,
+                    Message = SelectedMonster.Name,
+                    MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
+                    SelectedMonsterTypeId = SelectedMonster.MonsterTypeId
+                });
+            }
         }
 
         public void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
-            SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId);
+            SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId) ?? EnemyMonsters.Single(m => m.MonsterTypeId == selectedMonsterId);
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
 
@@ -286,7 +284,7 @@ namespace Assets.Scripts
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
 
-            Monster opponent = EnemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(SelectedAttackNode));
+            Monster opponent = EnemyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(SelectedAttackNode)) ?? FriendlyMonsters.FirstOrDefault(monster => monster.CurrentNode.Equals(SelectedAttackNode));
 
             ProcessAttackAction(SelectedMonster, opponent);
 
@@ -306,7 +304,7 @@ namespace Assets.Scripts
 
             GameObject battleSmokeInstance = GameObject.Find("BattleSmoke");
             Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
-            Vector3 battlePosition = BattleSmoke.transform.position;
+            Vector3 battlePosition = new Vector3(BattleSmoke.transform.position.x, BattleSmoke.transform.position.y, BattleSmoke.transform.position.z);
 
             if (attackResult == AttackResult.Kill)
             {
@@ -344,7 +342,7 @@ namespace Assets.Scripts
 
             GameObject battleSmokeInstance = GameObject.Find("BattleSmoke");
             Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
-            Vector3 battlePosition = BattleSmoke.transform.position;
+            Vector3 battlePosition = new Vector3(BattleSmoke.transform.position.x, BattleSmoke.transform.position.y, BattleSmoke.transform.position.z);
 
             AvailablePushDestinations = availablePushDestinationIds.Select(n => GameGraph.Nodes[n]);
 
@@ -411,13 +409,21 @@ namespace Assets.Scripts
 
             Monster pushedMonster;
 
-            if (push || counterPush)
+            if (push)
             {
                 pushedMonster = EnemyMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
             }
-            else if (enemyPush || enemyCounterPush)
+            else if (counterPush)
+            {
+                pushedMonster = EnemyMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
+            }
+            else if (enemyPush)
             {
                 pushedMonster = FriendlyMonsters.Single(m => m.CurrentNode.Id == SelectedAttackNode.Id);
+            }
+            else if (enemyCounterPush)
+            {
+                pushedMonster = FriendlyMonsters.Single(m => m.CurrentNode.Id == SelectedMonster.CurrentNode.Id);
             }
             else
             {
@@ -446,8 +452,8 @@ namespace Assets.Scripts
             attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
             defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
 
-            int number = _random.Next(0, AttackSounds.Count);
-            int number2 = _random.Next(0, AttackSounds.Count);
+            int number = _random.Next(0, AttackSounds.Count - 1);
+            int number2 = _random.Next(0, AttackSounds.Count - 1);
             attacker.PlaySound(AttackSounds[number]);
             defender.PlaySound(AttackSounds[number2]);
 
@@ -478,7 +484,7 @@ namespace Assets.Scripts
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
-            int number = _random.Next(0, MovementSounds.Count);
+            int number = _random.Next(0, MovementSounds.Count - 1);
             selectedMonster.PlaySound(MovementSounds[number]);
 
             selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
@@ -535,7 +541,7 @@ namespace Assets.Scripts
                     if (SelectedMonster != null)
                     {
                         selectedNode = SelectedMonster.CurrentNode;
-                        _subActionNumber = 3;
+//                        _subActionNumber = 3;
                         IEnumerable<BoardSpace> availableSpaces =
                             BoardSpaces.Values.Where(
                                 s => FriendlyMonsters.Select(m => m.CurrentNode.Id).Contains(s.Node.Id)).ToList();
@@ -545,7 +551,7 @@ namespace Assets.Scripts
                     {
                         ClearSelectionMenu();
                         space.SendMessage("OnClearHighlighting");
-                        _subActionNumber = 1;
+//                        _subActionNumber = 1;
                     }
 
                     space.SendMessage("OnClearHighlightingWithSelection", selectedNode);

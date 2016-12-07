@@ -15,7 +15,6 @@ namespace Assets.Scripts
         private GameState _gameState;
         private bool _isGuestReady = false;
         private bool _isHostReady = false;
-//        private GameMode _gameMode;
         private bool _isLocalSinglePlayer = true;
 
         void Update()
