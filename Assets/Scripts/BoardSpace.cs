@@ -97,6 +97,7 @@ namespace Assets.Scripts
             if (selectedNode != null && selectedNode.Equals(Node))
             {
                 _selectionIndicatorInstance.SetActive(true);
+                meshRenderer.material.color = SelectionYellow;
             }
             else
             {
