@@ -109,7 +109,13 @@ namespace Assets.Scripts
         }
 
         void Update()
-        {      
+        {
+            if (!GameManager.Instance.gameObject.activeSelf)
+            {
+                //Something has killed the game loop. DontDestroyOnLoad doesn't protect from deactivation
+                GameManager.Instance.gameObject.SetActive(true);
+            }
+
             if (Client == null || _actionNumber < 1)
             {
                 return;
@@ -561,6 +567,7 @@ namespace Assets.Scripts
                 {
                     space.SendMessage("OnClearHighlighting");
                 }
+                if(_actionNumber == 1 || _actionNumber == 3)
                 SelectedMonster = null;
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
@@ -652,16 +659,17 @@ namespace Assets.Scripts
         //TODO: do we even need to instantiate here? We could just as well reposition them.
         private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {
-            float yRotationAdjustment = Client.IsHost ? 180 : 0;
-
             foreach (Monster monster in friendlyMonsters)
             {
+
+                float yRotationAdjustment = Client.IsHost ? 180 : 0;
+
 
                 var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
                 Monster monsterInstance =
                     Instantiate(monster,
                         new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
-                        monsterQuaternion) as Monster;
+                        monsterQuaternion);
                 if (monsterInstance != null)
                 {
                     monsterInstance.BelongsToHost = true;
@@ -672,10 +680,14 @@ namespace Assets.Scripts
 
             foreach (Monster monster in enemyMonsters)
             {
+                float yRotationAdjustment = Client.IsHost ? 0 : 180;
+
+                var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
+
                 Monster monsterInstance =
                     Instantiate(monster,
-                        new Vector3(monster.CurrentNode.XPosition, 180 - yRotationAdjustment, monster.CurrentNode.YPosition),
-                        monster.transform.rotation);
+                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
+                        monsterQuaternion);
                 if (monsterInstance != null)
                 {
                     monsterInstance.BelongsToHost = false;
