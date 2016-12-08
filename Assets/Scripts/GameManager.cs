@@ -101,7 +101,7 @@ namespace Assets.Scripts
                 gonkDroidAI.Init(Server.IpAddress);
 
                 Client = gameObject.AddComponent<Client>();
-                Client.InitHost(Server.IpAddress);
+                Client.Init(Server.IpAddress, 1300);
             }
             catch (Exception e)
             {

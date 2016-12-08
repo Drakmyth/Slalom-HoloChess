@@ -29,7 +29,7 @@ namespace Assets.Scripts
 
             if (!_isGuestReady && _isLocalSinglePlayer)
             {
-                _isGuestReady = true;
+                _isHostReady = true;
             }
         }
 
