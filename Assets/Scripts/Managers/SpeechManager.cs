@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.Managers
 {
@@ -14,10 +15,9 @@ namespace Assets.Scripts.Managers
         // Use this for initialization
         void Start()
         {
-            keywords.Add("Restart", () => //menu instead?
+            keywords.Add("Menu", () => //menu instead?
             {
-            // Call the OnReset method on every descendant object.
-            //this.BroadcastMessage("OnReset");
+                SceneManager.LoadScene("lobby");
             });
 
             keywords.Add("Select", () =>
@@ -26,7 +26,8 @@ namespace Assets.Scripts.Managers
                 if (focusObject != null)
                 {
                     // Call the OnDrop method on just the focused object.
-                    focusObject.SendMessage("OnSpeechSelected");
+                    var currentObject = GameObject.Find("GameState");
+                    focusObject.SendMessage("OnSelected", currentObject);
                 }
             });
 
