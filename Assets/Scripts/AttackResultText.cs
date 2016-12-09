@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -41,7 +42,8 @@ namespace Assets.Scripts
 
         private void RotateToCamera()
         {
-            GameObject mainCamera = GameObject.Find("Main Camera");
+            GameObject mainCamera =
+                GameObject.FindGameObjectsWithTag("MainCamera").Single(o => o.GetComponent<Camera>().enabled);
             Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
             transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);

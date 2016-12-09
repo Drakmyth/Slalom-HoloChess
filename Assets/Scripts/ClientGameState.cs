@@ -205,9 +205,12 @@ namespace Assets.Scripts
 
             var availableSpaces = availableMonsterNodeIds.Select(s => BoardSpaces[s]);
 
-            foreach (BoardSpace space in availableSpaces)
+            if (_actionNumber == 1 || _actionNumber == 2)
             {
-                space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                foreach (BoardSpace space in availableSpaces)
+                {
+                    space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                }
             }
 
             Client.SendStateAck(_actionNumber, _subActionNumber);
@@ -236,7 +239,7 @@ namespace Assets.Scripts
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
 
-            if (SelectedMonster != null)
+            if (SelectedMonster != null && (_actionNumber == 1 || _actionNumber == 2))
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
@@ -251,11 +254,15 @@ namespace Assets.Scripts
         {
 
             UpdateSelectionMenu();
-            //Update board highlighting
-            foreach (BoardSpace space in BoardSpaces.Values)
+
+            if (_actionNumber == 1 || _actionNumber == 2)
             {
-                space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
-                space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
+                    space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
+                }
+
             }
 
             _actionNumber = actionNumber;
@@ -357,7 +364,10 @@ namespace Assets.Scripts
             Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
             Vector3 battlePosition = new Vector3(BattleSmoke.transform.position.x, BattleSmoke.transform.position.y, BattleSmoke.transform.position.z);
 
-            AvailablePushDestinations = availablePushDestinationIds.Select(n => GameGraph.Nodes[n]);
+            if (availablePushDestinationIds.Any())
+            {
+                AvailablePushDestinations = availablePushDestinationIds.Select(n => GameGraph.Nodes[n]);
+            }
 
             if (attackResult == AttackResult.Push)
             {
@@ -370,9 +380,13 @@ namespace Assets.Scripts
                     attackPushResultText.SendMessage("OnActivate", battlePosition);
                 }
 
-                foreach (BoardSpace space in BoardSpaces.Values)
+                if (_actionNumber == 1 || _actionNumber == 2)
                 {
-                    space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    }
+
                 }
 
                 Destroy(battleSmokeInstance);
@@ -389,9 +403,12 @@ namespace Assets.Scripts
                     attackCounterPushResultText.SendMessage("OnActivate", battlePosition);
                 }
 
-                foreach (BoardSpace space in BoardSpaces.Values)
+                if (_actionNumber == 3 || _actionNumber == 4)
                 {
-                    space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    }
                 }
 
                 Destroy(battleSmokeInstance);
