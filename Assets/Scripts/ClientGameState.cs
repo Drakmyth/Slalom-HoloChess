@@ -39,7 +39,7 @@ namespace Assets.Scripts
         private int _subActionNumber;
 
         private bool _isAnimationRunning = false;
-        private Monster SelectedMonster { get; set; }
+        public Monster SelectedMonster { get; private set; }
         private Monster PreviewMonster { get; set; }
         private Node SelectedAttackNode { get; set; }
         private NodePath SelectedMovementPath { get; set; }

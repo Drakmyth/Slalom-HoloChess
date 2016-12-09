@@ -33,7 +33,7 @@ namespace Assets.Scripts.Managers
 
             keywords.Add("Zoom", () => //possess?
             {
-
+				Camera.main.GetComponent<CameraZoom>().ZoomIn();
             });
 
 
