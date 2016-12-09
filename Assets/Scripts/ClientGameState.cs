@@ -591,8 +591,7 @@ namespace Assets.Scripts
                 {
                     space.SendMessage("OnClearHighlighting");
                 }
-                if(_actionNumber == 1 || _actionNumber == 3)
-                SelectedMonster = null;
+
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
             }
