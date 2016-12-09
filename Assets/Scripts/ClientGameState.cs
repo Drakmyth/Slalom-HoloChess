@@ -88,6 +88,8 @@ namespace Assets.Scripts
                 mainCamera.GetComponent<Camera>().enabled = false;
                 guestCamera.GetComponent<Camera>().enabled = true;
 
+                GameObject.Find("selectionPreview").GetComponent<Canvas>().worldCamera = guestCamera.GetComponent<Camera>();
+
             }
 
             _subActionNumber = 1;
@@ -253,10 +255,10 @@ namespace Assets.Scripts
         public void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
         {
 
-            UpdateSelectionMenu();
-
             if (_actionNumber == 1 || _actionNumber == 2)
             {
+                UpdateSelectionMenu();
+
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
                     space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
@@ -590,6 +592,11 @@ namespace Assets.Scripts
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
                     space.SendMessage("OnClearHighlighting");
+                }
+
+                if (_actionNumber == 1 || _actionNumber == 3)
+                {
+                    SelectedMonster = null;
                 }
 
                 SelectedAttackNode = null;
