@@ -25,8 +25,8 @@ namespace Assets.Scripts.Managers
                 var focusObject = GazeGestureManager.Instance.FocusedObject;
                 if (focusObject != null)
                 {
-                // Call the OnDrop method on just the focused object.
-                focusObject.SendMessage("OnSelect");
+                    // Call the OnDrop method on just the focused object.
+                    focusObject.SendMessage("OnSpeechSelected");
                 }
             });
 
