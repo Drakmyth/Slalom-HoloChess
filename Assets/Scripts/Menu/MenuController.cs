@@ -8,7 +8,10 @@ namespace Assets.Scripts.Menu
         // Use this for initialization
         void Start ()
         {
-            SceneManager.UnloadScene("dejarik");
+            if (SceneManager.GetSceneByName("dejarik").isLoaded)
+            {
+                SceneManager.UnloadSceneAsync("dejarik");
+            }
         }
 	
         // Update is called once per frame
@@ -18,7 +21,7 @@ namespace Assets.Scripts.Menu
 
         void OnSelected(GameObject gameObject)
         {
-            SceneManager.LoadScene("dejarik");
+            SceneManager.LoadScene("lobby");
         }
     }
 }

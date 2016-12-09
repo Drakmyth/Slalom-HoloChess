@@ -21,5 +21,11 @@
         {
             get { return "k'lor'slug"; }
         }
+
+        public override int MonsterTypeId
+        {
+            get { return MonsterTypes.Klorslug; }
+        }
+
     }
 }

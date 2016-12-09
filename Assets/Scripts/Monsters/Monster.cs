@@ -10,6 +10,7 @@ namespace Assets.Scripts.Monsters
         public abstract int DefenseRating { get; }
         public abstract int MovementRating { get; }
         public abstract string Name { get; }
+        public abstract int MonsterTypeId { get; }
 
         public Node CurrentNode { get; set; }
 
@@ -81,7 +82,7 @@ namespace Assets.Scripts.Monsters
 
                     if (MovementNodes.Count == 0)
                     {
-                        GameObject.Find("GameState").SendMessage("OnAnimationComplete");
+                        GameObject.Find("GameState").GetComponent<ClientGameState>().SendMessage("OnAnimationComplete");
                     }
 
                 }
@@ -139,7 +140,7 @@ namespace Assets.Scripts.Monsters
 
                     Destroy(gameObject);
 
-                    GameObject.Find("GameState").SendMessage("OnAnimationComplete");
+                    GameObject.Find("GameState").GetComponent<ClientGameState>().SendMessage("OnAnimationComplete");
 
                 }
 

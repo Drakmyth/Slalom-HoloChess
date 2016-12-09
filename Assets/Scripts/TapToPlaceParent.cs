@@ -5,7 +5,7 @@ public class TapToPlaceParent : MonoBehaviour
 	bool placing = false;
 
 	// Called by GazeGestureManager when the user performs a Select gesture
-	void OnSelect()
+	void OnSelected()
 	{
 		// On each Select gesture, toggle whether the user is in placing mode.
 		placing = !placing;
