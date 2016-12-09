@@ -14,8 +14,9 @@ namespace Assets.Scripts.Monsters
 
         public Node CurrentNode { get; set; }
 
-        //TODO: remove this work-around for rotation
+        //TODO: find a way to remove this work-around for rotation
         public bool BelongsToHost { get; set; }
+        public float YRotationAdjustment { get; set; }
 
         private List<Node> MovementNodes { get; set; }
 
@@ -45,7 +46,7 @@ namespace Assets.Scripts.Monsters
         void Start()
         {
             _initialXRotation = transform.rotation.eulerAngles.x;
-            _initialYRotation = transform.rotation.eulerAngles.y;
+            _initialYRotation = transform.rotation.eulerAngles.y + YRotationAdjustment;
             _initialZRotation = transform.rotation.eulerAngles.z;
             _movementDelta = 0;
             _rotationDelta = 0;

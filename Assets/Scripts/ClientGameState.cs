@@ -81,6 +81,12 @@ namespace Assets.Scripts
             if (!Client.IsHost)
             {
                 _actionNumber = 3;
+                var mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+                Quaternion cq = Quaternion.Euler(0, 180, 0);
+                mainCamera.transform.rotation = cq;
+                mainCamera.transform.position = new Vector3(0, .5f, 2);
+                
+
             }
 
             _subActionNumber = 1;
@@ -673,6 +679,7 @@ namespace Assets.Scripts
                 if (monsterInstance != null)
                 {
                     monsterInstance.BelongsToHost = true;
+                    monsterInstance.YRotationAdjustment = yRotationAdjustment;
                     monsterInstance.CurrentNode = monster.CurrentNode;
                     FriendlyMonsters.Add(monsterInstance);
                 }
@@ -691,6 +698,7 @@ namespace Assets.Scripts
                 if (monsterInstance != null)
                 {
                     monsterInstance.BelongsToHost = false;
+                    monsterInstance.YRotationAdjustment = yRotationAdjustment;
                     monsterInstance.CurrentNode = monster.CurrentNode;
                     EnemyMonsters.Add(monsterInstance);
                 }
