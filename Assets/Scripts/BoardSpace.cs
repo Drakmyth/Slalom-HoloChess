@@ -115,5 +115,9 @@ namespace Assets.Scripts
             gameStateObject.SendMessage("OnPreviewEnter", Node.Id);
         }
 
+        void OnSpeechSelected(GameObject gameStateObject)
+        {
+            gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
+        }
     }
 }
