@@ -37,7 +37,7 @@ namespace Assets.Scripts
         //6 : Select Push result (await user input)
         //7 : Listen for CounterPush result (await opponent input)
         private int _subActionNumber;
-
+        
         private bool _isAnimationRunning = false;
         private Monster SelectedMonster { get; set; }
         private Monster PreviewMonster { get; set; }
@@ -81,11 +81,12 @@ namespace Assets.Scripts
             if (!Client.IsHost)
             {
                 _actionNumber = 3;
-                var mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-                Quaternion cq = Quaternion.Euler(0, 180, 0);
-                mainCamera.transform.rotation = cq;
-                mainCamera.transform.position = new Vector3(0, .5f, 2);
-                
+                GameObject[] cameras = GameObject.FindGameObjectsWithTag("MainCamera");
+                GameObject guestCamera = cameras.Single(c => c.name == "Guest Camera");
+                GameObject mainCamera = cameras.Single(c => c.name == "Main Camera");
+
+                mainCamera.GetComponent<Camera>().enabled = false;
+                guestCamera.GetComponent<Camera>().enabled = true;
 
             }
 

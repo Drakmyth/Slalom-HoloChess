@@ -40,7 +40,9 @@ namespace Assets.Scripts
         }
 
         public void Init(string ipAddress)
-        {
+        {           
+            ShutDown();
+
             DontDestroyOnLoad(this);
 
             IpAddress = ipAddress;
