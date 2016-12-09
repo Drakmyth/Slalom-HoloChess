@@ -92,12 +92,7 @@ namespace Assets.Scripts.Monsters
 
                     Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                    float yAdjustment = 0f;
-
-                    if (!BelongsToHost)
-                    {
-                        yAdjustment = 180f;
-                    }
+                    float yAdjustment = 180f;
 
                     lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
@@ -113,12 +108,7 @@ namespace Assets.Scripts.Monsters
 
                 Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                float yAdjustment = 0f;
-
-                if (!BelongsToHost)
-                {
-                    yAdjustment = 180f;
-                }
+                float yAdjustment = 180f;
 
                 lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 

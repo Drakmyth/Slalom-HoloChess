@@ -678,7 +678,7 @@ namespace Assets.Scripts
                         monsterQuaternion);
                 if (monsterInstance != null)
                 {
-                    monsterInstance.BelongsToHost = true;
+                    monsterInstance.BelongsToHost = false;
                     monsterInstance.YRotationAdjustment = yRotationAdjustment;
                     monsterInstance.CurrentNode = monster.CurrentNode;
                     FriendlyMonsters.Add(monsterInstance);
@@ -697,7 +697,7 @@ namespace Assets.Scripts
                         monsterQuaternion);
                 if (monsterInstance != null)
                 {
-                    monsterInstance.BelongsToHost = false;
+                    monsterInstance.BelongsToHost = true;
                     monsterInstance.YRotationAdjustment = yRotationAdjustment;
                     monsterInstance.CurrentNode = monster.CurrentNode;
                     EnemyMonsters.Add(monsterInstance);
