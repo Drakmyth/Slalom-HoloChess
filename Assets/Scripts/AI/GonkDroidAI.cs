@@ -18,9 +18,9 @@ namespace Assets.Scripts.AI
         // Use this for initialization
         void Start()
         {
-            DontDestroyOnLoad(this);
+            //DontDestroyOnLoad(this);
 
-            IsHost = false;
+            IsHost = true;
             ClientName = "Gonk Droid AI";
            
         }
@@ -64,8 +64,8 @@ namespace Assets.Scripts.AI
             GameStartMessage gameStartMessage = netMsg.ReadMessage<GameStartMessage>();
 
             //Convert json strings to objects
-            _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters);
-            _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters);
+            _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters);
+            _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters);
 
         }
 
@@ -76,7 +76,7 @@ namespace Assets.Scripts.AI
             //reverse 1 : 1 relationship for easy monster selection
             Dictionary<int, int> nodeMonsters = _friendlyMonsterState.ToDictionary(m => m.Value, m => m.Key);
 
-            if (message.ActionNumber != 3 && message.ActionNumber != 4)
+            if (message.ActionNumber != 1 && message.ActionNumber != 2)
             {
                 return;
             }
@@ -97,7 +97,7 @@ namespace Assets.Scripts.AI
         {
             AvailableMovesResponseMessage message = msg.ReadMessage<AvailableMovesResponseMessage>();
 
-            if (message.ActionNumber != 3 && message.ActionNumber != 4)
+            if (message.ActionNumber != 1 && message.ActionNumber != 2)
             {
                 return;
             }
@@ -128,8 +128,8 @@ namespace Assets.Scripts.AI
         {
             AttackPushResponseMessage message = msg.ReadMessage<AttackPushResponseMessage>();
 
-            bool canPush = (message.ActionNumber == 3 || message.ActionNumber == 4) && message.SubActionNumber == 6;
-            bool canCounterPush = (message.ActionNumber == 1 || message.ActionNumber == 2) && message.SubActionNumber == 7;
+            bool canPush = (message.ActionNumber == 1 || message.ActionNumber == 2) && message.SubActionNumber == 6;
+            bool canCounterPush = (message.ActionNumber == 3 || message.ActionNumber == 4) && message.SubActionNumber == 7;
 
             if (message.AvailablePushDestinationIds.Any() && (canPush || canCounterPush))
             {
@@ -147,8 +147,8 @@ namespace Assets.Scripts.AI
         {
             GameStateMessage message = msg.ReadMessage<GameStateMessage>();
 
-            _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
-            _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
+            _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
+            _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
 
         }
     }
