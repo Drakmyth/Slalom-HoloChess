@@ -37,7 +37,7 @@ namespace Assets.Scripts
         //6 : Select Push result (await user input)
         //7 : Listen for CounterPush result (await opponent input)
         private int _subActionNumber;
-
+        
         private bool _isAnimationRunning = false;
         private Monster SelectedMonster { get; set; }
         private Monster PreviewMonster { get; set; }
@@ -81,6 +81,15 @@ namespace Assets.Scripts
             if (!Client.IsHost)
             {
                 _actionNumber = 3;
+                GameObject[] cameras = GameObject.FindGameObjectsWithTag("MainCamera");
+                GameObject guestCamera = cameras.Single(c => c.name == "Guest Camera");
+                GameObject mainCamera = cameras.Single(c => c.name == "Main Camera");
+
+                mainCamera.GetComponent<Camera>().enabled = false;
+                guestCamera.GetComponent<Camera>().enabled = true;
+
+                GameObject.Find("selectionPreview").GetComponent<Canvas>().worldCamera = guestCamera.GetComponent<Camera>();
+
             }
 
             _subActionNumber = 1;
@@ -109,7 +118,13 @@ namespace Assets.Scripts
         }
 
         void Update()
-        {      
+        {
+            if (!GameManager.Instance.gameObject.activeSelf)
+            {
+                //Something has killed the game loop. DontDestroyOnLoad doesn't protect from deactivation
+                GameManager.Instance.gameObject.SetActive(true);
+            }
+
             if (Client == null || _actionNumber < 1)
             {
                 return;
@@ -192,9 +207,12 @@ namespace Assets.Scripts
 
             var availableSpaces = availableMonsterNodeIds.Select(s => BoardSpaces[s]);
 
-            foreach (BoardSpace space in availableSpaces)
+            if (_actionNumber == 1 || _actionNumber == 2)
             {
-                space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                foreach (BoardSpace space in availableSpaces)
+                {
+                    space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
+                }
             }
 
             Client.SendStateAck(_actionNumber, _subActionNumber);
@@ -223,7 +241,7 @@ namespace Assets.Scripts
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
 
-            if (SelectedMonster != null)
+            if (SelectedMonster != null && (_actionNumber == 1 || _actionNumber == 2))
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
@@ -237,12 +255,16 @@ namespace Assets.Scripts
         public void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
         {
 
-            UpdateSelectionMenu();
-            //Update board highlighting
-            foreach (BoardSpace space in BoardSpaces.Values)
+            if (_actionNumber == 1 || _actionNumber == 2)
             {
-                space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
-                space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
+                UpdateSelectionMenu();
+
+                foreach (BoardSpace space in BoardSpaces.Values)
+                {
+                    space.SendMessage("OnAvailableAttacks", availableAttackActionNodeIds);
+                    space.SendMessage("OnAvailableMoves", availableMoveActionNodeIds);
+                }
+
             }
 
             _actionNumber = actionNumber;
@@ -344,7 +366,10 @@ namespace Assets.Scripts
             Quaternion battleSmokeQuaternion = Quaternion.Euler(BattleSmoke.transform.rotation.eulerAngles.x, BattleSmoke.transform.rotation.eulerAngles.y, BattleSmoke.transform.rotation.eulerAngles.z);
             Vector3 battlePosition = new Vector3(BattleSmoke.transform.position.x, BattleSmoke.transform.position.y, BattleSmoke.transform.position.z);
 
-            AvailablePushDestinations = availablePushDestinationIds.Select(n => GameGraph.Nodes[n]);
+            if (availablePushDestinationIds.Any())
+            {
+                AvailablePushDestinations = availablePushDestinationIds.Select(n => GameGraph.Nodes[n]);
+            }
 
             if (attackResult == AttackResult.Push)
             {
@@ -357,9 +382,13 @@ namespace Assets.Scripts
                     attackPushResultText.SendMessage("OnActivate", battlePosition);
                 }
 
-                foreach (BoardSpace space in BoardSpaces.Values)
+                if (_actionNumber == 1 || _actionNumber == 2)
                 {
-                    space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    }
+
                 }
 
                 Destroy(battleSmokeInstance);
@@ -376,9 +405,12 @@ namespace Assets.Scripts
                     attackCounterPushResultText.SendMessage("OnActivate", battlePosition);
                 }
 
-                foreach (BoardSpace space in BoardSpaces.Values)
+                if (_actionNumber == 3 || _actionNumber == 4)
                 {
-                    space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
+                    }
                 }
 
                 Destroy(battleSmokeInstance);
@@ -561,7 +593,12 @@ namespace Assets.Scripts
                 {
                     space.SendMessage("OnClearHighlighting");
                 }
-                SelectedMonster = null;
+
+                if (_actionNumber == 1 || _actionNumber == 3)
+                {
+                    SelectedMonster = null;
+                }
+
                 SelectedAttackNode = null;
                 SelectedMovementPath = null;
             }
@@ -652,19 +689,21 @@ namespace Assets.Scripts
         //TODO: do we even need to instantiate here? We could just as well reposition them.
         private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {
-            float yRotationAdjustment = Client.IsHost ? 180 : 0;
-
             foreach (Monster monster in friendlyMonsters)
             {
+
+                float yRotationAdjustment = Client.IsHost ? 180 : 0;
+
 
                 var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
                 Monster monsterInstance =
                     Instantiate(monster,
                         new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
-                        monsterQuaternion) as Monster;
+                        monsterQuaternion);
                 if (monsterInstance != null)
                 {
-                    monsterInstance.BelongsToHost = true;
+                    monsterInstance.BelongsToHost = false;
+                    monsterInstance.YRotationAdjustment = yRotationAdjustment;
                     monsterInstance.CurrentNode = monster.CurrentNode;
                     FriendlyMonsters.Add(monsterInstance);
                 }
@@ -672,13 +711,18 @@ namespace Assets.Scripts
 
             foreach (Monster monster in enemyMonsters)
             {
+                float yRotationAdjustment = Client.IsHost ? 0 : 180;
+
+                var monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
+
                 Monster monsterInstance =
                     Instantiate(monster,
-                        new Vector3(monster.CurrentNode.XPosition, 180 - yRotationAdjustment, monster.CurrentNode.YPosition),
-                        monster.transform.rotation);
+                        new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition),
+                        monsterQuaternion);
                 if (monsterInstance != null)
                 {
-                    monsterInstance.BelongsToHost = false;
+                    monsterInstance.BelongsToHost = true;
+                    monsterInstance.YRotationAdjustment = yRotationAdjustment;
                     monsterInstance.CurrentNode = monster.CurrentNode;
                     EnemyMonsters.Add(monsterInstance);
                 }
