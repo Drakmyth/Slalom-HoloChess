@@ -7,23 +7,36 @@ public class CameraZoom : MonoBehaviour
 	private Vector3 _originalScale;
 	private bool _isZoomed;
 
-	private ClientGameState GameState
-	{
-		get { return GameManager.Instance.Client.GameState; }
-	}
+    private ClientGameState GameState
+    {
+        get { return GameManager.Instance.Client.GameState; }
+    }
 
-	public void ZoomIn()
-	{
-		if (_isZoomed || GameState.SelectedMonster == null) return;
+    public void Zoom()
+    {
+        if (_isZoomed)
+        {
+            ZoomOut();
+        }
+        else
+        {
+            ZoomIn();
+        }
+    }
 
-		_originalPosition = Camera.main.transform.localPosition;
-		_originalScale = Camera.main.transform.localScale;
-		Camera.main.transform.localPosition = GameState.SelectedMonster.transform.localPosition;
-		Camera.main.transform.localScale *= 16;
-		_isZoomed = true;
-	}
+    public void ZoomIn()
+    {
+        var selectedMonster = GameState.GetSelectedMonsterPrefab();
+        if (_isZoomed || selectedMonster == null) return;
 
-	public void ZoomOut()
+        _originalPosition = Camera.main.transform.localPosition;
+        _originalScale = Camera.main.transform.localScale;
+        Camera.main.transform.localPosition = selectedMonster.transform.localPosition;
+        Camera.main.transform.localScale *= 16;
+        _isZoomed = true;
+    }
+
+    public void ZoomOut()
 	{
 		if (!_isZoomed) return;
 

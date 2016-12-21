@@ -31,11 +31,20 @@ namespace Assets.Scripts.Managers
                 }
             });
 
-            keywords.Add("Zoom", () => //possess?
+            keywords.Add("Zoom", () =>
             {
-				Camera.main.GetComponent<CameraZoom>().ZoomIn();
+				Camera.main.GetComponent<CameraZoom>().Zoom();
             });
 
+            keywords.Add("Possess", () =>
+            {
+                Camera.main.GetComponent<CameraZoom>().ZoomIn();
+            });
+
+            keywords.Add("Release", () =>
+            {
+                Camera.main.GetComponent<CameraZoom>().ZoomOut();
+            });
 
             // Tell the KeywordRecognizer about our keywords.
             keywordRecognizer = new KeywordRecognizer(keywords.Keys.ToArray());

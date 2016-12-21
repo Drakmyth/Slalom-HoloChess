@@ -39,7 +39,7 @@ namespace Assets.Scripts
         private int _subActionNumber;
 
         private bool _isAnimationRunning = false;
-        public Monster SelectedMonster { get; private set; }
+        private Monster SelectedMonster { get; set; }
         private Monster PreviewMonster { get; set; }
         private Node SelectedAttackNode { get; set; }
         private NodePath SelectedMovementPath { get; set; }
@@ -622,7 +622,10 @@ namespace Assets.Scripts
             GameObject.Find("SelectionDefense").SendMessage("OnClear");
         }
 
-
+        public Monster GetSelectedMonsterPrefab()
+        {
+            return this.SelectedMonster == null ? null : this.MonsterPrefabs.First(t => t.Name == this.SelectedMonster.Name);
+        }
 
         private void DisplayBoardSpaces()
         {
