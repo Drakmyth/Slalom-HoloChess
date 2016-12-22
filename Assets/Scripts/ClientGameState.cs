@@ -659,7 +659,10 @@ namespace Assets.Scripts
             GameObject.Find("SelectionDefense").SendMessage("OnClear");
         }
 
-
+        public Monster GetSelectedMonsterPrefab()
+        {
+            return this.SelectedMonster == null ? null : this.MonsterPrefabs.First(t => t.Name == this.SelectedMonster.Name);
+        }
 
         private void DisplayBoardSpaces()
         {
