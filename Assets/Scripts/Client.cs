@@ -22,7 +22,7 @@ namespace Assets.Scripts
 
         public void Init(string hostAddress, int port)
         {
-            DontDestroyOnLoad(this);
+            //DontDestroyOnLoad(this);
 
             if (!IsHost)
             {
@@ -202,6 +202,8 @@ namespace Assets.Scripts
         {
             GameStateMessage message = msg.ReadMessage<GameStateMessage>();
 
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
             //Convert json strings to objects
             Dictionary<int, int> friendlyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
             Dictionary<int, int> enemyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
@@ -213,6 +215,7 @@ namespace Assets.Scripts
 
         public void SendStateAck(int actionNumber, int subActionNumber)
         {
+            actionNumber = AdjustActionNumber(actionNumber);
             Send(CustomMessageTypes.StateAck, new StateAckMessage
             {
                 ActionNumber = actionNumber,

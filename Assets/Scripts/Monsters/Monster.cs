@@ -14,8 +14,9 @@ namespace Assets.Scripts.Monsters
 
         public Node CurrentNode { get; set; }
 
-        //TODO: remove this work-around for rotation
+        //TODO: find a way to remove this work-around for rotation
         public bool BelongsToHost { get; set; }
+        public float YRotationAdjustment { get; set; }
 
         private List<Node> MovementNodes { get; set; }
 
@@ -45,7 +46,7 @@ namespace Assets.Scripts.Monsters
         void Start()
         {
             _initialXRotation = transform.rotation.eulerAngles.x;
-            _initialYRotation = transform.rotation.eulerAngles.y;
+            _initialYRotation = transform.rotation.eulerAngles.y + YRotationAdjustment;
             _initialZRotation = transform.rotation.eulerAngles.z;
             _movementDelta = 0;
             _rotationDelta = 0;
@@ -91,12 +92,7 @@ namespace Assets.Scripts.Monsters
 
                     Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                    float yAdjustment = 0f;
-
-                    if (!BelongsToHost)
-                    {
-                        yAdjustment = 180f;
-                    }
+                    float yAdjustment = 180f;
 
                     lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
@@ -112,12 +108,7 @@ namespace Assets.Scripts.Monsters
 
                 Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                float yAdjustment = 0f;
-
-                if (!BelongsToHost)
-                {
-                    yAdjustment = 180f;
-                }
+                float yAdjustment = 180f;
 
                 lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
