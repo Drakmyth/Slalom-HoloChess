@@ -340,7 +340,6 @@ namespace Assets.Scripts
                     {
                         HostMonsters.Remove(defender);
                     }
-                    SelectedMonster = null;
                     SubActionNumber = 0;
 
                     _hostServer.SendToAll(CustomMessageTypes.AttackKillResponse, new AttackKillResponseMessage
@@ -611,12 +610,11 @@ namespace Assets.Scripts
             {
                 ActionNumber = 1;
                 SelectedMonster = null;
-               
             }
             else if (ActionNumber == 3)
             {
                 ActionNumber++;
-                SelectedMonster = null;
+                SubActionNumber = SelectedMonster != null ? 3 : 1;
             }
             else if (ActionNumber == 2)
             {
