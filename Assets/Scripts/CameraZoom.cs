@@ -4,8 +4,8 @@ using UnityEngine;
 public class CameraZoom : MonoBehaviour
 {
 	private Vector3 _originalPosition;
-	private Vector3 _originalScale;
-	private bool _isZoomed;
+    private Quaternion _originalRotation;
+    private bool _isZoomed;
 
     private ClientGameState GameState
     {
@@ -29,10 +29,15 @@ public class CameraZoom : MonoBehaviour
         var selectedMonster = GameState.GetSelectedMonsterPrefab();
         if (_isZoomed || selectedMonster == null) return;
 
-        _originalPosition = Camera.main.transform.localPosition;
-        _originalScale = Camera.main.transform.localScale;
-        Camera.main.transform.localPosition = selectedMonster.transform.localPosition;
-        Camera.main.transform.localScale *= 16;
+        // update camera location & rotation
+        GameObject mainCamera = GameObject.Find("CameraContainer");
+        _originalPosition = mainCamera.transform.localPosition;
+        _originalRotation = mainCamera.transform.localRotation;
+
+        mainCamera.transform.localPosition = new Vector3(selectedMonster.transform.localPosition.x, 
+            selectedMonster.transform.localPosition.y + .1f, selectedMonster.transform.localPosition.z);
+        mainCamera.transform.localRotation = new Quaternion(_originalRotation.x, _originalRotation.y, _originalRotation.z, _originalRotation.w);
+
         _isZoomed = true;
     }
 
@@ -40,8 +45,11 @@ public class CameraZoom : MonoBehaviour
 	{
 		if (!_isZoomed) return;
 
-		Camera.main.transform.localPosition = _originalPosition;
-		Camera.main.transform.localScale = _originalScale;
-		_isZoomed = false;
+        // update camera location
+	    var camera = GameObject.Find("CameraContainer");
+        camera.transform.localPosition = _originalPosition;
+        camera.transform.localRotation = new Quaternion(_originalRotation.x, _originalRotation.y, _originalRotation.z, _originalRotation.w);
+
+        _isZoomed = false;
 	}
 }
