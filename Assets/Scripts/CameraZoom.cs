@@ -30,13 +30,12 @@ public class CameraZoom : MonoBehaviour
         if (_isZoomed || selectedMonster == null) return;
 
         // update camera location & rotation
-        GameObject mainCamera = GameObject.Find("CameraContainer");
-        _originalPosition = mainCamera.transform.localPosition;
-        _originalRotation = mainCamera.transform.localRotation;
+        _originalPosition = Camera.main.transform.parent.localPosition;
+        _originalRotation = Camera.main.transform.parent.localRotation;
 
-        mainCamera.transform.localPosition = new Vector3(selectedMonster.transform.localPosition.x, 
+        Camera.main.transform.parent.transform.localPosition = new Vector3(selectedMonster.transform.localPosition.x, 
             selectedMonster.transform.localPosition.y + .1f, selectedMonster.transform.localPosition.z);
-        mainCamera.transform.localRotation = new Quaternion(_originalRotation.x, _originalRotation.y, _originalRotation.z, _originalRotation.w);
+        Camera.main.transform.parent.transform.localRotation = new Quaternion(0, 0, 0, 0);
 
         _isZoomed = true;
     }
@@ -46,9 +45,8 @@ public class CameraZoom : MonoBehaviour
 		if (!_isZoomed) return;
 
         // update camera location
-	    var camera = GameObject.Find("CameraContainer");
-        camera.transform.localPosition = _originalPosition;
-        camera.transform.localRotation = new Quaternion(_originalRotation.x, _originalRotation.y, _originalRotation.z, _originalRotation.w);
+        Camera.main.transform.parent.transform.localPosition = _originalPosition;
+        Camera.main.transform.parent.transform.localRotation = new Quaternion(_originalRotation.x, _originalRotation.y, _originalRotation.z, _originalRotation.w);
 
         _isZoomed = false;
 	}
