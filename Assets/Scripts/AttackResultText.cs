@@ -41,7 +41,7 @@ namespace Assets.Scripts
 
         private void RotateToCamera()
         {
-            GameObject mainCamera = GameObject.Find("Main Camera");
+            GameObject mainCamera = GameObject.Find("CameraContainer");
             Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
             transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
