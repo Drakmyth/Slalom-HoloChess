@@ -24,8 +24,8 @@ namespace Assets.Scripts
                     SelectionIndicatorPrefab.transform.rotation.eulerAngles.y,
                     SelectionIndicatorPrefab.transform.rotation.eulerAngles.z);
             _selectionIndicatorInstance = Instantiate(SelectionIndicatorPrefab,
-                new Vector3(Node.XPosition, SelectionIndicatorPrefab.transform.position.y, Node.YPosition),
-                selectionIndicatorQuaternion) as GameObject;
+                new Vector3(transform.position.x, SelectionIndicatorPrefab.transform.position.y, transform.position.z),
+                selectionIndicatorQuaternion);
             _selectionIndicatorInstance.SetActive(false);
         }
 

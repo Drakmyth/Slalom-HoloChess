@@ -31,10 +31,9 @@ namespace Assets.Scripts
 
                 RotateToCamera();
 
-
                 if (_currentLerp > 1 || text.color.a <= 0)
                 {
-                    Destroy(gameObject);
+                    gameObject.SetActive(false);
                 }
 
             }
