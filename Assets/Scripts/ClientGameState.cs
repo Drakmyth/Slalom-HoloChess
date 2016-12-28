@@ -60,6 +60,7 @@ namespace Assets.Scripts
         public List<AudioClip> AttackSounds;
         public List<AudioClip> MovementSounds;
 
+
         void Start()
         {
             GameGraph = new BoardGraph();
@@ -333,23 +334,23 @@ namespace Assets.Scripts
             Monster defender = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == defendingMonsterTypeId) ??
                    EnemyMonsters.SingleOrDefault(m => m.MonsterTypeId == defendingMonsterTypeId);
             
-            Vector3 battlePosition = new Vector3(BattleSmoke.transform.position.x, BattleSmoke.transform.position.y, BattleSmoke.transform.position.z);
+            Vector3 battlePosition = new Vector3(BattleSmoke.transform.localPosition.x, BattleSmoke.transform.localPosition.y, BattleSmoke.transform.localPosition.z);
 
             if (attackResult == AttackResult.Kill)
             {
                 KillResultTextPrefab.gameObject.SetActive(true);
-                KillResultTextPrefab.transform.position = battlePosition;
+                KillResultTextPrefab.transform.localPosition = battlePosition;
 
-                KillResultTextPrefab.LerpDestination = KillResultTextPrefab.transform.position + Vector3.up;
+                KillResultTextPrefab.LerpDestination = KillResultTextPrefab.transform.localPosition + Vector3.up;
                 KillResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 ProcessKill(defender, !isFriendlyMonster);
             } else if (attackResult == AttackResult.CounterKill)
             {
                 CounterKillResultTextPrefab.gameObject.SetActive(true);
-                CounterKillResultTextPrefab.transform.position = battlePosition;
+                CounterKillResultTextPrefab.transform.localPosition = battlePosition;
 
-                CounterKillResultTextPrefab.LerpDestination = CounterKillResultTextPrefab.transform.position + Vector3.up;
+                CounterKillResultTextPrefab.LerpDestination = CounterKillResultTextPrefab.transform.localPosition + Vector3.up;
                 CounterKillResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 ProcessKill(attacker, isFriendlyMonster);
@@ -363,7 +364,7 @@ namespace Assets.Scripts
 
         public void ConfirmAttackPushResult(AttackResult attackResult, IEnumerable<int> availablePushDestinationIds, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
-            Vector3 battlePosition = new Vector3(BattleSmoke.transform.position.x, BattleSmoke.transform.position.y, BattleSmoke.transform.position.z);
+            Vector3 battlePosition = new Vector3(BattleSmoke.transform.localPosition.x, BattleSmoke.transform.localPosition.y, BattleSmoke.transform.localPosition.z);
 
             if (availablePushDestinationIds.Any())
             {
@@ -373,9 +374,9 @@ namespace Assets.Scripts
             if (attackResult == AttackResult.Push)
             {
                 PushResultTextPrefab.gameObject.SetActive(true);
-                PushResultTextPrefab.transform.position = battlePosition;
+                PushResultTextPrefab.transform.localPosition = battlePosition;
 
-                PushResultTextPrefab.LerpDestination = PushResultTextPrefab.transform.position + Vector3.up;
+                PushResultTextPrefab.LerpDestination = PushResultTextPrefab.transform.localPosition + Vector3.up;
                 PushResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 if (_actionNumber == 1 || _actionNumber == 2)
@@ -393,9 +394,9 @@ namespace Assets.Scripts
             else if (attackResult == AttackResult.CounterPush)
             {
                 CounterPushResultTextPrefab.gameObject.SetActive(true);
-                CounterPushResultTextPrefab.transform.position = battlePosition;
+                CounterPushResultTextPrefab.transform.localPosition = battlePosition;
 
-                CounterPushResultTextPrefab.LerpDestination = CounterPushResultTextPrefab.transform.position + Vector3.up;
+                CounterPushResultTextPrefab.LerpDestination = CounterPushResultTextPrefab.transform.localPosition + Vector3.up;
                 CounterPushResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 if (_actionNumber == 3 || _actionNumber == 4)
@@ -471,7 +472,7 @@ namespace Assets.Scripts
         {
             Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition) / 2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
             BattleSmoke.SetActive(true);
-            BattleSmoke.transform.position = battleSmokePosition;
+            BattleSmoke.transform.localPosition = battleSmokePosition;
 
             attacker.SendMessage("OnBeginBattle", defender.CurrentNode);
             defender.SendMessage("OnBeginBattle", attacker.CurrentNode);
