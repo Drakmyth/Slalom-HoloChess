@@ -45,9 +45,9 @@ namespace Assets.Scripts.Monsters
 
         void Start()
         {
-            _initialXRotation = transform.rotation.eulerAngles.x;
-            _initialYRotation = transform.rotation.eulerAngles.y + YRotationAdjustment;
-            _initialZRotation = transform.rotation.eulerAngles.z;
+            _initialXRotation = transform.localRotation.eulerAngles.x;
+            _initialYRotation = transform.localRotation.eulerAngles.y + YRotationAdjustment;
+            _initialZRotation = transform.localRotation.eulerAngles.z;
             _movementDelta = 0;
             _rotationDelta = 0;
             MovementNodes = new List<Node>();
@@ -67,12 +67,12 @@ namespace Assets.Scripts.Monsters
                     _movementDelta = 1;
                 }
 
-                Vector3 newPosition = Vector3.Lerp(transform.position, new Vector3(MovementNodes[0].XPosition, transform.position.y,
+                Vector3 newPosition = Vector3.Lerp(transform.localPosition, new Vector3(MovementNodes[0].XPosition, transform.localPosition.y,
                 MovementNodes[0].YPosition), _movementDelta);
 
-                Vector3 deltaVector = newPosition - transform.position;
+                Vector3 deltaVector = newPosition - transform.localPosition;
 
-                transform.position = newPosition;
+                transform.localPosition = newPosition;
 
                 if (_movementDelta >= 1)
                 {
@@ -96,7 +96,7 @@ namespace Assets.Scripts.Monsters
 
                     lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
-                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, _rotationDelta);
+                    transform.localRotation = Quaternion.Slerp(transform.localRotation, lookRotation, _rotationDelta);
 
                 }
             }
@@ -112,7 +112,7 @@ namespace Assets.Scripts.Monsters
 
                 lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
-                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, _rotationDelta);
+                transform.localRotation = Quaternion.Slerp(transform.localRotation, lookRotation, _rotationDelta);
 
                 if (_rotationDelta >= 1)
                 {
@@ -122,7 +122,7 @@ namespace Assets.Scripts.Monsters
             }
             else if (!_isAlive)
             {
-                if (gameObject.transform.position.y < -.2)
+                if (gameObject.transform.localPosition.y < -.2)
                 {
                     if (_battleSmokeInstance != null)
                     {
@@ -135,9 +135,9 @@ namespace Assets.Scripts.Monsters
 
                 }
 
-                Vector3 updatedPosition = new Vector3(transform.position.x, transform.position.y - Time.deltaTime * VerticalMovementPerSecond, transform.position.z);
+                Vector3 updatedPosition = new Vector3(transform.localPosition.x, transform.localPosition.y - Time.deltaTime * VerticalMovementPerSecond, transform.localPosition.z);
 
-                transform.position = updatedPosition;
+                transform.localPosition = updatedPosition;
             }
 
         }

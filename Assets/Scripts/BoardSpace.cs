@@ -24,7 +24,7 @@ namespace Assets.Scripts
                     SelectionIndicatorPrefab.transform.rotation.eulerAngles.y,
                     SelectionIndicatorPrefab.transform.rotation.eulerAngles.z);
             _selectionIndicatorInstance = Instantiate(SelectionIndicatorPrefab,
-                new Vector3(transform.position.x, SelectionIndicatorPrefab.transform.position.y, transform.position.z),
+                new Vector3(transform.localPosition.x, SelectionIndicatorPrefab.transform.localPosition.y, transform.localPosition.z),
                 selectionIndicatorQuaternion);
             _selectionIndicatorInstance.SetActive(false);
         }

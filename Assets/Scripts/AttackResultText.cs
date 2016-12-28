@@ -13,7 +13,7 @@ namespace Assets.Scripts
         // Use this for initialization
         void Start () {
             _currentLerp = 0;
-            LerpDestination = transform.position + Vector3.up * .4f;
+            LerpDestination = transform.localPosition + Vector3.up * .4f;
             RotateToCamera();
         }
 	
@@ -27,7 +27,7 @@ namespace Assets.Scripts
                 var text = GetComponent<TextMesh>();
                 text.color = new Color(text.color.r, text.color.g, text.color.b, text.color.a * .98f - .01f);
 
-                transform.position = Vector3.Lerp(transform.position, LerpDestination, _currentLerp);
+                transform.localPosition = Vector3.Lerp(transform.localPosition, LerpDestination, _currentLerp);
 
                 RotateToCamera();
 
@@ -43,9 +43,9 @@ namespace Assets.Scripts
         {
             GameObject mainCamera =
                 GameObject.FindGameObjectsWithTag("MainCamera").Single(o => o.GetComponent<Camera>().enabled);
-            Vector3 relativePos = mainCamera.transform.position - transform.position;
+            Vector3 relativePos = mainCamera.transform.localPosition - transform.localPosition;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
-            transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
+            transform.localRotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
 
         }
 
