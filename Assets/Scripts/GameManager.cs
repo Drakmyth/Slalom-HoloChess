@@ -90,6 +90,14 @@ namespace Assets.Scripts
             Debug.Log("Host");
         }
 
+        public void OpenDifficultySelector()
+        {
+            SceneManager.LoadScene("selectlevel");
+        }
+
+        // The Game Difficulty:
+        // 0= EASY
+        // 1= HARD
         public void SinglePlayerButton(int difficulty)
         {
             try
@@ -97,8 +105,19 @@ namespace Assets.Scripts
                 Server = gameObject.AddComponent<Server>();
                 Server.InitSinglePlayer();
 
-                GonkDroidAI gonkDroidAI = Server.gameObject.AddComponent<GonkDroidAI>();
-                gonkDroidAI.Init(Server.IpAddress);
+                if (difficulty == 0)
+                {
+                    // easy has been selected, use dumb AI
+                    GonkDroidAI gonkDroidAI = Server.gameObject.AddComponent<GonkDroidAI>();
+                    gonkDroidAI.Init(Server.IpAddress);
+                }
+                else
+                {
+                    // hard has been selected. use intelligent AI
+                    // TODO : Wesley to add intelliegent AI to replace GonkDroidAI
+                    GonkDroidAI gonkDroidAI = Server.gameObject.AddComponent<GonkDroidAI>();
+                    gonkDroidAI.Init(Server.IpAddress);
+                }
 
                 Client = gameObject.AddComponent<Client>();
                 Client.Init(Server.IpAddress, 1300);
@@ -107,13 +126,6 @@ namespace Assets.Scripts
             {
                 Debug.Log(e.Message);
             }
-
-            LobbyMenu.SetActive(false);
-            HostMenu.SetActive(true);
-
-            HostMenu.transform.FindChild("IpAddress").GetComponent<Text>().text = Server.IpAddress;
-
-            ConnectMenu.SetActive(false);
             Debug.Log("Host");
     }
 
