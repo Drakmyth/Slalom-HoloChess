@@ -126,10 +126,10 @@ namespace Assets.Scripts.Monsters
                 {
                     if (_battleSmokeInstance != null)
                     {
-                        Destroy(_battleSmokeInstance);
+                        _battleSmokeInstance.SetActive(false);
                     }
 
-                    Destroy(gameObject);
+                    gameObject.SetActive(false);
 
                     GameObject.Find("GameState").GetComponent<ClientGameState>().SendMessage("OnAnimationComplete");
 
