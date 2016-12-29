@@ -22,7 +22,7 @@ namespace Assets.Scripts
 
         public void Init(string hostAddress, int port)
         {
-            //DontDestroyOnLoad(this);
+            DontDestroyOnLoad(this);
 
             if (!IsHost)
             {
@@ -248,9 +248,8 @@ namespace Assets.Scripts
             Dictionary<int, int> friendlyMonsterIds = IsHost? JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters) : JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters);
             Dictionary<int, int> enemyMonsterIds = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters) : JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters);
 
-            GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-            gameManager.FriendlyMonsterInitialNodeIds = friendlyMonsterIds;
-            gameManager.EnemyMonsterInitialNodeIds = enemyMonsterIds;
+            GameManager.Instance.FriendlyMonsterInitialNodeIds = friendlyMonsterIds;
+            GameManager.Instance.EnemyMonsterInitialNodeIds = enemyMonsterIds;
 
             StartCoroutine(LoadGameScene());
         }

@@ -29,14 +29,19 @@ namespace Assets.Scripts
 
         void Start()
         {
+
+            if (Instance != null)
+            {
+                Destroy(Instance.gameObject);
+            }
+
             Instance = this;
+            DontDestroyOnLoad(gameObject);
 
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
 
             _isHosting = false;
-
-            DontDestroyOnLoad(gameObject);
 
         }
 
@@ -164,7 +169,7 @@ namespace Assets.Scripts
             if (_isHosting)
             {
                 _isHosting = false;
-                Server.ShutDown();
+                Server.ResetServer();
                 Server = null;
             }
 

@@ -64,14 +64,12 @@ namespace Assets.Scripts
 
             AvailablePushDestinations = new List<Node>();
 
-            GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-
-            if (gameManager == null || gameManager.Server == null)
+            if (GameManager.Instance == null || GameManager.Instance.Server == null)
             {
                 throw new InvalidOperationException("Server must exist to begin game");
             }
 
-            _hostServer = gameManager.Server;
+            _hostServer = GameManager.Instance.Server;
 
             if (_hostServer == null || !_hostServer.IsServerStarted)
             {
@@ -242,6 +240,19 @@ namespace Assets.Scripts
 
         public void SelectAction(int selectedNodeId)
         {
+            if (selectedNodeId < 0)
+            {
+                SubActionNumber = 0;
+                _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                {
+                    ActionNumber = ActionNumber,
+                    SubActionNumber = SubActionNumber,
+                    Message = "No available moves.",
+                    HostMonsterState = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                    GuestMonsterState = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                });
+            }
+
             IEnumerable<Node> friendlyOccupiedNodes;
             IEnumerable<Node> enemyOccupiedNodes;
 
@@ -308,7 +319,6 @@ namespace Assets.Scripts
             }
         }
 
-        //TODO: Net are coordinates necessary?
         public void ProcessAttackAction(int attackingMonsterTypeId, int defendingMonsterTypeId)
         {
             Monster attacker;
