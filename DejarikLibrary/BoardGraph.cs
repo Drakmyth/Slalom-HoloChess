@@ -12,7 +12,7 @@ namespace DejarikLibrary
 
         // node positions need to adjust for the table scale.
         // if the table scale changes, we'll have to apply that scale to each node coordinate
-	    private const float TableScale = 0.1f;
+	    private const float TableScale = 0.1332398f;
 
 
         public List<Node> Nodes { get; set; }
