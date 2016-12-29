@@ -17,7 +17,7 @@ namespace Assets.Scripts
         public MoveCalculator MoveCalculator { get; set; }
         public Dictionary<int, BoardSpace> BoardSpaces { get; set; }
         public List<Monster> FriendlyMonsters { get; set; }
-        public List<Monster> EnemyMonsters { get; set; } 
+        public List<Monster> EnemyMonsters { get; set; }
 
         private readonly Random _random = new Random();
 
