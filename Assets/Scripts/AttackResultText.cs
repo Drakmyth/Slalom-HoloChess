@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -8,12 +7,12 @@ namespace Assets.Scripts
 
         public Vector3 LerpDestination { get; set; }
         private float _currentLerp;
-        private const float LerpRate = .05f;
+        private const float LerpRate = .2f;
 
         // Use this for initialization
         void Start () {
             _currentLerp = 0;
-            LerpDestination = transform.localPosition + Vector3.up * .4f;
+            LerpDestination = transform.localPosition + Vector3.up * 1.6f;
             RotateToCamera();
         }
 	
@@ -43,7 +42,7 @@ namespace Assets.Scripts
         {
             GameObject mainCamera =
                 GameObject.FindGameObjectsWithTag("MainCamera").Single(o => o.GetComponent<Camera>().enabled);
-            Vector3 relativePos = mainCamera.transform.localPosition - transform.localPosition;
+            Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
             transform.localRotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
 

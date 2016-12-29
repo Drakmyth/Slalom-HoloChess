@@ -35,7 +35,7 @@ namespace Assets.Scripts.Monsters
 
         private const float HorizontalMovementRate = 1f;
 
-        private const float VerticalMovementPerSecond = .05f;
+        private const float VerticalMovementPerSecond = .4f;
 
         private const float RotationRate = .1f;
 
@@ -122,7 +122,7 @@ namespace Assets.Scripts.Monsters
             }
             else if (!_isAlive)
             {
-                if (gameObject.transform.localPosition.y < -.2)
+                if (gameObject.transform.localPosition.y < -1.2)
                 {
                     if (_battleSmokeInstance != null)
                     {
