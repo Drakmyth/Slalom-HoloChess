@@ -248,7 +248,7 @@ namespace Assets.Scripts
             Dictionary<int, int> friendlyMonsterIds = IsHost? JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters) : JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters);
             Dictionary<int, int> enemyMonsterIds = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.GuestMonsters) : JsonConvert.DeserializeObject<Dictionary<int, int>>(gameStartMessage.HostMonsters);
 
-            GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+            GameManager gameManager = GameManager.Instance;
             gameManager.FriendlyMonsterInitialNodeIds = friendlyMonsterIds;
             gameManager.EnemyMonsterInitialNodeIds = enemyMonsterIds;
 
