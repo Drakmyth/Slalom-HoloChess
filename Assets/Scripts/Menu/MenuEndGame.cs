@@ -23,6 +23,7 @@ namespace Assets.Scripts.Menu
 
         void OnSelected(GameObject gameObject)
         {
+            GameManager.Instance.ResetGameManager();
             SceneManager.LoadSceneAsync("lobby");
         }
     }
