@@ -17,6 +17,7 @@ namespace Assets.Scripts.Managers
         {
             keywords.Add("Menu", () => //menu instead?
             {
+                GameManager.Instance.ResetGameManager();
                 SceneManager.LoadScene("lobby");
             });
 
@@ -32,8 +33,8 @@ namespace Assets.Scripts.Managers
             });
 
             keywords.Add("Zoom", () =>
-            {
-				Camera.main.GetComponent<CameraZoom>().Zoom();
+            {              
+                Camera.main.GetComponent<CameraZoom>().Zoom();
             });
 
             // Tell the KeywordRecognizer about our keywords.

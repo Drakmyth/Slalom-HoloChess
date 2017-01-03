@@ -127,7 +127,21 @@ namespace Assets.Scripts
                 Debug.Log(e.Message);
             }
             Debug.Log("Host");
-    }
+        }
+
+        public void ResetGameManager()
+        {
+            var ai = Server.gameObject.GetComponent<GonkDroidAI>();
+            if (ai != null)
+            {
+                ai.NetClient.Shutdown();
+                Destroy(ai);
+            }
+            Destroy(Server);
+
+            Client.NetClient.Shutdown();
+            Destroy(Client);
+        }
 
         public void ConnectToServerButton()
         {

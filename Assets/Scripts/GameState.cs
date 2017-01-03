@@ -64,7 +64,7 @@ namespace Assets.Scripts
 
             AvailablePushDestinations = new List<Node>();
 
-            GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+            GameManager gameManager = GameManager.Instance;
 
             if (gameManager == null || gameManager.Server == null)
             {
