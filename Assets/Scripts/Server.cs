@@ -102,6 +102,7 @@ namespace Assets.Scripts
         {
             NetworkServer.DisconnectAll();
             NetworkServer.Shutdown();
+            NetworkServer.Reset();
         }
 
         public bool ClientsAreReady()
