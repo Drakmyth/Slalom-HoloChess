@@ -23,7 +23,7 @@ namespace Assets.Scripts.Menu
 
         void OnSelected(GameObject gameObject)
         {
-            Destroy(GameManager.Instance.gameObject);
+            GameManager.Instance.ResetGameManager();
             SceneManager.LoadSceneAsync("lobby");
         }
     }

@@ -35,7 +35,7 @@ public class CameraZoom : MonoBehaviour
 
         Camera.main.transform.parent.transform.localPosition = new Vector3(selectedMonster.transform.localPosition.x, 
             selectedMonster.transform.localPosition.y + .1f, selectedMonster.transform.localPosition.z);
-        Camera.main.transform.parent.transform.localRotation = new Quaternion(0, 0, 0, 0);
+        Camera.main.transform.parent.transform.localRotation = new Quaternion(0,180,0,0);
 
         _isZoomed = true;
     }

@@ -39,7 +39,7 @@ namespace Assets.Scripts
 
         public void Init(string ipAddress)
         {           
-            ResetServer();
+            ShutDown();
 
             DontDestroyOnLoad(this);
 
@@ -49,6 +49,7 @@ namespace Assets.Scripts
 
             try
             {
+
                 NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnected);
                 
                 NetworkServer.RegisterHandler(CustomMessageTypes.StateAck, OnStateAck);
@@ -95,9 +96,10 @@ namespace Assets.Scripts
             }
         }
 
-        public void ResetServer()
+        public void ShutDown()
         {
             NetworkServer.DisconnectAll();
+            NetworkServer.Shutdown();
             NetworkServer.Reset();
         }
 
