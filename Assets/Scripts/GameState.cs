@@ -64,12 +64,14 @@ namespace Assets.Scripts
 
             AvailablePushDestinations = new List<Node>();
 
-            if (GameManager.Instance == null || GameManager.Instance.Server == null)
+            GameManager gameManager = GameManager.Instance;
+
+            if (gameManager == null || gameManager.Server == null)
             {
                 throw new InvalidOperationException("Server must exist to begin game");
             }
 
-            _hostServer = GameManager.Instance.Server;
+            _hostServer = gameManager.Server;
 
             if (_hostServer == null || !_hostServer.IsServerStarted)
             {
