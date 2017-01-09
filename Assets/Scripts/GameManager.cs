@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.AI;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace Assets.Scripts
         public GameObject LobbyMenu;
         public GameObject ConnectMenu;
         public GameObject HostMenu;
+        public GameObject Tutorial;
+        public GameObject MicropohoneGameObject;
 
         // monsterTypeIds keyed to initial position nodeIds
         public Dictionary<int, int> FriendlyMonsterInitialNodeIds;
@@ -23,6 +26,8 @@ namespace Assets.Scripts
 
         public Client Client;
 
+        private bool _isScrolling; // We'll use this for debugging
+        private float _rotation;   // Default 55deg, but read in from canvas
         public Server Server;
 
         private bool _isHosting;
@@ -33,8 +38,11 @@ namespace Assets.Scripts
 
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
+            Tutorial.SetActive(false);
+            MicropohoneGameObject.SetActive(false);
 
             _isHosting = false;
+            _isScrolling = false;
 
             DontDestroyOnLoad(gameObject);
 
@@ -53,6 +61,21 @@ namespace Assets.Scripts
                 Debug.Log("Connections: " + NetworkServer.connections.Count);
             }
 
+            // If we are scrolling, perform update action
+            if (_isScrolling && Tutorial != null)
+            {
+                // Get the current transform position of the panel
+                Vector3 _currentUIPosition = Tutorial.gameObject.transform.position;
+
+                // Increment the Y value of the panel 
+                Vector3 _incrementYPosition =
+                 new Vector3(_currentUIPosition.x,
+                             _currentUIPosition.y + .001f * Mathf.Sin(Mathf.Deg2Rad * _rotation),
+                             _currentUIPosition.z + .001f * Mathf.Cos(Mathf.Deg2Rad * _rotation));
+
+                // Change the transform position to the new one
+                Tutorial.gameObject.transform.position = _incrementYPosition;
+            }
 
         }
 
@@ -88,6 +111,23 @@ namespace Assets.Scripts
 
             ConnectMenu.SetActive(false);
             Debug.Log("Host");
+        }
+
+        public void DisplayGameRules()
+        {
+            LobbyMenu.SetActive(false);
+            Tutorial.SetActive(true);
+            StartCoroutine(ActivateMicrophone());
+            
+            // display logic
+            _isScrolling = true;
+            _rotation = Tutorial.gameObject.transform.eulerAngles.x;
+        }
+
+        private IEnumerator ActivateMicrophone()
+        {
+            yield return new WaitForSeconds(5);
+            MicropohoneGameObject.SetActive(true);
         }
 
         public void OpenDifficultySelector()
@@ -131,16 +171,27 @@ namespace Assets.Scripts
 
         public void ResetGameManager()
         {
-            var ai = Server.gameObject.GetComponent<GonkDroidAI>();
-            if (ai != null)
+            if (Server != null)
             {
-                ai.NetClient.Shutdown();
-                Destroy(ai);
-            }
-            Destroy(Server);
+                var ai = Server.gameObject.GetComponent<GonkDroidAI>();
+                if (ai != null)
+                {
+                    ai.NetClient.Shutdown();
+                    Destroy(ai);
+                }
 
-            Client.NetClient.Shutdown();
+                Destroy(Server);
+            }
+
+            if (Client == null) return;
+
+            if (Client.NetClient != null)
+            {
+                Client.NetClient.Shutdown();
+            }        
             Destroy(Client);
+
+            _isScrolling = false;
         }
 
         public void ConnectToServerButton()
