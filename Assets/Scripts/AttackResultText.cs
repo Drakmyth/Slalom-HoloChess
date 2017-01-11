@@ -8,6 +8,7 @@ namespace Assets.Scripts
         public Vector3 LerpDestination { get; set; }
         private float _currentLerp;
         private const float LerpRate = .2f;
+        private bool _isReset = true;
 
         // Use this for initialization
         void Start () {
@@ -20,10 +21,19 @@ namespace Assets.Scripts
         void Update () {
             if (isActiveAndEnabled)
             {
+                var text = GetComponent<TextMesh>();
+
+                if (_isReset)
+                {
+                    _isReset = false;
+                    _currentLerp = 0;
+                    LerpDestination = transform.localPosition + Vector3.up * 1.6f;
+                    RotateToCamera();
+                    text.color = new Color(text.color.r, text.color.g, text.color.b, 1);
+                }
 
                 _currentLerp += Time.deltaTime*LerpRate;
 
-                var text = GetComponent<TextMesh>();
                 text.color = new Color(text.color.r, text.color.g, text.color.b, text.color.a * .98f - .01f);
 
                 transform.localPosition = Vector3.Lerp(transform.localPosition, LerpDestination, _currentLerp);
@@ -32,6 +42,7 @@ namespace Assets.Scripts
 
                 if (_currentLerp > 1 || text.color.a <= 0)
                 {
+                    _isReset = true;
                     gameObject.SetActive(false);
                 }
 
