@@ -35,11 +35,6 @@ namespace Assets.Scripts
         void Start()
         {
 
-            if (Instance != null)
-            {
-                Destroy(Instance.gameObject);
-            }
-
             Instance = this;
             DontDestroyOnLoad(gameObject);
 

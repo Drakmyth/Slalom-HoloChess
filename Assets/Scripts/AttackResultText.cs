@@ -8,7 +8,7 @@ namespace Assets.Scripts
         public Vector3 LerpDestination { get; set; }
         private float _currentLerp;
         private const float LerpRate = .2f;
-        private bool _isReset = true;
+        private bool _isReset = false;
 
         // Use this for initialization
         void Start () {
