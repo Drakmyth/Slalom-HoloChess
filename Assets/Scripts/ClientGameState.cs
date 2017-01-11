@@ -72,6 +72,8 @@ namespace Assets.Scripts
 
             AvailablePushDestinations = new List<Node>();
 
+            BattleSmoke.gameObject.SetActive(false);
+
             Client = GameManager.Instance.Client;
 
             Client.GameState = this;
@@ -342,7 +344,6 @@ namespace Assets.Scripts
                 KillResultTextPrefab.transform.localPosition = battlePosition;
 
                 KillResultTextPrefab.LerpDestination = KillResultTextPrefab.transform.localPosition + Vector3.up;
-                KillResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 ProcessKill(defender, !isFriendlyMonster);
             } else if (attackResult == AttackResult.CounterKill)
@@ -351,7 +352,6 @@ namespace Assets.Scripts
                 CounterKillResultTextPrefab.transform.localPosition = battlePosition;
 
                 CounterKillResultTextPrefab.LerpDestination = CounterKillResultTextPrefab.transform.localPosition + Vector3.up;
-                CounterKillResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 ProcessKill(attacker, isFriendlyMonster);
                 SelectedMonster = null;
@@ -377,7 +377,6 @@ namespace Assets.Scripts
                 PushResultTextPrefab.transform.localPosition = battlePosition;
 
                 PushResultTextPrefab.LerpDestination = PushResultTextPrefab.transform.localPosition + Vector3.up;
-                PushResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 if (_actionNumber == 1 || _actionNumber == 2)
                 {
@@ -397,7 +396,6 @@ namespace Assets.Scripts
                 CounterPushResultTextPrefab.transform.localPosition = battlePosition;
 
                 CounterPushResultTextPrefab.LerpDestination = CounterPushResultTextPrefab.transform.localPosition + Vector3.up;
-                CounterPushResultTextPrefab.SendMessage("OnActivate", battlePosition);
 
                 if (_actionNumber == 3 || _actionNumber == 4)
                 {

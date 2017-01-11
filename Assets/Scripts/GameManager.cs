@@ -183,7 +183,7 @@ namespace Assets.Scripts
             if (_isHosting)
             {
                 _isHosting = false;
-                Server.ResetServer();
+                Server.ShutDown();
                 Server = null;
             }
 
