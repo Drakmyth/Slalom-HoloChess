@@ -34,7 +34,9 @@ namespace Assets.Scripts
 
         void Start()
         {
+
             Instance = this;
+            DontDestroyOnLoad(gameObject);
 
             ConnectMenu.SetActive(false);
             HostMenu.SetActive(false);
@@ -43,8 +45,6 @@ namespace Assets.Scripts
 
             _isHosting = false;
             _isScrolling = false;
-
-            DontDestroyOnLoad(gameObject);
 
         }
 

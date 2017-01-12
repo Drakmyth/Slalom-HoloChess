@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -8,12 +7,13 @@ namespace Assets.Scripts
 
         public Vector3 LerpDestination { get; set; }
         private float _currentLerp;
-        private const float LerpRate = .05f;
+        private const float LerpRate = .2f;
+        private bool _isReset = false;
 
         // Use this for initialization
         void Start () {
             _currentLerp = 0;
-            LerpDestination = transform.position + Vector3.up * .4f;
+            LerpDestination = transform.localPosition + Vector3.up * 1.6f;
             RotateToCamera();
         }
 	
@@ -21,20 +21,29 @@ namespace Assets.Scripts
         void Update () {
             if (isActiveAndEnabled)
             {
+                var text = GetComponent<TextMesh>();
+
+                if (_isReset)
+                {
+                    _isReset = false;
+                    _currentLerp = 0;
+                    LerpDestination = transform.localPosition + Vector3.up * 1.6f;
+                    RotateToCamera();
+                    text.color = new Color(text.color.r, text.color.g, text.color.b, 1);
+                }
 
                 _currentLerp += Time.deltaTime*LerpRate;
 
-                var text = GetComponent<TextMesh>();
                 text.color = new Color(text.color.r, text.color.g, text.color.b, text.color.a * .98f - .01f);
 
-                transform.position = Vector3.Lerp(transform.position, LerpDestination, _currentLerp);
+                transform.localPosition = Vector3.Lerp(transform.localPosition, LerpDestination, _currentLerp);
 
                 RotateToCamera();
 
-
                 if (_currentLerp > 1 || text.color.a <= 0)
                 {
-                    Destroy(gameObject);
+                    _isReset = true;
+                    gameObject.SetActive(false);
                 }
 
             }
@@ -46,7 +55,7 @@ namespace Assets.Scripts
                 GameObject.FindGameObjectsWithTag("MainCamera").Single(o => o.GetComponent<Camera>().enabled);
             Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
-            transform.rotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
+            transform.localRotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
 
         }
 

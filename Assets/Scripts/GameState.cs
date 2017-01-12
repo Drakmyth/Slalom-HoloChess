@@ -242,6 +242,19 @@ namespace Assets.Scripts
 
         public void SelectAction(int selectedNodeId)
         {
+            if (selectedNodeId < 0)
+            {
+                SubActionNumber = 0;
+                _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                {
+                    ActionNumber = ActionNumber,
+                    SubActionNumber = SubActionNumber,
+                    Message = "No available moves.",
+                    HostMonsterState = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                    GuestMonsterState = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                });
+            }
+
             IEnumerable<Node> friendlyOccupiedNodes;
             IEnumerable<Node> enemyOccupiedNodes;
 
@@ -308,7 +321,6 @@ namespace Assets.Scripts
             }
         }
 
-        //TODO: Net are coordinates necessary?
         public void ProcessAttackAction(int attackingMonsterTypeId, int defendingMonsterTypeId)
         {
             Monster attacker;

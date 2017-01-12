@@ -10,7 +10,12 @@ namespace DejarikLibrary
 		public const double InnerRingBoundingRadius = .3;
 		public const double OuterRingBoundingRadius = .45;
 
-		public List<Node> Nodes { get; set; }
+        // node positions need to adjust for the table scale.
+        // if the table scale changes, we'll have to apply that scale to each node coordinate
+	    private const float TableScale = 0.1332398f;
+
+
+        public List<Node> Nodes { get; set; }
 		public Dictionary<NodeMapKey, List<NodePath>> NodeMap { get; set; }
 
 		public BoardGraph()
@@ -96,8 +101,8 @@ namespace DejarikLibrary
 			double x = Math.Cos(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
 			double y = Math.Sin(angle) * ((innerBoundingRadius + outerBoundingRadius) / 2.0);
 
-			node.XPosition = -(float)x;
-			node.YPosition = -(float)y;
+			node.XPosition = -(float)x/TableScale;
+			node.YPosition = -(float)y/TableScale;
 		}
 
 		private Dictionary<NodeMapKey, List<NodePath>> BuildNodeMap(List<Node> nodes, List<Node> excludedNodes)
