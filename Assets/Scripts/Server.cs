@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-
-
 using Assets.Scripts.MessageModels;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -16,9 +14,9 @@ namespace Assets.Scripts
         public string IpAddress = "";
         public bool IsServerStarted;
         private GameState _gameState;
-        private bool _isGuestReady = false;
-        private bool _isHostReady = false;
-        private bool _isLocalSinglePlayer = false;
+        private bool _isGuestReady;
+        private bool _isHostReady;
+        private bool _isLocalSinglePlayer;
 
         void Update()
         {

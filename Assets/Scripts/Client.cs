@@ -22,7 +22,6 @@ namespace Assets.Scripts
 
         public void Init(string hostAddress, int port)
         {
-            //DontDestroyOnLoad(this);
 
             if (!IsHost)
             {

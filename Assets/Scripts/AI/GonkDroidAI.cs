@@ -14,6 +14,7 @@ namespace Assets.Scripts.AI
         private readonly Random _random = new Random();
         private Dictionary<int, int> _friendlyMonsterState = new Dictionary<int, int>();
         private Dictionary<int, int> _enemyMonsterState = new Dictionary<int, int>();
+        private List<int> _monstersWithAvailableMoves;
 
         // Use this for initialization
         void Start()
@@ -114,13 +115,29 @@ namespace Assets.Scripts.AI
             }
             else
             {
-                int randInt = _random.Next(0, message.AvailableMoveNodeIds.Length - 1);
-                NetClient.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
+
+                if (message.AvailableMoveNodeIds.Any())
                 {
-                    ActionNumber = message.ActionNumber,
-                    SubActionNumber = message.SubActionNumber,
-                    SelectedNodeId = message.AvailableMoveNodeIds[randInt]
-                });
+                    int randInt = _random.Next(0, message.AvailableMoveNodeIds.Length - 1);
+                    NetClient.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
+                    {
+                        ActionNumber = message.ActionNumber,
+                        SubActionNumber = message.SubActionNumber,
+                        SelectedNodeId = message.AvailableMoveNodeIds[randInt]
+                    });
+                }
+                else
+                {
+                    _monstersWithAvailableMoves.Remove(message.SelectedMonsterTypeId);
+
+                    //TODO: this would perhaps be better as a custom message type that triggers a pass
+                    NetClient.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
+                    {
+                        ActionNumber = message.ActionNumber,
+                        SubActionNumber = message.SubActionNumber,
+                        SelectedNodeId = -1
+                    });
+                }
             }
         }
 
@@ -149,6 +166,7 @@ namespace Assets.Scripts.AI
 
             _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
             _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
+            _monstersWithAvailableMoves = _friendlyMonsterState.Keys.ToList();
 
         }
     }
