@@ -84,6 +84,12 @@ namespace Assets.Scripts
             {
                 _actionNumber = 3;
 
+                Camera.main.transform.parent.localPosition = new Vector3(Camera.main.transform.parent.localPosition.x, Camera.main.transform.parent.localPosition.y, Camera.main.transform.parent.localPosition.z * -1);
+                Camera.main.transform.parent.localRotation =
+                    Quaternion.Euler(new Vector3(Camera.main.transform.parent.localRotation.eulerAngles.x,
+                        Camera.main.transform.parent.localRotation.eulerAngles.y + 180,
+                        Camera.main.transform.parent.localRotation.eulerAngles.z));
+
             }
 
             _subActionNumber = 1;
@@ -144,7 +150,8 @@ namespace Assets.Scripts
                     {
                         space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
                     }
-                    BoardSpaces[SelectedMonster.CurrentNode.Id].SendMessage("OnClearHighlightingWithSelection", SelectedMonster.CurrentNode);
+                    BoardSpaces[SelectedMonster.CurrentNode.Id].SendMessage("OnClearHighlightingWithSelection",
+                        SelectedMonster.CurrentNode);
                 }
 
             }
@@ -515,7 +522,29 @@ namespace Assets.Scripts
 
         }
 
-        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState)
+        public void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
+        {
+            //Need to wait for animations to finish or things start to look weird
+            if (_isAnimationRunning)
+            {
+                return;
+            }
+
+            UpdateGameState(actionNumber, subActionNumber, friendlyMonsterState, enemyMonsterState, true);
+
+            SelectedMonster = MonsterPrefabs.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterTypeId);
+            SelectedAttackNode = GameGraph.Nodes[selectedAttackNodeId];
+
+            SelectedMovementPath = movementPathIds == null ? null : new NodePath
+            {
+                DestinationNode = GameGraph.Nodes[destinationNodeId],
+                PathToDestination = GameGraph.Nodes.Where(n => movementPathIds.Contains(n.Id)).ToList()
+            };
+
+            AvailablePushDestinations = GameGraph.Nodes.Where(n => availablePushDestinationIds.Contains(n.Id)).ToList();
+        }
+
+        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState, bool isFullSync = false)
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
@@ -547,7 +576,7 @@ namespace Assets.Scripts
             }
 
 
-            if (_actionNumber == 2)
+            if (_actionNumber == 2 && !isFullSync)
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
@@ -570,7 +599,7 @@ namespace Assets.Scripts
                     space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
                 }
             }
-            else
+            else if (!isFullSync)
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {

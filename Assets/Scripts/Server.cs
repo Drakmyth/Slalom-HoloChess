@@ -167,13 +167,18 @@ namespace Assets.Scripts
                 else
                 {
                     _isHostReady = false;
-                    SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                    SendToAll(CustomMessageTypes.GameStateSync, new GameStateSyncMessage
                     {
                         ActionNumber = _gameState.ActionNumber,
                         SubActionNumber = _gameState.SubActionNumber,
                         Message = "Game State Sync",
                         HostMonsterState = JsonConvert.SerializeObject(_gameState.HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
-                        GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                        GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                        SelectedMonsterTypeId = _gameState.SelectedMonster != null ? _gameState.SelectedMonster.MonsterTypeId : 0,
+                        MovementPathIds = _gameState.SelectedMovementPath != null ? JsonConvert.SerializeObject(_gameState.SelectedMovementPath.PathToDestination.Select(n => n.Id).ToArray()) : null,
+                        DestinationNodeId = _gameState.SelectedMovementPath != null ? _gameState.SelectedMovementPath.DestinationNode.Id : 0,
+                        SelectedAttackNodeId = _gameState.SelectedAttackNode != null ? _gameState.SelectedAttackNode.Id : 0,
+                        AvailablePushDestinationIds = JsonConvert.SerializeObject(_gameState.AvailablePushDestinations.Select(n => n.Id))
                     });
                 }
             }
@@ -186,13 +191,18 @@ namespace Assets.Scripts
                 else
                 {
                     _isGuestReady = false;
-                    SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                    SendToAll(CustomMessageTypes.GameStateSync, new GameStateSyncMessage
                     {
                         ActionNumber = _gameState.ActionNumber,
                         SubActionNumber = _gameState.SubActionNumber,
                         Message = "Game State Sync",
                         HostMonsterState = JsonConvert.SerializeObject(_gameState.HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
-                        GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                        GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                        SelectedMonsterTypeId = _gameState.SelectedMonster != null ? _gameState.SelectedMonster.MonsterTypeId : 0,
+                        MovementPathIds = _gameState.SelectedMovementPath != null? JsonConvert.SerializeObject(_gameState.SelectedMovementPath.PathToDestination.Select(n => n.Id).ToArray()) : null,
+                        DestinationNodeId = _gameState.SelectedMovementPath != null ? _gameState.SelectedMovementPath.DestinationNode.Id : 0,
+                        SelectedAttackNodeId = _gameState.SelectedAttackNode != null ? _gameState.SelectedAttackNode.Id : 0,
+                        AvailablePushDestinationIds = JsonConvert.SerializeObject(_gameState.AvailablePushDestinations.Select(n => n.Id))
                     });
                 }
 

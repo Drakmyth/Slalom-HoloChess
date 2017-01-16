@@ -48,6 +48,8 @@ namespace Assets.Scripts.AI
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
 
+                NetClient.RegisterHandler(CustomMessageTypes.GameStateSync, OnGameStateSyncResponse);
+
                 NetClient.Connect(ipAddress, 1300);
 
                 Debug.Log("Gonk Droid AI");
@@ -163,6 +165,16 @@ namespace Assets.Scripts.AI
         private void OnGameStateResponse(NetworkMessage msg)
         {
             GameStateMessage message = msg.ReadMessage<GameStateMessage>();
+
+            _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
+            _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
+            _monstersWithAvailableMoves = _friendlyMonsterState.Keys.ToList();
+
+        }
+
+        private void OnGameStateSyncResponse(NetworkMessage msg)
+        {
+            GameStateSyncMessage message = msg.ReadMessage<GameStateSyncMessage>();
 
             _friendlyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
             _enemyMonsterState = JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
