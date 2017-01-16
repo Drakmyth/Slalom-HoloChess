@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Assets.Scripts.MessageModels;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
@@ -77,23 +78,6 @@ namespace Assets.Scripts
             _isHostReady = false;
             _isGuestReady = false;
             NetworkServer.SendToAll(messageTypeId, msg);
-        }
-
-        public void SendToClient(string data, Client client, short messageTypeId = 0)
-        {
-            try
-            {
-                NetworkServer.SendToClient(client.NetClient.connection.connectionId, messageTypeId, new StringMessage(data));
-            }
-            catch (NullReferenceException npe)
-            {
-                Debug.Log("Connection does not exist for " + client.ClientName);
-                Debug.Log(npe.Message);
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.Message);
-            }
         }
 
         public void ShutDown()
@@ -183,7 +167,14 @@ namespace Assets.Scripts
                 else
                 {
                     _isHostReady = false;
-                    //TODO: Net push game state to client
+                    SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                    {
+                        ActionNumber = _gameState.ActionNumber,
+                        SubActionNumber = _gameState.SubActionNumber,
+                        Message = "Game State Sync",
+                        HostMonsterState = JsonConvert.SerializeObject(_gameState.HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                        GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                    });
                 }
             }
             else
@@ -195,7 +186,14 @@ namespace Assets.Scripts
                 else
                 {
                     _isGuestReady = false;
-                    //TODO: Net push game state to client
+                    SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                    {
+                        ActionNumber = _gameState.ActionNumber,
+                        SubActionNumber = _gameState.SubActionNumber,
+                        Message = "Game State Sync",
+                        HostMonsterState = JsonConvert.SerializeObject(_gameState.HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                        GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                    });
                 }
 
             }
