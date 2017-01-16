@@ -83,14 +83,6 @@ namespace Assets.Scripts
             if (!Client.IsHost)
             {
                 _actionNumber = 3;
-                GameObject[] cameras = GameObject.FindGameObjectsWithTag("MainCamera");
-                GameObject guestCamera = cameras.Single(c => c.name == "Guest Camera");
-                GameObject mainCamera = cameras.Single(c => c.name == "Main Camera");
-
-                mainCamera.GetComponent<Camera>().enabled = false;
-                guestCamera.GetComponent<Camera>().enabled = true;
-
-                GameObject.Find("selectionPreview").GetComponent<Canvas>().worldCamera = guestCamera.GetComponent<Camera>();
 
             }
 
