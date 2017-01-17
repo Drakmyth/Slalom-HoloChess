@@ -173,7 +173,7 @@ namespace Assets.Scripts
                     SelectAction(selectedNode);
                 }
 
-                if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
+                if (_subActionNumber == 6)
                 {
                     SelectPushDestination(selectedNode);
                 }
@@ -414,12 +414,15 @@ namespace Assets.Scripts
 
         private void SelectPushDestination(Node selectedNode)
         {
-            Client.Send(CustomMessageTypes.PushDestinationRequest, new PushDestinationRequestMessage
+            if (AvailablePushDestinations.Contains(selectedNode))
             {
-                ActionNumber = _actionNumber,
-                SubActionNumber = _subActionNumber,
-                SelectedNodeId = selectedNode.Id
-            });
+                Client.Send(CustomMessageTypes.PushDestinationRequest, new PushDestinationRequestMessage
+                {
+                    ActionNumber = _actionNumber,
+                    SubActionNumber = _subActionNumber,
+                    SelectedNodeId = selectedNode.Id
+                });
+            }
         }
 
         public void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
