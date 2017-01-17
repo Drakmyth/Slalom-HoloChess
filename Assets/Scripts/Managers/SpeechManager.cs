@@ -9,46 +9,61 @@ namespace Assets.Scripts.Managers
 
     public class SpeechManager : MonoBehaviour
     {
-        KeywordRecognizer keywordRecognizer = null;
-        Dictionary<string, System.Action> keywords = new Dictionary<string, System.Action>();
+        private KeywordRecognizer _keywordRecognizer = null;
+        private readonly Dictionary<string, System.Action> _keywords = new Dictionary<string, System.Action>();
 
         // Use this for initialization
         void Start()
         {
-            keywords.Add("Menu", () => //menu instead?
+            _keywords.Add("Menu", () =>
             {
                 GameManager.Instance.ResetGameManager();
                 SceneManager.LoadScene("lobby");
             });
 
-            keywords.Add("Select", () =>
+            _keywords.Add("Select", () =>
             {
                 var focusObject = GazeGestureManager.Instance.FocusedObject;
                 if (focusObject != null)
                 {
-                    // Call the OnDrop method on just the focused object.
+                    // Call the OnSelected method on just the focused object.
                     var currentObject = GameObject.Find("GameState");
                     focusObject.SendMessage("OnSelected", currentObject);
                 }
             });
 
-            keywords.Add("Zoom", () =>
+            _keywords.Add("Grab Table", () =>
+            {
+                GameObject.Find("Table").GetComponent<TapToPlace>().UpdatePlacingStatus(true);
+            });
+
+            _keywords.Add("Move Table", () =>
+            {
+                GameObject.Find("Table").GetComponent<TapToPlace>().UpdatePlacingStatus();
+            });
+
+            _keywords.Add("Place Table", () =>
+            {
+                GameObject.Find("Table").GetComponent<TapToPlace>().UpdatePlacingStatus(false);
+            });
+
+            _keywords.Add("Zoom", () =>
             {              
                 Camera.main.GetComponent<CameraZoom>().Zoom();
             });
 
-            // Tell the KeywordRecognizer about our keywords.
-            keywordRecognizer = new KeywordRecognizer(keywords.Keys.ToArray());
+            // Tell the KeywordRecognizer about our _keywords.
+            _keywordRecognizer = new KeywordRecognizer(_keywords.Keys.ToArray());
 
             // Register a callback for the KeywordRecognizer and start recognizing!
-            keywordRecognizer.OnPhraseRecognized += KeywordRecognizer_OnPhraseRecognized;
-            keywordRecognizer.Start();
+            _keywordRecognizer.OnPhraseRecognized += KeywordRecognizer_OnPhraseRecognized;
+            _keywordRecognizer.Start();
         }
 
         private void KeywordRecognizer_OnPhraseRecognized(PhraseRecognizedEventArgs args)
         {
             System.Action keywordAction;
-            if (keywords.TryGetValue(args.text, out keywordAction))
+            if (_keywords.TryGetValue(args.text, out keywordAction))
             {
                 keywordAction.Invoke();
             }
