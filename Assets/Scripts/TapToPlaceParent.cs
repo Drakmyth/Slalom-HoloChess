@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts;
+using UnityEngine;
 
 public class TapToPlaceParent : MonoBehaviour
 {
@@ -40,13 +41,13 @@ public class TapToPlaceParent : MonoBehaviour
 			{
 				// Move this object's parent object to
 				// where the raycast hit the Spatial Mapping mesh.
-				this.transform.parent.position = hitInfo.point;
+				this.transform.position = hitInfo.point + new Vector3(0, 1, 0);
 
 				// Rotate this object's parent object to face the user.
-				Quaternion toQuat = Camera.main.transform.localRotation;
+				Quaternion toQuat = Camera.main.transform.parent.localRotation;
 				toQuat.x = 0;
 				toQuat.z = 0;
-				this.transform.parent.rotation = toQuat;
+				this.transform.rotation = toQuat;
 			}
 		}
 	}
