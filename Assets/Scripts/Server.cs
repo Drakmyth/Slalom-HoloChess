@@ -44,9 +44,9 @@ namespace Assets.Scripts
 
             DontDestroyOnLoad(this);
 
-            IpAddress = ipAddress;
 
             //TODO: Net this is a work around until we can get IP through code or spin up a matchmaking service
+            IpAddress = ipAddress;
 
             try
             {
