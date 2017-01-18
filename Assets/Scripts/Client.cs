@@ -234,7 +234,6 @@ namespace Assets.Scripts
 
         public void SendStateAck(int actionNumber, int subActionNumber)
         {
-            actionNumber = AdjustActionNumber(actionNumber);
             Send(CustomMessageTypes.StateAck, new StateAckMessage
             {
                 ActionNumber = actionNumber,
@@ -286,7 +285,8 @@ namespace Assets.Scripts
 
         }
 
-        private int AdjustActionNumber(int actionNumber)
+
+        public int AdjustActionNumber(int actionNumber)
         {
             if (!IsHost)
             {
@@ -295,7 +295,6 @@ namespace Assets.Scripts
 
             return actionNumber;
         }
-
 
     }
 }
