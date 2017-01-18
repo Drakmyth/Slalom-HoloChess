@@ -60,9 +60,12 @@ namespace Assets.Scripts
         public List<AudioClip> AttackSounds;
         public List<AudioClip> MovementSounds;
 
+        public static ClientGameState Instance;
 
         void Start()
         {
+            Instance = this;
+
             GameGraph = new BoardGraph();
             BoardSpaces = new Dictionary<int, BoardSpace>();
             FriendlyMonsters = new List<Monster>();
@@ -123,7 +126,7 @@ namespace Assets.Scripts
 
             DisplayMonsters(friendlyMonsters, enemyMonsters);
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -207,7 +210,7 @@ namespace Assets.Scripts
         void OnAnimationComplete()
         {
             _isAnimationRunning = false;
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
         }
 
         public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
@@ -226,7 +229,7 @@ namespace Assets.Scripts
                 }
             }
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -237,7 +240,7 @@ namespace Assets.Scripts
             {
                 Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
                 {
-                    ActionNumber = _actionNumber,
+                    ActionNumber = GetAdjustedActionNumber(),
                     SubActionNumber = _subActionNumber,
                     Message = SelectedMonster.Name,
                     MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
@@ -259,7 +262,7 @@ namespace Assets.Scripts
                     space.SendMessage("OnMonsterSelected", SelectedMonster.CurrentNode.Id);
                 }
             }
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -280,7 +283,7 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -289,7 +292,7 @@ namespace Assets.Scripts
             Client.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
             {
                 SelectedNodeId = selectedNode.Id,
-                ActionNumber = _actionNumber,
+                ActionNumber = GetAdjustedActionNumber(),
                 SubActionNumber = _subActionNumber,
                 Message = SelectedMonster.Name,
                 MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
@@ -321,7 +324,7 @@ namespace Assets.Scripts
 
             ProcessAttackAction(SelectedMonster, opponent);
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -418,7 +421,7 @@ namespace Assets.Scripts
             {
                 Client.Send(CustomMessageTypes.PushDestinationRequest, new PushDestinationRequestMessage
                 {
-                    ActionNumber = _actionNumber,
+                    ActionNumber = GetAdjustedActionNumber(),
                     SubActionNumber = _subActionNumber,
                     SelectedNodeId = selectedNode.Id
                 });
@@ -484,8 +487,11 @@ namespace Assets.Scripts
 
             Client.Send(CustomMessageTypes.AttackRequest, new AttackRequestMessage
             {
+                ActionNumber = GetAdjustedActionNumber(),
+                SubActionNumber = _subActionNumber,
                 AttackingMonsterTypeId = attacker.MonsterTypeId,
                 DefendingMonsterTypeId = defender.MonsterTypeId,
+                Message = "Requesting attack"
             });
 
         }
@@ -623,7 +629,7 @@ namespace Assets.Scripts
                 ClearSelectionMenu();
             }
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
         }
 
         private void UpdateAttackResultPreview()
@@ -678,6 +684,17 @@ namespace Assets.Scripts
         {
             return SelectedMonster == null ? null : MonsterPrefabs.First(t => t.Name == SelectedMonster.Name);
         }
+
+        public int GetAdjustedActionNumber()
+        {
+            if (!Client.IsHost)
+            {
+                return (_actionNumber + 1) % 4 + 1;
+            }
+
+            return _actionNumber;
+        }
+
 
         private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {

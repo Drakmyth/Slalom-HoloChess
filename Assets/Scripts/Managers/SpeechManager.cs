@@ -27,8 +27,7 @@ namespace Assets.Scripts.Managers
                 if (focusObject != null)
                 {
                     // Call the OnSelected method on just the focused object.
-                    var currentObject = GameObject.Find("GameState");
-                    focusObject.SendMessage("OnSelected", currentObject);
+                    focusObject.SendMessage("OnSelected", ClientGameState.Instance);
                 }
             });
 
