@@ -15,6 +15,7 @@ namespace Assets.Scripts
             _currentLerp = 0;
             LerpDestination = transform.localPosition + Vector3.up * 1.6f;
             RotateToCamera();
+            gameObject.SetActive(false);
         }
 	
         // Update is called once per frame

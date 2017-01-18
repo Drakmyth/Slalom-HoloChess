@@ -60,9 +60,12 @@ namespace Assets.Scripts
         public List<AudioClip> AttackSounds;
         public List<AudioClip> MovementSounds;
 
+        public static ClientGameState Instance;
 
         void Start()
         {
+            Instance = this;
+
             GameGraph = new BoardGraph();
             BoardSpaces = new Dictionary<int, BoardSpace>();
             FriendlyMonsters = new List<Monster>();
@@ -83,14 +86,12 @@ namespace Assets.Scripts
             if (!Client.IsHost)
             {
                 _actionNumber = 3;
-                GameObject[] cameras = GameObject.FindGameObjectsWithTag("MainCamera");
-                GameObject guestCamera = cameras.Single(c => c.name == "Guest Camera");
-                GameObject mainCamera = cameras.Single(c => c.name == "Main Camera");
 
-                mainCamera.GetComponent<Camera>().enabled = false;
-                guestCamera.GetComponent<Camera>().enabled = true;
-
-                GameObject.Find("selectionPreview").GetComponent<Canvas>().worldCamera = guestCamera.GetComponent<Camera>();
+                Camera.main.transform.parent.localPosition = new Vector3(Camera.main.transform.parent.localPosition.x, Camera.main.transform.parent.localPosition.y, Camera.main.transform.parent.localPosition.z * -1);
+                Camera.main.transform.parent.localRotation =
+                    Quaternion.Euler(new Vector3(Camera.main.transform.parent.localRotation.eulerAngles.x,
+                        Camera.main.transform.parent.localRotation.eulerAngles.y + 180,
+                        Camera.main.transform.parent.localRotation.eulerAngles.z));
 
             }
 
@@ -125,7 +126,7 @@ namespace Assets.Scripts
 
             DisplayMonsters(friendlyMonsters, enemyMonsters);
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -152,7 +153,8 @@ namespace Assets.Scripts
                     {
                         space.SendMessage("OnAvailableMonsters", availableSpaces.Select(s => s.Node.Id));
                     }
-                    BoardSpaces[SelectedMonster.CurrentNode.Id].SendMessage("OnClearHighlightingWithSelection", SelectedMonster.CurrentNode);
+                    BoardSpaces[SelectedMonster.CurrentNode.Id].SendMessage("OnClearHighlightingWithSelection",
+                        SelectedMonster.CurrentNode);
                 }
 
             }
@@ -174,7 +176,7 @@ namespace Assets.Scripts
                     SelectAction(selectedNode);
                 }
 
-                if (_subActionNumber == 6 && AvailablePushDestinations.Any(apd => apd.Id == nodeId))
+                if (_subActionNumber == 6)
                 {
                     SelectPushDestination(selectedNode);
                 }
@@ -208,7 +210,7 @@ namespace Assets.Scripts
         void OnAnimationComplete()
         {
             _isAnimationRunning = false;
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
         }
 
         public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
@@ -227,7 +229,7 @@ namespace Assets.Scripts
                 }
             }
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -238,7 +240,7 @@ namespace Assets.Scripts
             {
                 Client.Send(CustomMessageTypes.SelectMonsterRequest, new SelectMonsterRequestMessage
                 {
-                    ActionNumber = _actionNumber,
+                    ActionNumber = GetAdjustedActionNumber(),
                     SubActionNumber = _subActionNumber,
                     Message = SelectedMonster.Name,
                     MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
@@ -260,7 +262,7 @@ namespace Assets.Scripts
                     space.SendMessage("OnMonsterSelected", SelectedMonster.CurrentNode.Id);
                 }
             }
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -281,7 +283,7 @@ namespace Assets.Scripts
 
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -290,7 +292,7 @@ namespace Assets.Scripts
             Client.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
             {
                 SelectedNodeId = selectedNode.Id,
-                ActionNumber = _actionNumber,
+                ActionNumber = GetAdjustedActionNumber(),
                 SubActionNumber = _subActionNumber,
                 Message = SelectedMonster.Name,
                 MessageTypeId = CustomMessageTypes.SelectMonsterRequest,
@@ -322,7 +324,7 @@ namespace Assets.Scripts
 
             ProcessAttackAction(SelectedMonster, opponent);
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
 
         }
 
@@ -415,12 +417,15 @@ namespace Assets.Scripts
 
         private void SelectPushDestination(Node selectedNode)
         {
-            Client.Send(CustomMessageTypes.PushDestinationRequest, new PushDestinationRequestMessage
+            if (AvailablePushDestinations.Contains(selectedNode))
             {
-                ActionNumber = _actionNumber,
-                SubActionNumber = _subActionNumber,
-                SelectedNodeId = selectedNode.Id
-            });
+                Client.Send(CustomMessageTypes.PushDestinationRequest, new PushDestinationRequestMessage
+                {
+                    ActionNumber = GetAdjustedActionNumber(),
+                    SubActionNumber = _subActionNumber,
+                    SelectedNodeId = selectedNode.Id
+                });
+            }
         }
 
         public void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
@@ -482,8 +487,11 @@ namespace Assets.Scripts
 
             Client.Send(CustomMessageTypes.AttackRequest, new AttackRequestMessage
             {
+                ActionNumber = GetAdjustedActionNumber(),
+                SubActionNumber = _subActionNumber,
                 AttackingMonsterTypeId = attacker.MonsterTypeId,
                 DefendingMonsterTypeId = defender.MonsterTypeId,
+                Message = "Requesting attack"
             });
 
         }
@@ -523,7 +531,29 @@ namespace Assets.Scripts
 
         }
 
-        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState)
+        public void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
+        {
+            //Need to wait for animations to finish or things start to look weird
+            if (_isAnimationRunning)
+            {
+                return;
+            }
+
+            UpdateGameState(actionNumber, subActionNumber, friendlyMonsterState, enemyMonsterState, true);
+
+            SelectedMonster = MonsterPrefabs.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterTypeId);
+            SelectedAttackNode = GameGraph.Nodes[selectedAttackNodeId];
+
+            SelectedMovementPath = movementPathIds == null ? null : new NodePath
+            {
+                DestinationNode = GameGraph.Nodes[destinationNodeId],
+                PathToDestination = GameGraph.Nodes.Where(n => movementPathIds.Contains(n.Id)).ToList()
+            };
+
+            AvailablePushDestinations = GameGraph.Nodes.Where(n => availablePushDestinationIds.Contains(n.Id)).ToList();
+        }
+
+        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState, bool isFullSync = false)
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
@@ -555,7 +585,7 @@ namespace Assets.Scripts
             }
 
 
-            if (_actionNumber == 2)
+            if (_actionNumber == 2 && !isFullSync)
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
@@ -578,7 +608,7 @@ namespace Assets.Scripts
                     space.SendMessage("OnClearHighlightingWithSelection", selectedNode);
                 }
             }
-            else
+            else if (!isFullSync)
             {
                 foreach (BoardSpace space in BoardSpaces.Values)
                 {
@@ -599,7 +629,7 @@ namespace Assets.Scripts
                 ClearSelectionMenu();
             }
 
-            Client.SendStateAck(_actionNumber, _subActionNumber);
+            Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
         }
 
         private void UpdateAttackResultPreview()
@@ -654,6 +684,17 @@ namespace Assets.Scripts
         {
             return SelectedMonster == null ? null : MonsterPrefabs.First(t => t.Name == SelectedMonster.Name);
         }
+
+        public int GetAdjustedActionNumber()
+        {
+            if (!Client.IsHost)
+            {
+                return (_actionNumber + 1) % 4 + 1;
+            }
+
+            return _actionNumber;
+        }
+
 
         private void DisplayMonsters(List<Monster> friendlyMonsters, List<Monster> enemyMonsters)
         {
