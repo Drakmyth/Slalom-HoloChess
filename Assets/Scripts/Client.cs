@@ -56,6 +56,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.PushDestinationResponse, OnPushDestinationResponse);
 
+                NetClient.RegisterHandler(CustomMessageTypes.GameStateSync, OnGameStateSyncResponse);
+
                 NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameEnd, OnGameEnd);
@@ -211,10 +213,27 @@ namespace Assets.Scripts
             GameState.UpdateGameState(message.ActionNumber, message.SubActionNumber, friendlyMonsterState, enemyMonsterState);
         }
 
+        private void OnGameStateSyncResponse(NetworkMessage msg)
+        {
+            GameStateSyncMessage message = msg.ReadMessage<GameStateSyncMessage>();
+
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
+            //Convert json strings to objects
+            Dictionary<int, int> friendlyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
+            Dictionary<int, int> enemyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
+
+            List<int> movementPathIds = message.MovementPathIds != null ? JsonConvert.DeserializeObject<List<int>>(message.MovementPathIds) : null;
+
+            IEnumerable<int> availablePushDestinationIds =
+                JsonConvert.DeserializeObject<IEnumerable<int>>(message.AvailablePushDestinationIds);            
+
+            GameState.SyncGameState(friendlyMonsterState, enemyMonsterState, movementPathIds, availablePushDestinationIds, message.ActionNumber, message.SubActionNumber, message.SelectedMonsterTypeId, message.SelectedAttackNodeId,  message.DestinationNodeId);
+        }
+
 
         public void SendStateAck(int actionNumber, int subActionNumber)
         {
-            actionNumber = AdjustActionNumber(actionNumber);
             Send(CustomMessageTypes.StateAck, new StateAckMessage
             {
                 ActionNumber = actionNumber,
@@ -266,7 +285,8 @@ namespace Assets.Scripts
 
         }
 
-        private int AdjustActionNumber(int actionNumber)
+
+        public int AdjustActionNumber(int actionNumber)
         {
             if (!IsHost)
             {
@@ -275,7 +295,6 @@ namespace Assets.Scripts
 
             return actionNumber;
         }
-
 
     }
 }

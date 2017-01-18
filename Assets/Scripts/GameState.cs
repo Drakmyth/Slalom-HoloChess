@@ -47,7 +47,7 @@ namespace Assets.Scripts
         public NodePath SelectedMovementPath { get; set; }
 
         //TODO: we can probably do better than this
-        private IEnumerable<Node> AvailablePushDestinations { get; set; }
+        public IEnumerable<Node> AvailablePushDestinations { get; set; }
 
         void Start()
         {

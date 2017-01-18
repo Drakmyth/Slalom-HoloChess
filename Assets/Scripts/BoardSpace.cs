@@ -107,17 +107,17 @@ namespace Assets.Scripts
 
         void OnSelected(GameObject gameStateObject)
         {
-            gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
+            ClientGameState.Instance.SendMessage("OnSpaceSelected", Node.Id);
         }
 
         void OnPreviewEnter(GameObject gameStateObject)
         {
-            gameStateObject.SendMessage("OnPreviewEnter", Node.Id);
+            ClientGameState.Instance.SendMessage("OnPreviewEnter", Node.Id);
         }
 
         void OnSpeechSelected(GameObject gameStateObject)
         {
-            gameStateObject.SendMessage("OnSpaceSelected", Node.Id);
+            ClientGameState.Instance.SendMessage("OnSpaceSelected", Node.Id);
         }
     }
 }
