@@ -6,6 +6,7 @@ namespace Assets.Scripts
     {
         private Vector3 _originalPosition;
         private Quaternion _originalRotation;
+        private Vector3 _originalScale;
         private bool _isZoomed;
 
         private ClientGameState GameState
@@ -25,31 +26,35 @@ namespace Assets.Scripts
             }
         }
 
-        public void ZoomIn()
+        private void ZoomIn()
         {
             var selectedMonster = GameState.GetSelectedMonsterPrefab();
             if (_isZoomed || selectedMonster == null) return;
+            
+            var parent = Camera.main.transform.parent;
 
             // update camera location & rotation
-            _originalPosition = Camera.main.transform.parent.localPosition;
-            _originalRotation = Camera.main.transform.parent.localRotation;
+            _originalPosition = parent.localPosition;
+            _originalRotation = parent.localRotation;
+            _originalScale = parent.localScale;
 
-            Camera.main.transform.parent.transform.localPosition = new Vector3(selectedMonster.transform.localPosition.x, 
+			parent.localScale = new Vector3(parent.localScale.x/25f, parent.localScale.y / 25f, parent.localScale.z / 25f);
+            parent.transform.localPosition = new Vector3(selectedMonster.transform.localPosition.x, 
                 selectedMonster.transform.localPosition.y + .1f, selectedMonster.transform.localPosition.z);
-            Camera.main.transform.parent.localScale = new Vector3(Camera.main.transform.localScale.x/25f, Camera.main.transform.localScale.y / 25f, Camera.main.transform.localScale.z / 25f);
 
             _isZoomed = true;
         }
 
-        public void ZoomOut()
+        private void ZoomOut()
         {
             if (!_isZoomed) return;
 
-            // update camera location
-            Camera.main.transform.parent.transform.localPosition = _originalPosition;
-            Camera.main.transform.parent.transform.localRotation = new Quaternion(_originalRotation.x, _originalRotation.y, _originalRotation.z, _originalRotation.w);
+			var parent = Camera.main.transform.parent;
 
-            Camera.main.transform.parent.localScale = new Vector3(Camera.main.transform.localScale.x * 25f, Camera.main.transform.localScale.y * 25f, Camera.main.transform.localScale.z * 25f);
+            // update camera location
+            parent.localScale = _originalScale;
+            parent.transform.localPosition = _originalPosition;
+            parent.transform.localRotation = _originalRotation;
 
             _isZoomed = false;
         }
