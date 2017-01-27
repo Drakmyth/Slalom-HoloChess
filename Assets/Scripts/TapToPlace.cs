@@ -22,7 +22,7 @@ namespace Assets.Scripts
             if (_placing)
             {
                 // Do a raycast into the world that will only hit the Spatial Mapping mesh.
-                var headPosition = Camera.main.transform.fposition;
+                var headPosition = Camera.main.transform.position;
                 var gazeDirection = Camera.main.transform.forward;
 
                 RaycastHit hitInfo;
