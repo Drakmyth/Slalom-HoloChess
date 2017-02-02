@@ -10,9 +10,13 @@ namespace Assets.Scripts.SelectionPreview.AttackResultPreview
         private float _initialWidth;
         private float _initialHeight;
 
+        public static PushResultPreview Instance;
+
         // Use this for initialization
         void Start()
         {
+            Instance = this;
+
             _initialY = GetComponent<RectTransform>().anchoredPosition.y;
             _initialWidth = GetComponent<RectTransform>().sizeDelta.x;
             _initialHeight = GetComponent<RectTransform>().sizeDelta.y;

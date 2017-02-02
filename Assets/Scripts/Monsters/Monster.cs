@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DejarikLibrary;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ namespace Assets.Scripts.Monsters
         //TODO: find a way to remove this work-around for rotation
         public bool BelongsToHost { get; set; }
         public float YRotationAdjustment { get; set; }
+        //TODO: ew ew ew ew ew ew ew ew ew
+        private IEnumerable<int> _reverseRotationMonsterIds;
 
         private List<Node> MovementNodes { get; set; }
 
@@ -45,17 +48,26 @@ namespace Assets.Scripts.Monsters
 
         void Start()
         {
-            _initialXRotation = transform.localRotation.eulerAngles.x;
-            _initialYRotation = transform.localRotation.eulerAngles.y + YRotationAdjustment;
-            _initialZRotation = transform.localRotation.eulerAngles.z;
+
+            _reverseRotationMonsterIds = new List<int>
+            {
+                MonsterTypes.Ghhhk,
+                MonsterTypes.Strider,
+                MonsterTypes.Houjix,
+                MonsterTypes.Ngok
+            };
+
             _movementDelta = 0;
             _rotationDelta = 0;
             MovementNodes = new List<Node>();
             _isAlive = true;
+
+
         }
 
         void Update()
         {
+
             if (MovementNodes.Count > 0)
             {
 
@@ -87,14 +99,15 @@ namespace Assets.Scripts.Monsters
                     }
 
                 }
-                else if (_rotationDelta < 1)
+
+                if (_rotationDelta < 1)
                 {
 
                     Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                    float yAdjustment = 180f;
+//                    float yAdjustment = _reverseRotationMonsterIds.Contains(MonsterTypeId) ? 0f : 180f;
 
-                    lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
+                    lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + YRotationAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
                     transform.localRotation = Quaternion.Slerp(transform.localRotation, lookRotation, _rotationDelta);
 
@@ -108,9 +121,9 @@ namespace Assets.Scripts.Monsters
 
                 Quaternion lookRotation = Quaternion.LookRotation(deltaVector.normalized);
 
-                float yAdjustment = 180f;
+//                float yAdjustment = _reverseRotationMonsterIds.Contains(MonsterTypeId) ? 0f : 180f;
 
-                lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + yAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
+                lookRotation = Quaternion.Euler(lookRotation.eulerAngles.x + _initialXRotation, lookRotation.eulerAngles.y + _initialYRotation + YRotationAdjustment, lookRotation.eulerAngles.z + _initialZRotation);
 
                 transform.localRotation = Quaternion.Slerp(transform.localRotation, lookRotation, _rotationDelta);
 
@@ -158,6 +171,28 @@ namespace Assets.Scripts.Monsters
         {
             MovementNodes = currentPath.PathToDestination;
             _movementDelta = 0;
+        }
+
+        public void ShouldActivate()
+        {
+            _reverseRotationMonsterIds = new List<int>
+            {
+                MonsterTypes.Ghhhk,
+                MonsterTypes.Strider,
+                MonsterTypes.Houjix,
+                MonsterTypes.Ngok
+            };
+
+            float yAdjustment = _reverseRotationMonsterIds.Contains(MonsterTypeId) ? 180f : 0f;
+
+            _initialXRotation = transform.localRotation.eulerAngles.x;
+            _initialYRotation = transform.localRotation.eulerAngles.y + yAdjustment;
+            _initialYRotation = _initialYRotation % 360;
+            _initialZRotation = transform.localRotation.eulerAngles.z;
+
+            transform.localRotation = Quaternion.Euler(_initialXRotation, _initialYRotation, _initialZRotation);
+
+            gameObject.SetActive(true);
         }
 
         public override bool Equals(object o)

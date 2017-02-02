@@ -6,6 +6,13 @@ namespace Assets.Scripts
     {
         private bool _placing = false;
 
+        public static TapToPlace Instance;
+
+        void Start()
+        {
+            Instance = this;
+        }
+
         // Called by GazeGestureManager when the user performs a Select gesture
         void OnSelected()
         {
@@ -29,15 +36,9 @@ namespace Assets.Scripts
                 if (Physics.Raycast(headPosition, gazeDirection, out hitInfo,
                     30.0f, SpatialMapping.PhysicsRaycastMask))
                 {
-                    // Move this object's parent object to
+                    // Move this object to
                     // where the raycast hit the Spatial Mapping mesh.
-                    this.transform.position = hitInfo.point + new Vector3(0, .5f, 0);
-
-                    // Rotate this object's parent object to face the user.
-                    Quaternion toQuat = Camera.main.transform.parent.localRotation;
-                    toQuat.x = 0;
-                    toQuat.z = 0;
-                    this.transform.rotation = toQuat;
+                    this.transform.position = hitInfo.point + new Vector3(0, .5f, 0); // TODO: account for this's size
                 }
             }
         }
@@ -45,22 +46,16 @@ namespace Assets.Scripts
         //Allow for explicit or implicit toggle of placing status
         public void UpdatePlacingStatus(bool? placingStatus = null)
         {
-            if (placingStatus == null)
+            if (!placingStatus.HasValue)
             {
                 placingStatus = !_placing;
             }
 
             _placing = placingStatus.Value;
+            
             // If the user is in _placing mode, display the spatial mapping mesh.
-            if (_placing)
-            {
-                SpatialMapping.Instance.DrawVisualMeshes = true;
-            }
             // If the user is not in _placing mode, hide the spatial mapping mesh.
-            else
-            {
-                SpatialMapping.Instance.DrawVisualMeshes = false;
-            }
+            SpatialMapping.Instance.DrawVisualMeshes = _placing;
         }
     }
 }
