@@ -39,14 +39,6 @@ namespace Assets.Scripts
                     // Move this object to
                     // where the raycast hit the Spatial Mapping mesh.
                     this.transform.position = hitInfo.point + new Vector3(0, .5f, 0); // TODO: account for this's size
-
-                    // Rotate this object's parent object to face the user.
-                    // TODO: camera rotation or parent rotation?
-                    // TODO: need to offset by 180 degrees?
-                    Quaternion toQuat = Camera.main.transform.parent.localRotation;
-                    toQuat.x = 0;
-                    toQuat.z = 0;
-                    this.transform.rotation = toQuat;
                 }
             }
         }
