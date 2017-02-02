@@ -43,9 +43,10 @@ namespace Assets.Scripts
             _originalRotation = transform.localRotation;
             _originalScale = transform.localScale;
 
+            transform.localScale = new Vector3(transform.localScale.x*25f, transform.localScale.y*25f, transform.localScale.z*25f);
+
             transform.localPosition = new Vector3(-selectedMonster.transform.localPosition.x,
-                selectedMonster.transform.localPosition.y + .1f, -selectedMonster.transform.localPosition.z);
-            transform.localScale = new Vector3(transform.localScale.x/25f, transform.localScale.y / 25f, transform.localScale.z / 25f);
+                selectedMonster.transform.localPosition.y - 4, -selectedMonster.transform.localPosition.z);
 
             _isZoomed = true;
         }

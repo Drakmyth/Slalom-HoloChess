@@ -73,6 +73,10 @@ namespace Assets.Scripts
         {
             MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
 
+            const float tableScale = .1f;
+
+            _selectionIndicatorInstance.transform.position = new Vector3(Node.XPosition * tableScale, _selectionIndicatorInstance.transform.position.y, Node.YPosition * tableScale);
+
             _selectionIndicatorInstance.SetActive(nodeId == Node.Id);
         }
 
