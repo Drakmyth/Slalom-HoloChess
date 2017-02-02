@@ -33,22 +33,22 @@ namespace Assets.Scripts.Managers
 
             _keywords.Add("Grab Table", () =>
             {
-                GameObject.Find("Table").GetComponent<TapToPlace>().UpdatePlacingStatus(true);
+                TapToPlace.Instance.UpdatePlacingStatus(true);
             });
 
             _keywords.Add("Move Table", () =>
             {
-                GameObject.Find("Table").GetComponent<TapToPlace>().UpdatePlacingStatus();
+                TapToPlace.Instance.UpdatePlacingStatus();
             });
 
             _keywords.Add("Place Table", () =>
             {
-                GameObject.Find("Table").GetComponent<TapToPlace>().UpdatePlacingStatus(false);
+                TapToPlace.Instance.UpdatePlacingStatus(false);
             });
 
             _keywords.Add("Zoom", () =>
             {              
-                Camera.main.GetComponent<CameraZoom>().Zoom();
+                TableZoom.Instance.Zoom();
             });
 
             // Tell the KeywordRecognizer about our _keywords.

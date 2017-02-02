@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Assets.Scripts.MessageModels;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
+using Assets.Scripts.SelectionPreview.AttackResultPreview;
 using Random = System.Random;
 
 namespace Assets.Scripts
@@ -87,12 +88,9 @@ namespace Assets.Scripts
             {
                 _actionNumber = 3;
 
-                Camera.main.transform.parent.localPosition = new Vector3(Camera.main.transform.parent.localPosition.x, Camera.main.transform.parent.localPosition.y, Camera.main.transform.parent.localPosition.z * -1);
-                Camera.main.transform.parent.localRotation =
-                    Quaternion.Euler(new Vector3(Camera.main.transform.parent.localRotation.eulerAngles.x,
-                        Camera.main.transform.parent.localRotation.eulerAngles.y + 180,
-                        Camera.main.transform.parent.localRotation.eulerAngles.z));
-
+                var table = GameObject.Find("Table");
+                table.transform.localRotation = Quaternion.Euler(table.transform.localRotation.eulerAngles.x,
+                    table.transform.localRotation.eulerAngles.y + 180, table.transform.localRotation.eulerAngles.z);
             }
 
             _subActionNumber = 1;
@@ -218,6 +216,8 @@ namespace Assets.Scripts
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
+
+            BattleSmoke.SetActive(false);
 
             var availableSpaces = availableMonsterNodeIds.Select(s => BoardSpaces[s]);
 
@@ -636,18 +636,18 @@ namespace Assets.Scripts
         {
             IDictionary<AttackResult, decimal> attackResultPercentages = AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating, PreviewMonster.DefenseRating);
 
-            GameObject.Find("KillResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("PushResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("CounterPushResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("CounterKillResultPreview").SendMessage("OnUpdate", attackResultPercentages);
+            KillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            PushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            CounterPushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            CounterKillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
         }
 
         private void ClearAttackResultPreview()
         {
-            GameObject.Find("KillResultPreview").SendMessage("OnClear");
-            GameObject.Find("PushResultPreview").SendMessage("OnClear");
-            GameObject.Find("CounterPushResultPreview").SendMessage("OnClear");
-            GameObject.Find("CounterKillResultPreview").SendMessage("OnClear");
+            KillResultPreview.Instance.SendMessage("OnClear");
+            PushResultPreview.Instance.SendMessage("OnClear");
+            CounterPushResultPreview.Instance.SendMessage("OnClear");
+            CounterKillResultPreview.Instance.SendMessage("OnClear");
         }
 
         private void UpdatePreviewMenu()
@@ -701,10 +701,9 @@ namespace Assets.Scripts
             foreach (Monster monster in friendlyMonsters)
             {
 
-                float yRotationAdjustment = Client.IsHost ? 180 : 0;
+                float yRotationAdjustment = Client.IsHost ? 0 : 180;
 
-
-                Quaternion monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
+                Quaternion monsterQuaternion = Quaternion.Euler(monster.transform.localRotation.eulerAngles.x, yRotationAdjustment, monster.transform.localRotation.eulerAngles.z);
                 Vector3 monsterPosition = new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition);
 
                 monster.transform.localPosition = monsterPosition;
@@ -714,15 +713,15 @@ namespace Assets.Scripts
 
                 monster.BelongsToHost = false;
                 monster.YRotationAdjustment = yRotationAdjustment;
-                monster.gameObject.SetActive(true);
+                monster.ShouldActivate();
                 FriendlyMonsters.Add(monster);
             }
 
             foreach (Monster enemyMonster in enemyMonsters)
             {
-                float yRotationAdjustment = Client.IsHost ? 0 : 180;
+                float yRotationAdjustment = Client.IsHost ? 180 : 0;
 
-                Quaternion enemyMonsterQuaternion = Quaternion.Euler(enemyMonster.transform.rotation.eulerAngles.x, enemyMonster.transform.rotation.eulerAngles.y + yRotationAdjustment, enemyMonster.transform.rotation.eulerAngles.z);
+                Quaternion enemyMonsterQuaternion = Quaternion.Euler(enemyMonster.transform.localRotation.eulerAngles.x, yRotationAdjustment, enemyMonster.transform.localRotation.eulerAngles.z);
                 Vector3 enemyMonsterPosition = new Vector3(enemyMonster.CurrentNode.XPosition, 0, enemyMonster.CurrentNode.YPosition);
 
                 enemyMonster.transform.localPosition = enemyMonsterPosition;
@@ -730,7 +729,8 @@ namespace Assets.Scripts
 
                 enemyMonster.BelongsToHost = true;
                 enemyMonster.YRotationAdjustment = yRotationAdjustment;
-                enemyMonster.gameObject.SetActive(true);
+
+                enemyMonster.ShouldActivate();
                 EnemyMonsters.Add(enemyMonster);
             }
         }
