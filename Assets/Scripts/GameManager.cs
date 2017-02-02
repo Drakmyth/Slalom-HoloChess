@@ -192,9 +192,6 @@ namespace Assets.Scripts
             Destroy(Client);
 
             _isScrolling = false;
-
-            // reset zoom if necessary
-            Camera.main.GetComponent<CameraZoom>().ZoomOut();
         }
 
         public void ConnectToServerButton()

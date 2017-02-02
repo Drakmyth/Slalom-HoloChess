@@ -6,6 +6,13 @@ namespace Assets.Scripts
     {
         private bool _placing = false;
 
+        public static TapToPlace Instance;
+
+        void Start()
+        {
+            Instance = this;
+        }
+
         // Called by GazeGestureManager when the user performs a Select gesture
         void OnSelected()
         {
