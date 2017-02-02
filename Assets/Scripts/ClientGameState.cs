@@ -220,6 +220,8 @@ namespace Assets.Scripts
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
 
+            BattleSmoke.SetActive(false);
+
             var availableSpaces = availableMonsterNodeIds.Select(s => BoardSpaces[s]);
 
             if (_actionNumber == 1 || _actionNumber == 2)
