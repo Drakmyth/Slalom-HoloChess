@@ -13,6 +13,8 @@ namespace Assets.Scripts
         private Color OriginalColor { get; set; }
         private Color SelectionYellow { get; set; }
 
+        private float? _tableScale;
+
         // Use this for initialization
         void Start()
         {
@@ -27,11 +29,21 @@ namespace Assets.Scripts
                 new Vector3(transform.localPosition.x, SelectionIndicatorPrefab.transform.localPosition.y, transform.localPosition.z),
                 selectionIndicatorQuaternion);
             _selectionIndicatorInstance.SetActive(false);
+
+            if (ClientGameState.Instance != null)
+            {
+                _tableScale = ClientGameState.Instance.Client.IsHost ? .1f : -.1f;
+            }
+
         }
 
         // Update is called once per frame
         void Update()
         {
+            if (ClientGameState.Instance != null && _tableScale == null)
+            {
+                _tableScale = ClientGameState.Instance.Client.IsHost ? .1f : -.1f;
+            }
         }
 
         void OnAvailableMonsters(IEnumerable<int> availableNodeIds)
@@ -71,13 +83,13 @@ namespace Assets.Scripts
 
         void OnMonsterSelected(int nodeId)
         {
-            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+            if (_tableScale != null)
+            {
+                _selectionIndicatorInstance.transform.localPosition = new Vector3(Node.XPosition * _tableScale.Value, _selectionIndicatorInstance.transform.localPosition.y, Node.YPosition * _tableScale.Value);
 
-            const float tableScale = .1f;
+                _selectionIndicatorInstance.SetActive(nodeId == Node.Id);
 
-            _selectionIndicatorInstance.transform.position = new Vector3(Node.XPosition * tableScale, _selectionIndicatorInstance.transform.position.y, Node.YPosition * tableScale);
-
-            _selectionIndicatorInstance.SetActive(nodeId == Node.Id);
+            }
         }
 
         void OnClearHighlighting()

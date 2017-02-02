@@ -88,12 +88,9 @@ namespace Assets.Scripts
             {
                 _actionNumber = 3;
 
-                Camera.main.transform.parent.localPosition = new Vector3(Camera.main.transform.parent.localPosition.x, Camera.main.transform.parent.localPosition.y, Camera.main.transform.parent.localPosition.z * -1);
-                Camera.main.transform.parent.localRotation =
-                    Quaternion.Euler(new Vector3(Camera.main.transform.parent.localRotation.eulerAngles.x,
-                        Camera.main.transform.parent.localRotation.eulerAngles.y + 180,
-                        Camera.main.transform.parent.localRotation.eulerAngles.z));
-
+                var table = GameObject.Find("Table");
+                table.transform.localRotation = Quaternion.Euler(table.transform.localRotation.eulerAngles.x,
+                    table.transform.localRotation.eulerAngles.y + 180, table.transform.localRotation.eulerAngles.z);
             }
 
             _subActionNumber = 1;
@@ -704,10 +701,9 @@ namespace Assets.Scripts
             foreach (Monster monster in friendlyMonsters)
             {
 
-                float yRotationAdjustment = Client.IsHost ? 180 : 0;
+                float yRotationAdjustment = Client.IsHost ? 0 : 180;
 
-
-                Quaternion monsterQuaternion = Quaternion.Euler(monster.transform.rotation.eulerAngles.x, monster.transform.rotation.eulerAngles.y + yRotationAdjustment, monster.transform.rotation.eulerAngles.z);
+                Quaternion monsterQuaternion = Quaternion.Euler(monster.transform.localRotation.eulerAngles.x, yRotationAdjustment, monster.transform.localRotation.eulerAngles.z);
                 Vector3 monsterPosition = new Vector3(monster.CurrentNode.XPosition, 0, monster.CurrentNode.YPosition);
 
                 monster.transform.localPosition = monsterPosition;
@@ -717,15 +713,15 @@ namespace Assets.Scripts
 
                 monster.BelongsToHost = false;
                 monster.YRotationAdjustment = yRotationAdjustment;
-                monster.gameObject.SetActive(true);
+                monster.ShouldActivate();
                 FriendlyMonsters.Add(monster);
             }
 
             foreach (Monster enemyMonster in enemyMonsters)
             {
-                float yRotationAdjustment = Client.IsHost ? 0 : 180;
+                float yRotationAdjustment = Client.IsHost ? 180 : 0;
 
-                Quaternion enemyMonsterQuaternion = Quaternion.Euler(enemyMonster.transform.rotation.eulerAngles.x, enemyMonster.transform.rotation.eulerAngles.y + yRotationAdjustment, enemyMonster.transform.rotation.eulerAngles.z);
+                Quaternion enemyMonsterQuaternion = Quaternion.Euler(enemyMonster.transform.localRotation.eulerAngles.x, yRotationAdjustment, enemyMonster.transform.localRotation.eulerAngles.z);
                 Vector3 enemyMonsterPosition = new Vector3(enemyMonster.CurrentNode.XPosition, 0, enemyMonster.CurrentNode.YPosition);
 
                 enemyMonster.transform.localPosition = enemyMonsterPosition;
@@ -733,7 +729,8 @@ namespace Assets.Scripts
 
                 enemyMonster.BelongsToHost = true;
                 enemyMonster.YRotationAdjustment = yRotationAdjustment;
-                enemyMonster.gameObject.SetActive(true);
+
+                enemyMonster.ShouldActivate();
                 EnemyMonsters.Add(enemyMonster);
             }
         }
