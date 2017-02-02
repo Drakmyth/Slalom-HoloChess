@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Assets.Scripts.MessageModels;
 using DejarikLibrary;
 using Assets.Scripts.Monsters;
+using Assets.Scripts.SelectionPreview.AttackResultPreview;
 using Random = System.Random;
 
 namespace Assets.Scripts
@@ -636,18 +637,18 @@ namespace Assets.Scripts
         {
             IDictionary<AttackResult, decimal> attackResultPercentages = AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating, PreviewMonster.DefenseRating);
 
-            GameObject.Find("KillResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("PushResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("CounterPushResultPreview").SendMessage("OnUpdate", attackResultPercentages);
-            GameObject.Find("CounterKillResultPreview").SendMessage("OnUpdate", attackResultPercentages);
+            KillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            PushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            CounterPushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            CounterKillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
         }
 
         private void ClearAttackResultPreview()
         {
-            GameObject.Find("KillResultPreview").SendMessage("OnClear");
-            GameObject.Find("PushResultPreview").SendMessage("OnClear");
-            GameObject.Find("CounterPushResultPreview").SendMessage("OnClear");
-            GameObject.Find("CounterKillResultPreview").SendMessage("OnClear");
+            KillResultPreview.Instance.SendMessage("OnClear");
+            PushResultPreview.Instance.SendMessage("OnClear");
+            CounterPushResultPreview.Instance.SendMessage("OnClear");
+            CounterKillResultPreview.Instance.SendMessage("OnClear");
         }
 
         private void UpdatePreviewMenu()

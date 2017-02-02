@@ -52,12 +52,10 @@ namespace Assets.Scripts
 
         private void RotateToCamera()
         {
-            GameObject mainCamera =
-                GameObject.FindGameObjectsWithTag("MainCamera").Single(o => o.GetComponent<Camera>().enabled);
+            GameObject mainCamera = Camera.main.gameObject;
             Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
             transform.localRotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
-
         }
 
     }
