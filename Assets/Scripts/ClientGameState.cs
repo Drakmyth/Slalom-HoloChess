@@ -76,11 +76,18 @@ namespace Assets.Scripts
 
             AvailablePushDestinations = new List<Node>();
 
-            BattleSmoke.gameObject.SetActive(false);
+        BattleSmoke.gameObject.SetActive(false);
 
             Client = GameManager.Instance.Client;
 
             Client.GameState = this;
+
+            float attackResultTextRotationOffset = Client.IsHost ? 180 : 0;
+
+            PushResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            KillResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            CounterPushResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            CounterKillResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
 
             _actionNumber = 1;
 
