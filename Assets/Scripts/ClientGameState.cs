@@ -65,6 +65,15 @@ namespace Assets.Scripts
 
         void Start()
         {
+            Client = GameManager.Instance.Client;
+
+            if (!Client.IsPlayer)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+
             Instance = this;
 
             GameGraph = new BoardGraph();
@@ -77,13 +86,6 @@ namespace Assets.Scripts
             AvailablePushDestinations = new List<Node>();
 
             BattleSmoke.gameObject.SetActive(false);
-
-            Client = GameManager.Instance.Client;
-
-            if (!Client.IsPlayer)
-            {
-                Destroy(gameObject);
-            }
 
             Client.GameState = this;
 
