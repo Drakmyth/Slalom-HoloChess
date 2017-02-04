@@ -15,6 +15,7 @@ namespace Assets.Scripts
     {
 
         public bool IsHost = false;
+        public bool IsPlayer = true;
         //TODO: Net make this private and abstract necessary functionality out
         public NetworkClient NetClient;
         public string ClientName = "client";
@@ -90,6 +91,55 @@ namespace Assets.Scripts
 
         }
 
+        public void InitObserver(string hostAddress, int port)
+        {
+            IsPlayer = false;
+            ClientName = "observer";
+
+            try
+            {
+                NetClient = new NetworkClient();
+
+                NetClient.RegisterHandler(MsgType.Connect, OnConnected);
+
+                NetClient.RegisterHandler(MsgType.Disconnect, OnDisconnected);
+
+                NetClient.RegisterHandler(MsgType.Error, OnError);
+
+                NetClient.RegisterHandler(CustomMessageTypes.GameStart, OnGameStart);
+
+                NetClient.RegisterHandler(CustomMessageTypes.AvailableMonstersResponse, OnAvailableMonsters);
+
+                NetClient.RegisterHandler(CustomMessageTypes.SelectMonsterResponse, OnSelectMonster);
+
+                NetClient.RegisterHandler(CustomMessageTypes.AvailableMovesResponse, OnAvailableMoves);
+
+                NetClient.RegisterHandler(CustomMessageTypes.SelectMoveActionResponse, OnSelectMoveAction);
+
+                NetClient.RegisterHandler(CustomMessageTypes.SelectAttackActionResponse, OnSelectAttackAction);
+
+                NetClient.RegisterHandler(CustomMessageTypes.AttackKillResponse, OnAttackKillResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.AttackPushResponse, OnAttackPushResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.PushDestinationResponse, OnPushDestinationResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.GameStateSync, OnGameStateSyncResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.GameEnd, OnGameEnd);
+
+                NetClient.Connect(hostAddress, port);
+
+                Debug.Log("Observer");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+        }
+
         public bool Send(short messageType, MessageBase message)
         {
             return NetClient.Send(messageType, message);
@@ -103,6 +153,7 @@ namespace Assets.Scripts
         private void OnDisconnected(NetworkMessage msg)
         {
             Debug.Log("Disconnected from server");
+
         }
 
         private void OnError(NetworkMessage msg)
