@@ -297,9 +297,14 @@ namespace Assets.Scripts
         private void OnGameEnd(NetworkMessage msg)
         {
             GameEndMessage message = msg.ReadMessage<GameEndMessage>();
-            bool isWinResult = IsHost ? message.IsHostWinner : !message.IsHostWinner;
+            bool isConclusive = !message.IsHostWinner && !message.IsGuestWinner;
+            bool isWinResult = IsHost ? message.IsHostWinner : message.IsGuestWinner;
 
-            if (isWinResult)
+            if (!isConclusive || !IsPlayer)
+            {
+                SceneManager.LoadSceneAsync("endgame");
+            }
+            else if (isWinResult)
             {
                 SceneManager.LoadSceneAsync("wingame");
             }
