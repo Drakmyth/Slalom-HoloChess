@@ -194,7 +194,7 @@ namespace Assets.Scripts
             _isScrolling = false;
         }
 
-        public void ConnectToServerButton()
+        public void ConnectToServerButton(bool isPlayer)
         {
             string hostAddress = GameObject.Find("HostInput").GetComponent<InputField>().text;
 
@@ -206,7 +206,15 @@ namespace Assets.Scripts
             try
             {
                 Client = gameObject.AddComponent<Client>();
-                Client.Init(hostAddress, 1300);
+
+                if (isPlayer)
+                {
+                    Client.Init(hostAddress, 1300);
+                }
+                else
+                {
+                    Client.InitObserver(hostAddress, 1300);
+                }
             }
             catch (Exception e)
             {
