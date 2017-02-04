@@ -11,7 +11,7 @@ namespace Assets.Scripts.Menu
         // Use this for initialization
         void Start()
         {
-            _rotationSpeed = -60;
+            _rotationSpeed = -40;
             PlaySound();
         }
 
@@ -25,7 +25,7 @@ namespace Assets.Scripts.Menu
             }
 
             transform.Rotate(Vector3.down, _rotationSpeed);
-            _rotationSpeed = _rotationSpeed * .991f;
+            _rotationSpeed = _rotationSpeed * .99f;
         }
 
         void PlaySound()

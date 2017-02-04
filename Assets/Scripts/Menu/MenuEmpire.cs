@@ -15,7 +15,7 @@ namespace Assets.Scripts.Menu
         void Start()
         {
             _currentAlpha = 1f;
-            _rotationSpeed = -.004f;
+            _rotationSpeed = -.008f;
             _deltaAlpha = 0.002f;
         }
 
@@ -36,7 +36,7 @@ namespace Assets.Scripts.Menu
                 transform.Rotate(Vector3.down, _rotationSpeed);
                 if (_rotationSpeed > -10)
                 {
-                    _rotationSpeed = _rotationSpeed*1.04f;
+                    _rotationSpeed = _rotationSpeed*1.08f;
                 }
                 else if (_currentAlpha > .01f)
                 {
