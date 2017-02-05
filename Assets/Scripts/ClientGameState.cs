@@ -420,6 +420,13 @@ namespace Assets.Scripts
                         space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
                     }
                 }
+                else
+                {
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnClearHighlighting", AvailablePushDestinations.Select(n => n.Id));
+                    }
+                }
 
                 BattleSmoke.SetActive(false);
 
