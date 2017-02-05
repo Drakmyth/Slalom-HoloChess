@@ -153,7 +153,14 @@ namespace Assets.Scripts
         private void OnDisconnected(NetworkMessage msg)
         {
             Debug.Log("Disconnected from server");
-            GameManager.Instance.BackButton();
+            if (SceneManager.GetSceneByName("lobby").isLoaded)
+            {
+                GameManager.Instance.BackButton();
+            }
+            else
+            {
+                SceneManager.LoadSceneAsync("endgame");
+            }
         }
 
         private void OnError(NetworkMessage msg)

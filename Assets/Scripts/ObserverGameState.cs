@@ -86,7 +86,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
+        public override void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
                 int subActionNumber)
         {
             _actionNumber = actionNumber;
@@ -96,21 +96,21 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
+        public override void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId) ?? EnemyMonsters.Single(m => m.MonsterTypeId == selectedMonsterId);
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
         }
 
-        public void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
+        public override void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
 
         }
 
-        public void ConfirmSelectMoveAction(List<int> pathToDestination, int destinationNodeId, int actionNumber, int subActionNumber)
+        public override void ConfirmSelectMoveAction(List<int> pathToDestination, int destinationNodeId, int actionNumber, int subActionNumber)
         {
 
             SelectedMovementPath = new NodePath(pathToDestination.Select(i => GameGraph.Nodes[i]).ToList(), GameGraph.Nodes[destinationNodeId]);
@@ -123,7 +123,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmSelectAttackAction(int attackNodeId, int actionNumber, int subActionNumber)
+        public override void ConfirmSelectAttackAction(int attackNodeId, int actionNumber, int subActionNumber)
         {
             SelectedAttackNode = GameGraph.Nodes[attackNodeId];
             SelectedMovementPath = null;
@@ -137,7 +137,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAttackKillResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
+        public override void ConfirmAttackKillResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
             bool isFriendlyMonster = _actionNumber == 1 || _actionNumber == 2;
 
@@ -173,7 +173,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAttackPushResult(AttackResult attackResult, IEnumerable<int> availablePushDestinationIds, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
+        public override void ConfirmAttackPushResult(AttackResult attackResult, IEnumerable<int> availablePushDestinationIds, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
             Vector3 battlePosition = new Vector3(BattleSmoke.transform.localPosition.x, BattleSmoke.transform.localPosition.y, BattleSmoke.transform.localPosition.z);
 
@@ -207,7 +207,7 @@ namespace Assets.Scripts
             _subActionNumber = subActionNumber;
         }
 
-        public void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
+        public override void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
         {
             bool enemyPush = (_actionNumber == 3 || _actionNumber == 4) && _subActionNumber == 6;
             bool enemyCounterPush = (_actionNumber == 1 || _actionNumber == 2) && _subActionNumber == 7;
@@ -295,7 +295,7 @@ namespace Assets.Scripts
 
         }
 
-        public void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
+        public override void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
         {
             //Need to wait for animations to finish or things start to look weird
             if (_isAnimationRunning)
@@ -317,7 +317,7 @@ namespace Assets.Scripts
             AvailablePushDestinations = GameGraph.Nodes.Where(n => availablePushDestinationIds.Contains(n.Id)).ToList();
         }
 
-        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState, bool isFullSync = false)
+        public override void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState, bool isFullSync = false)
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
@@ -347,7 +347,9 @@ namespace Assets.Scripts
                     monster.CurrentNode = GameGraph.Nodes[enemyMonsterState[monster.MonsterTypeId]];
                 }
             }
-            
+
+            DisplayMonsters(FriendlyMonsters, EnemyMonsters);
+
             if (!isFullSync)
             {
                 if (_actionNumber == 1 || _actionNumber == 3)
@@ -361,12 +363,12 @@ namespace Assets.Scripts
             
         }
 
-        public Monster GetSelectedMonsterPrefab()
+        public override Monster GetSelectedMonsterPrefab()
         {
             return SelectedMonster == null ? null : MonsterPrefabs.First(t => t.Name == SelectedMonster.Name);
         }
 
-        public int GetAdjustedActionNumber()
+        public override int GetAdjustedActionNumber()
         {
             if (!Client.IsHost)
             {
