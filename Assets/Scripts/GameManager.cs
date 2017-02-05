@@ -20,6 +20,13 @@ namespace Assets.Scripts
         public GameObject Tutorial;
         public GameObject MicropohoneGameObject;
 
+        // tutorial panels
+        public GameObject LeftPanel;
+        public GameObject RightPanel;
+        public GameObject CenterPanel;
+        public GameObject FarLeftPanel;
+        public GameObject FarRightPanel;
+
         // monsterTypeIds keyed to initial position nodeIds
         public Dictionary<int, int> FriendlyMonsterInitialNodeIds;
         public Dictionary<int, int> EnemyMonsterInitialNodeIds;
@@ -42,6 +49,13 @@ namespace Assets.Scripts
             HostMenu.SetActive(false);
             Tutorial.SetActive(false);
             MicropohoneGameObject.SetActive(false);
+
+            // tutorial panels
+            LeftPanel.SetActive(false);
+            RightPanel.SetActive(false);
+            CenterPanel.SetActive(false);
+            FarLeftPanel.SetActive(false);
+            FarRightPanel.SetActive(false);
 
             _isHosting = false;
             _isScrolling = false;
@@ -126,8 +140,16 @@ namespace Assets.Scripts
 
         private IEnumerator ActivateMicrophone()
         {
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(10);
             MicropohoneGameObject.SetActive(true);
+            Tutorial.SetActive(false);
+
+            // tutorial panels
+            LeftPanel.SetActive(true);
+            RightPanel.SetActive(true);
+            CenterPanel.SetActive(true);
+            FarLeftPanel.SetActive(true);
+            FarRightPanel.SetActive(true);
         }
 
         public void OpenDifficultySelector()
