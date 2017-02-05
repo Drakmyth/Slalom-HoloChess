@@ -74,26 +74,6 @@ namespace Assets.Scripts
                     BoardSpaces.Add(i, spacePrefab);
                 }
             }
-
-            List<Monster> friendlyMonsters = new List<Monster>();
-            List<Monster> enemyMonsters = new List<Monster>();
-            foreach (Monster monster in MonsterPrefabs)
-            {
-                if (GameManager.Instance.FriendlyMonsterInitialNodeIds.ContainsKey(monster.MonsterTypeId))
-                {
-                    monster.CurrentNode = GameGraph.Nodes[GameManager.Instance.FriendlyMonsterInitialNodeIds[monster.MonsterTypeId]];
-                    friendlyMonsters.Add(monster);
-                }
-                else
-                {
-                    monster.CurrentNode = GameGraph.Nodes[GameManager.Instance.EnemyMonsterInitialNodeIds[monster.MonsterTypeId]];
-                    enemyMonsters.Add(monster);
-                }
-
-            }
-
-            DisplayMonsters(friendlyMonsters, enemyMonsters);
-
         }
 
         void Update()

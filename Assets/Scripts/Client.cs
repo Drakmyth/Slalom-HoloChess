@@ -153,7 +153,7 @@ namespace Assets.Scripts
         private void OnDisconnected(NetworkMessage msg)
         {
             Debug.Log("Disconnected from server");
-
+            GameManager.Instance.BackButton();
         }
 
         private void OnError(NetworkMessage msg)
