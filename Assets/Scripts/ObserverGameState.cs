@@ -98,7 +98,7 @@ namespace Assets.Scripts
 
         public override void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
-            SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId) ?? EnemyMonsters.Single(m => m.MonsterTypeId == selectedMonsterId);
+            SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId) ?? EnemyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId);
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
         }
@@ -252,6 +252,11 @@ namespace Assets.Scripts
 
         private void ProcessAttackAction(Monster attacker, Monster defender)
         {
+            if (attacker == null && defender == null)
+            {
+                return;
+            }
+
             Vector3 battleSmokePosition = new Vector3((attacker.CurrentNode.XPosition + defender.CurrentNode.XPosition) / 2f, 0, (attacker.CurrentNode.YPosition + defender.CurrentNode.YPosition) / 2f);
             BattleSmoke.SetActive(true);
             BattleSmoke.transform.localPosition = battleSmokePosition;
@@ -284,15 +289,17 @@ namespace Assets.Scripts
 
         private void ProcessMoveAction(Monster selectedMonster, NodePath path)
         {
-            int number = _random.Next(0, MovementSounds.Count - 1);
-            selectedMonster.PlaySound(MovementSounds[number]);
+            if (selectedMonster != null)
+            {
+                int number = _random.Next(0, MovementSounds.Count - 1);
+                selectedMonster.PlaySound(MovementSounds[number]);
 
-            selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
+                selectedMonster.CurrentNode = GameGraph.Nodes[path.DestinationNode.Id];
 
-            _isAnimationRunning = true;
+                _isAnimationRunning = true;
 
-            selectedMonster.SendMessage("OnBeginMoveAnimation", path);
-
+                selectedMonster.SendMessage("OnBeginMoveAnimation", path);
+            }
         }
 
         public override void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
@@ -321,6 +328,26 @@ namespace Assets.Scripts
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
+
+            foreach (int monsterTypeId in friendlyMonsterState.Keys)
+            {
+                if (FriendlyMonsters.All(m => m.MonsterTypeId != monsterTypeId))
+                {
+                    Monster monster = MonsterPrefabs.SingleOrDefault(m => m.MonsterTypeId == monsterTypeId);
+                    monster.CurrentNode = GameGraph.Nodes[friendlyMonsterState[monsterTypeId]];
+                    FriendlyMonsters.Add(monster);
+                }
+            }
+
+            foreach (int monsterTypeId in enemyMonsterState.Keys)
+            {
+                if (EnemyMonsters.All(m => m.MonsterTypeId != monsterTypeId))
+                {
+                    Monster monster = MonsterPrefabs.SingleOrDefault(m => m.MonsterTypeId == monsterTypeId);
+                    monster.CurrentNode = GameGraph.Nodes[enemyMonsterState[monsterTypeId]];
+                    EnemyMonsters.Add(monster);
+                }
+            }
 
             foreach (Monster monster in FriendlyMonsters)
             {
@@ -397,7 +424,10 @@ namespace Assets.Scripts
                 monster.BelongsToHost = false;
                 monster.YRotationAdjustment = yRotationAdjustment;
                 monster.ShouldActivate();
-                FriendlyMonsters.Add(monster);
+                if (FriendlyMonsters.All(m => m.MonsterTypeId != monster.MonsterTypeId))
+                {
+                    FriendlyMonsters.Add(monster);
+                }
             }
 
             foreach (Monster enemyMonster in enemyMonsters)
@@ -414,7 +444,10 @@ namespace Assets.Scripts
                 enemyMonster.YRotationAdjustment = yRotationAdjustment;
 
                 enemyMonster.ShouldActivate();
-                EnemyMonsters.Add(enemyMonster);
+                if (EnemyMonsters.All(m => m.MonsterTypeId != enemyMonster.MonsterTypeId))
+                {
+                    EnemyMonsters.Add(enemyMonster);
+                }
             }
         }
     }
