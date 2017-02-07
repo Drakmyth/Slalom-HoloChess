@@ -17,6 +17,8 @@ namespace Assets.Scripts
         private bool _isGuestReady;
         private bool _isHostReady;
         private bool _isLocalSinglePlayer;
+        private int _hostConnectionId;
+        private int _guestConnectionId;
 
         void Update()
         {
@@ -51,7 +53,9 @@ namespace Assets.Scripts
             {
 
                 NetworkServer.RegisterHandler(MsgType.Connect, OnClientConnected);
-                
+
+                NetworkServer.RegisterHandler(MsgType.Disconnect, OnClientDisconnected);
+
                 NetworkServer.RegisterHandler(CustomMessageTypes.StateAck, OnStateAck);
 
                 NetworkServer.RegisterHandler(CustomMessageTypes.SelectMonsterRequest, OnSelectMonster);
@@ -94,11 +98,51 @@ namespace Assets.Scripts
         private void OnClientConnected(NetworkMessage netMsg)
         {
             Debug.Log("Client has been connected to host");
+            int connectionCount = NetworkServer.connections.Count(c => c != null);
+            if (connectionCount == 1)
+            {
+                _hostConnectionId = netMsg.conn.connectionId;
+            }
+
             if (NetworkServer.connections.Count(c => c != null) == 2)
             {
+                _guestConnectionId = netMsg.conn.connectionId;
                 _gameState = gameObject.AddComponent<GameState>();
             }
 
+            if (NetworkServer.connections.Count(c => c != null) > 2)
+            {
+                netMsg.conn.Send(CustomMessageTypes.GameStart, new GameStartMessage
+                {
+                    HostMonsters = JsonConvert.SerializeObject(_gameState.HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                    GuestMonsters = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                    ActionNumber = 1,
+                    SubActionNumber = 1
+                });
+
+                netMsg.conn.Send(CustomMessageTypes.GameStateSync, new GameStateSyncMessage
+                {
+                    ActionNumber = _gameState.ActionNumber,
+                    SubActionNumber = _gameState.SubActionNumber,
+                    Message = "Game State Sync",
+                    HostMonsterState = JsonConvert.SerializeObject(_gameState.HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                    GuestMonsterState = JsonConvert.SerializeObject(_gameState.GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                    SelectedMonsterTypeId = _gameState.SelectedMonster != null ? _gameState.SelectedMonster.MonsterTypeId : 0,
+                    MovementPathIds = _gameState.SelectedMovementPath != null ? JsonConvert.SerializeObject(_gameState.SelectedMovementPath.PathToDestination.Select(n => n.Id).ToArray()) : null,
+                    DestinationNodeId = _gameState.SelectedMovementPath != null ? _gameState.SelectedMovementPath.DestinationNode.Id : 0,
+                    SelectedAttackNodeId = _gameState.SelectedAttackNode != null ? _gameState.SelectedAttackNode.Id : 0,
+                    AvailablePushDestinationIds = JsonConvert.SerializeObject(_gameState.AvailablePushDestinations.Select(n => n.Id))
+                });
+            }
+
+        }
+
+        private void OnClientDisconnected(NetworkMessage netMsg)
+        {
+            if (netMsg.conn.connectionId == _hostConnectionId || netMsg.conn.connectionId == _guestConnectionId)
+            {
+                SendToAll(CustomMessageTypes.GameEnd, new GameEndMessage {IsHostWinner = false, IsGuestWinner = false});
+            }
         }
 
         public void OnSelectMonster(NetworkMessage msg)

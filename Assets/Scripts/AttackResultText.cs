@@ -1,11 +1,11 @@
-﻿using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts
 {
     public class AttackResultText : MonoBehaviour  {
 
         public Vector3 LerpDestination { get; set; }
+        public float YRotationOffset;
         private float _currentLerp;
         private const float LerpRate = .2f;
         private bool _isReset = false;
@@ -55,7 +55,7 @@ namespace Assets.Scripts
             GameObject mainCamera = Camera.main.gameObject;
             Vector3 relativePos = mainCamera.transform.position - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(relativePos);
-            transform.localRotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + 180, lookRotation.eulerAngles.z);
+            transform.localRotation = Quaternion.Euler(lookRotation.eulerAngles.x, lookRotation.eulerAngles.y + YRotationOffset, lookRotation.eulerAngles.z);
         }
 
     }
