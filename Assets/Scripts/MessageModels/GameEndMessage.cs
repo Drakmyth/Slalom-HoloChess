@@ -6,6 +6,7 @@ namespace Assets.Scripts.MessageModels
     {
         public short MessageTypeId;
         public bool IsHostWinner;
+        public bool IsGuestWinner;
 
         public GameEndMessage()
         {

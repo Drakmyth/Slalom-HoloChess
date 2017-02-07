@@ -110,7 +110,8 @@ namespace Assets.Scripts
                 ActionNumber = 0;
                 _hostServer.SendToAll(CustomMessageTypes.GameEnd, new GameEndMessage
                 {
-                    IsHostWinner = false
+                    IsHostWinner = false,
+                    IsGuestWinner = true
                 });
             }
             else if (GuestMonsters.Count == 0)
@@ -118,7 +119,8 @@ namespace Assets.Scripts
                 ActionNumber = 0;
                 _hostServer.SendToAll(CustomMessageTypes.GameEnd, new GameEndMessage
                 {
-                    IsHostWinner = true
+                    IsHostWinner = true,
+                    IsGuestWinner = false
                 });
             }
 

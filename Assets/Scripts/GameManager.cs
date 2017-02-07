@@ -16,7 +16,7 @@ namespace Assets.Scripts
 
         public GameObject LobbyMenu;
         public GameObject ConnectMenu;
-        public GameObject HostMenu;
+        public GameObject ConnectingMenu;
         public GameObject Tutorial;
         public GameObject MicropohoneGameObject;
 
@@ -39,6 +39,8 @@ namespace Assets.Scripts
 
         private bool _isHosting;
 
+        private string _ipAddress;
+
         void Start()
         {
 
@@ -46,7 +48,7 @@ namespace Assets.Scripts
             DontDestroyOnLoad(gameObject);
 
             ConnectMenu.SetActive(false);
-            HostMenu.SetActive(false);
+            ConnectingMenu.SetActive(false);
             Tutorial.SetActive(false);
             MicropohoneGameObject.SetActive(false);
 
@@ -59,7 +61,7 @@ namespace Assets.Scripts
 
             _isHosting = false;
             _isScrolling = false;
-
+            _ipAddress = null;
         }
 
         void Update()
@@ -97,7 +99,13 @@ namespace Assets.Scripts
         {
             LobbyMenu.SetActive(false);
             ConnectMenu.SetActive(true);
-            HostMenu.SetActive(false);
+            ConnectingMenu.SetActive(false);
+
+            if (_ipAddress != null)
+            {
+                GameObject.Find("HostInput").GetComponent<InputField>().text = _ipAddress;
+            }
+
             Debug.Log("Multiplayer");
         }
 
@@ -107,8 +115,8 @@ namespace Assets.Scripts
             try
             {
                 Server = gameObject.AddComponent<Server>();
-                string ipAddress = GameObject.Find("HostInput").GetComponent<InputField>().text;
-                Server.Init(ipAddress);
+                _ipAddress = GameObject.Find("HostInput").GetComponent<InputField>().text;
+                Server.Init(_ipAddress);
 
                 Client = gameObject.AddComponent<Client>();
                 Client.InitHost(Server.IpAddress);
@@ -119,9 +127,11 @@ namespace Assets.Scripts
             }
 
             LobbyMenu.SetActive(false);
-            HostMenu.SetActive(true);
+            ConnectingMenu.SetActive(true);
 
-            HostMenu.transform.FindChild("IpAddress").GetComponent<Text>().text = Server.IpAddress;
+            ConnectingMenu.transform.FindChild("HostingText").GetComponent<Text>().text = "hosting fRom:";
+
+            ConnectingMenu.transform.FindChild("IpAddress").GetComponent<Text>().text = Server.IpAddress;
 
             ConnectMenu.SetActive(false);
             Debug.Log("Host");
@@ -221,8 +231,9 @@ namespace Assets.Scripts
             _isScrolling = false;
         }
 
-        public void ConnectToServerButton()
+        public void ConnectToServerButton(bool isPlayer)
         {
+
             string hostAddress = GameObject.Find("HostInput").GetComponent<InputField>().text;
 
             if (string.IsNullOrEmpty(hostAddress))
@@ -230,22 +241,41 @@ namespace Assets.Scripts
                 hostAddress = "127.0.0.1";
             }
 
+            _ipAddress = hostAddress;
+
+            LobbyMenu.SetActive(false);
+            ConnectingMenu.SetActive(true);
+
+            ConnectingMenu.transform.FindChild("HostingText").GetComponent<Text>().text = "";
+
+            ConnectMenu.SetActive(false);
+
+
             try
             {
                 Client = gameObject.AddComponent<Client>();
-                Client.Init(hostAddress, 1300);
+
+                if (isPlayer)
+                {
+                    Client.Init(hostAddress, 1300);
+                }
+                else
+                {
+                    Client.InitObserver(hostAddress, 1300);
+                }
             }
             catch (Exception e)
             {
                 Debug.Log(e.Message);
             }
+
         }
 
         public void BackButton()
         {
             LobbyMenu.SetActive(true);
             ConnectMenu.SetActive(false);
-            HostMenu.SetActive(false);
+            ConnectingMenu.SetActive(false);
 
             if (Client != null && Client.NetClient.isConnected)
             {
