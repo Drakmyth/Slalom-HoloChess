@@ -20,14 +20,12 @@ namespace Assets.Scripts
         public List<Monster> FriendlyMonsters { get; set; }
         public List<Monster> EnemyMonsters { get; set; }
 
-        private readonly Random _random = new Random();
-
         //0 : GameEnded
         //1 : HostAction
         //2 : HostAction
         //3 : GuestAction
         //4 : GuestAction
-        private int _actionNumber;
+        public int _actionNumber;
 
         //TODO: seems a decent candidate for an enum
         //1 : Highlight available monsters
@@ -37,13 +35,15 @@ namespace Assets.Scripts
         //5 : Process Action
         //6 : Select Push result (await user input)
         //7 : Listen for CounterPush result (await opponent input)
-        private int _subActionNumber;
+        public int _subActionNumber;
         
-        private bool _isAnimationRunning = false;
-        private Monster SelectedMonster { get; set; }
+        public bool _isAnimationRunning = false;
+        public Monster SelectedMonster { get; set; }
         private Monster PreviewMonster { get; set; }
         private Node SelectedAttackNode { get; set; }
         private NodePath SelectedMovementPath { get; set; }
+
+        private readonly Random _random = new Random();
 
         //TODO: we can probably do better than this
         private IEnumerable<Node> AvailablePushDestinations { get; set; }
@@ -65,6 +65,15 @@ namespace Assets.Scripts
 
         void Start()
         {
+            Client = GameManager.Instance.Client;
+
+            if (!Client.IsPlayer)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+
             Instance = this;
 
             GameGraph = new BoardGraph();
@@ -78,9 +87,14 @@ namespace Assets.Scripts
 
             BattleSmoke.gameObject.SetActive(false);
 
-            Client = GameManager.Instance.Client;
-
             Client.GameState = this;
+
+            float attackResultTextRotationOffset = Client.IsHost ? 180 : 0;
+
+            PushResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            KillResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            CounterPushResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            CounterKillResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
 
             _actionNumber = 1;
 
@@ -211,7 +225,7 @@ namespace Assets.Scripts
             Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
         }
 
-        public void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
+        public virtual void ConfirmAvailableMonsters(List<int> availableMonsterNodeIds, int actionNumber,
                 int subActionNumber)
         {
             _actionNumber = actionNumber;
@@ -249,7 +263,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
+        public virtual void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId) ?? EnemyMonsters.Single(m => m.MonsterTypeId == selectedMonsterId);
             _actionNumber = actionNumber;
@@ -266,7 +280,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
+        public virtual void ConfirmAvailableActions(List<int> availableMoveActionNodeIds, List<int> availableAttackActionNodeIds, int actionNumber, int subActionNumber)
         {
 
             if (_actionNumber == 1 || _actionNumber == 2)
@@ -299,7 +313,7 @@ namespace Assets.Scripts
             });
         }
 
-        public void ConfirmSelectMoveAction(List<int> pathToDestination, int destinationNodeId, int actionNumber, int subActionNumber)
+        public virtual void ConfirmSelectMoveAction(List<int> pathToDestination, int destinationNodeId, int actionNumber, int subActionNumber)
         {
 
             SelectedMovementPath = new NodePath(pathToDestination.Select(i => GameGraph.Nodes[i]).ToList(), GameGraph.Nodes[destinationNodeId]);
@@ -312,7 +326,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmSelectAttackAction(int attackNodeId, int actionNumber, int subActionNumber)
+        public virtual void ConfirmSelectAttackAction(int attackNodeId, int actionNumber, int subActionNumber)
         {
             SelectedAttackNode = GameGraph.Nodes[attackNodeId];
             SelectedMovementPath = null;
@@ -328,7 +342,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAttackKillResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
+        public virtual void ConfirmAttackKillResult(AttackResult attackResult, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
             bool isFriendlyMonster = _actionNumber == 1 || _actionNumber == 2;
 
@@ -364,7 +378,7 @@ namespace Assets.Scripts
 
         }
 
-        public void ConfirmAttackPushResult(AttackResult attackResult, IEnumerable<int> availablePushDestinationIds, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
+        public virtual void ConfirmAttackPushResult(AttackResult attackResult, IEnumerable<int> availablePushDestinationIds, int attackingMonsterTypeId, int defendingMonsterTypeId, int actionNumber, int subActionNumber)
         {
             Vector3 battlePosition = new Vector3(BattleSmoke.transform.localPosition.x, BattleSmoke.transform.localPosition.y, BattleSmoke.transform.localPosition.z);
 
@@ -406,6 +420,13 @@ namespace Assets.Scripts
                         space.SendMessage("OnAvailableMoves", AvailablePushDestinations.Select(n => n.Id));
                     }
                 }
+                else
+                {
+                    foreach (BoardSpace space in BoardSpaces.Values)
+                    {
+                        space.SendMessage("OnClearHighlighting", AvailablePushDestinations.Select(n => n.Id));
+                    }
+                }
 
                 BattleSmoke.SetActive(false);
 
@@ -428,7 +449,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
+        public virtual void ConfirmPushDestination(int[] pathToDestinationNodeIds, int destinationNodeId, int actionNumber, int subActionNumber)
         {
             bool enemyPush = (_actionNumber == 3 || _actionNumber == 4) && _subActionNumber == 6;
             bool enemyCounterPush = (_actionNumber == 1 || _actionNumber == 2) && _subActionNumber == 7;
@@ -531,7 +552,7 @@ namespace Assets.Scripts
 
         }
 
-        public void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
+        public virtual void SyncGameState(Dictionary<int, int> friendlyMonsterState, Dictionary<int, int> enemyMonsterState, IEnumerable<int> movementPathIds, IEnumerable<int> availablePushDestinationIds, int actionNumber, int subActionNumber, int selectedMonsterTypeId, int selectedAttackNodeId, int destinationNodeId)
         {
             //Need to wait for animations to finish or things start to look weird
             if (_isAnimationRunning)
@@ -553,7 +574,7 @@ namespace Assets.Scripts
             AvailablePushDestinations = GameGraph.Nodes.Where(n => availablePushDestinationIds.Contains(n.Id)).ToList();
         }
 
-        public void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState, bool isFullSync = false)
+        public virtual void UpdateGameState(int actionNumber, int subActionNumber, IDictionary<int, int> friendlyMonsterState, IDictionary<int, int> enemyMonsterState, bool isFullSync = false)
         {
             _actionNumber = actionNumber;
             _subActionNumber = subActionNumber;
@@ -680,12 +701,12 @@ namespace Assets.Scripts
             GameObject.Find("SelectionDefense").SendMessage("OnClear");
         }
 
-        public Monster GetSelectedMonsterPrefab()
+        public virtual Monster GetSelectedMonsterPrefab()
         {
             return SelectedMonster == null ? null : MonsterPrefabs.First(t => t.Name == SelectedMonster.Name);
         }
 
-        public int GetAdjustedActionNumber()
+        public virtual int GetAdjustedActionNumber()
         {
             if (!Client.IsHost)
             {
