@@ -26,7 +26,7 @@ namespace Assets.Scripts
                     SelectionIndicatorPrefab.transform.rotation.eulerAngles.y,
                     SelectionIndicatorPrefab.transform.rotation.eulerAngles.z);
             _selectionIndicatorInstance = Instantiate(SelectionIndicatorPrefab,
-                new Vector3(transform.localPosition.x, SelectionIndicatorPrefab.transform.localPosition.y, transform.localPosition.z),
+                new Vector3(transform.position.x, 0, transform.position.z),
                 selectionIndicatorQuaternion);
             _selectionIndicatorInstance.SetActive(false);
 
@@ -85,7 +85,7 @@ namespace Assets.Scripts
         {
             if (_tableScale != null)
             {
-                _selectionIndicatorInstance.transform.localPosition = new Vector3(Node.XPosition * _tableScale.Value, _selectionIndicatorInstance.transform.localPosition.y, Node.YPosition * _tableScale.Value);
+                _selectionIndicatorInstance.transform.localPosition = new Vector3(Node.XPosition * _tableScale.Value + transform.position.x, Mathf.Abs(SelectionIndicatorPrefab.transform.position.y * 5 * _tableScale.Value) + transform.position.y, Node.YPosition * _tableScale.Value + transform.position.z);
 
                 _selectionIndicatorInstance.SetActive(nodeId == Node.Id);
 

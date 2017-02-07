@@ -30,7 +30,7 @@ namespace Assets.Scripts.Menu
             {
                 var color = gameObject.GetComponent<Text>().color;
 
-                _textAlpha = color.a + .005f;
+                _textAlpha = color.a + .01f;
 
                 if (_textAlpha >= 1)
                 {
