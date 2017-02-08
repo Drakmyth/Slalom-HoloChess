@@ -187,8 +187,8 @@ namespace Assets.Scripts
                 {
                     // hard has been selected. use intelligent AI
                     // TODO : Wesley to add intelliegent AI to replace GonkDroidAI
-                    GonkDroidAI gonkDroidAI = Server.gameObject.AddComponent<GonkDroidAI>();
-                    gonkDroidAI.Init(Server.IpAddress);
+                    SithAI sithAI = Server.gameObject.AddComponent<SithAI>();
+                    sithAI.Init(Server.IpAddress);
                 }
 
                 Client = gameObject.AddComponent<Client>();
@@ -210,6 +210,12 @@ namespace Assets.Scripts
                 {
                     ai.NetClient.Shutdown();
                     Destroy(ai);
+                }
+                var sithai = Server.gameObject.GetComponent<SithAI>();
+                if (sithai != null)
+                {
+                    sithai.NetClient.Shutdown();
+                    Destroy(sithai);
                 }
 
                 Destroy(Server);
