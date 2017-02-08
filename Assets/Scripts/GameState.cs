@@ -478,7 +478,7 @@ namespace Assets.Scripts
                 availableNodeIds =
                     GameGraph.Nodes.Where(n => HostMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id))
                         .OrderByDescending(t => MoveCalculator.FindAttackMoves(t, enemyNodes).Count())           // 1. one with the most attack moves
-                        .ThenBy(m => m.Id > 10 ? 0 : 1)                                                          // 2. Monsters on the outer circle 
+                        .ThenBy(m => m.Id > 12 ? 0 : 1)                                                          // 2. Monsters on the outer circle 
                         .ThenByDescending(r => HostMonsters.First(w => w.CurrentNode.Id == r.Id).AttackRating)   // 3. the attack level of the monster
                         .Select(n => n.Id);
             }
@@ -488,7 +488,7 @@ namespace Assets.Scripts
                 availableNodeIds =
                     GameGraph.Nodes.Where(n => GuestMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id))
                         .OrderByDescending(t => MoveCalculator.FindAttackMoves(t, enemyNodes).Count())            // 1. one with the most attack moves
-                        .ThenBy(m => m.Id > 10 ? 0 : 1)                                                           // 2. Monsters on the outer circle
+                        .ThenBy(m => m.Id > 12 ? 0 : 1)                                                           // 2. Monsters on the outer circle
                         .ThenByDescending(r => GuestMonsters.First(w => w.CurrentNode.Id == r.Id).AttackRating)   // 3. the attack level of the monster
                         .Select(n => n.Id);
             }
