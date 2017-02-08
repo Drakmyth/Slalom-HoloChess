@@ -474,14 +474,22 @@ namespace Assets.Scripts
             IEnumerable<int> availableNodeIds;
             if (ActionNumber == 1 || ActionNumber == 2)
             {
+                var enemyNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
                 availableNodeIds =
                     GameGraph.Nodes.Where(n => HostMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id))
+                        .OrderByDescending(t => MoveCalculator.FindAttackMoves(t, enemyNodes).Count())           // 1. one with the most attack moves
+                        .ThenBy(m => m.Id > 12 ? 0 : 1)                                                          // 2. Monsters on the outer circle 
+                        .ThenByDescending(r => HostMonsters.First(w => w.CurrentNode.Id == r.Id).AttackRating)   // 3. the attack level of the monster
                         .Select(n => n.Id);
             }
             else
             {
+                var enemyNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
                 availableNodeIds =
                     GameGraph.Nodes.Where(n => GuestMonsters.Select(m => m.CurrentNode.Id).Contains(n.Id))
+                        .OrderByDescending(t => MoveCalculator.FindAttackMoves(t, enemyNodes).Count())            // 1. one with the most attack moves
+                        .ThenBy(m => m.Id > 12 ? 0 : 1)                                                           // 2. Monsters on the outer circle
+                        .ThenByDescending(r => GuestMonsters.First(w => w.CurrentNode.Id == r.Id).AttackRating)   // 3. the attack level of the monster
                         .Select(n => n.Id);
             }
 
@@ -507,17 +515,19 @@ namespace Assets.Scripts
                 if (ActionNumber == 1 || ActionNumber == 2)
                 {
                     friendlyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
-                    enemyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
+                    enemyOccupiedNodes = GuestMonsters.OrderBy(t => t.DefenseRating).Select(monster => monster.CurrentNode).ToList(); // order enemies defense rating
                 }
                 else
                 {
                     friendlyOccupiedNodes = GuestMonsters.Select(monster => monster.CurrentNode).ToList();
-                    enemyOccupiedNodes = HostMonsters.Select(monster => monster.CurrentNode).ToList();
+                    enemyOccupiedNodes = HostMonsters.OrderBy(t => t.DefenseRating).Select(monster => monster.CurrentNode).ToList(); // order enemies defense rating
                 }
 
 
                 IEnumerable<int> availableMoveActionNodeIds = MoveCalculator.FindMoves(SelectedMonster.CurrentNode,
-                    SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes)).Select(a => a.DestinationNode.Id);
+                    SelectedMonster.MovementRating, friendlyOccupiedNodes.Union(enemyOccupiedNodes))
+                    .Select(a => a.DestinationNode.Id)
+                    .OrderBy(a => a); // order nodes by id so center nodes are prioritized
 
                 IEnumerable<int> availableAttackActionNodeIds = MoveCalculator.FindAttackMoves(SelectedMonster.CurrentNode,
                     enemyOccupiedNodes).Select(a => a.Id);
