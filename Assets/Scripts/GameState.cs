@@ -247,7 +247,7 @@ namespace Assets.Scripts
             if (selectedNodeId < 0)
             {
                 SubActionNumber = 0;
-                _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                _hostServer.SendToAll(CustomMessageTypes.GameState, new PassActionMessage
                 {
                     ActionNumber = ActionNumber,
                     SubActionNumber = SubActionNumber,
@@ -528,7 +528,7 @@ namespace Assets.Scripts
                     !availableMoveActionNodeIds.Any())
                 {
                     SubActionNumber = 0;
-                    _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                    _hostServer.SendToAll(CustomMessageTypes.GameState, new PassActionMessage
                     {
                         ActionNumber = ActionNumber,
                         SubActionNumber = SubActionNumber,

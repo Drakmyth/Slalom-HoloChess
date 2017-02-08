@@ -59,6 +59,8 @@ namespace Assets.Scripts
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameStateSync, OnGameStateSyncResponse);
 
+                NetClient.RegisterHandler(CustomMessageTypes.PassAction, OnPassActionResponse);
+
                 NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameEnd, OnGameEnd);
@@ -127,6 +129,8 @@ namespace Assets.Scripts
                 NetClient.RegisterHandler(CustomMessageTypes.GameStateSync, OnGameStateSyncResponse);
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameState, OnGameStateResponse);
+
+                NetClient.RegisterHandler(CustomMessageTypes.PassAction, OnPassActionResponse);
 
                 NetClient.RegisterHandler(CustomMessageTypes.GameEnd, OnGameEnd);
 
@@ -270,6 +274,21 @@ namespace Assets.Scripts
 
             GameState.UpdateGameState(message.ActionNumber, message.SubActionNumber, friendlyMonsterState, enemyMonsterState);
         }
+
+        private void OnPassActionResponse(NetworkMessage msg)
+        {
+            PassActionMessage message = msg.ReadMessage<PassActionMessage>();
+
+            message.ActionNumber = AdjustActionNumber(message.ActionNumber);
+
+            //Convert json strings to objects
+            Dictionary<int, int> friendlyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState);
+            Dictionary<int, int> enemyMonsterState = IsHost ? JsonConvert.DeserializeObject<Dictionary<int, int>>(message.GuestMonsterState) : JsonConvert.DeserializeObject<Dictionary<int, int>>(message.HostMonsterState);
+
+
+            GameState.PassAction(message.ActionNumber, message.SubActionNumber, friendlyMonsterState, enemyMonsterState);
+        }
+
 
         private void OnGameStateSyncResponse(NetworkMessage msg)
         {
