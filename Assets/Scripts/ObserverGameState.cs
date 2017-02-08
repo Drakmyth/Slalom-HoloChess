@@ -47,10 +47,7 @@ namespace Assets.Scripts
 
             float attackResultTextRotationOffset = Client.IsHost ? 180 : 0;
 
-            PushResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
-            KillResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
-            CounterPushResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
-            CounterKillResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
+            AttackResultTextPrefab.YRotationOffset = attackResultTextRotationOffset;
 
             _actionNumber = 1;
 
@@ -151,18 +148,20 @@ namespace Assets.Scripts
 
             if (attackResult == AttackResult.Kill)
             {
-                KillResultTextPrefab.gameObject.SetActive(true);
-                KillResultTextPrefab.transform.localPosition = battlePosition;
+                AttackResultTextPrefab.GetComponent<TextMesh>().text = "KiLL";
+                AttackResultTextPrefab.gameObject.SetActive(true);
+                AttackResultTextPrefab.transform.localPosition = battlePosition;
 
-                KillResultTextPrefab.LerpDestination = KillResultTextPrefab.transform.localPosition + Vector3.up;
+                AttackResultTextPrefab.LerpDestination = AttackResultTextPrefab.transform.localPosition + Vector3.up;
 
                 ProcessKill(defender, !isFriendlyMonster);
             } else if (attackResult == AttackResult.CounterKill)
             {
-                CounterKillResultTextPrefab.gameObject.SetActive(true);
-                CounterKillResultTextPrefab.transform.localPosition = battlePosition;
+                AttackResultTextPrefab.GetComponent<TextMesh>().text = "Counter KiLL";
+                AttackResultTextPrefab.gameObject.SetActive(true);
+                AttackResultTextPrefab.transform.localPosition = battlePosition;
 
-                CounterKillResultTextPrefab.LerpDestination = CounterKillResultTextPrefab.transform.localPosition + Vector3.up;
+                AttackResultTextPrefab.LerpDestination = AttackResultTextPrefab.transform.localPosition + Vector3.up;
 
                 ProcessKill(attacker, isFriendlyMonster);
                 SelectedMonster = null;
@@ -184,20 +183,22 @@ namespace Assets.Scripts
 
             if (attackResult == AttackResult.Push)
             {
-                PushResultTextPrefab.gameObject.SetActive(true);
-                PushResultTextPrefab.transform.localPosition = battlePosition;
+                AttackResultTextPrefab.GetComponent<TextMesh>().text = "push";
+                AttackResultTextPrefab.gameObject.SetActive(true);
+                AttackResultTextPrefab.transform.localPosition = battlePosition;
 
-                PushResultTextPrefab.LerpDestination = PushResultTextPrefab.transform.localPosition + Vector3.up;
+                AttackResultTextPrefab.LerpDestination = AttackResultTextPrefab.transform.localPosition + Vector3.up;
 
                 BattleSmoke.SetActive(false);
 
             }
             else if (attackResult == AttackResult.CounterPush)
             {
-                CounterPushResultTextPrefab.gameObject.SetActive(true);
-                CounterPushResultTextPrefab.transform.localPosition = battlePosition;
+                AttackResultTextPrefab.GetComponent<TextMesh>().text = "Counter push";
+                AttackResultTextPrefab.gameObject.SetActive(true);
+                AttackResultTextPrefab.transform.localPosition = battlePosition;
 
-                CounterPushResultTextPrefab.LerpDestination = CounterPushResultTextPrefab.transform.localPosition + Vector3.up;
+                AttackResultTextPrefab.LerpDestination = AttackResultTextPrefab.transform.localPosition + Vector3.up;
 
                 BattleSmoke.SetActive(false);
 

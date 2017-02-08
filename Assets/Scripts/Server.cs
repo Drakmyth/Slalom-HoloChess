@@ -139,6 +139,11 @@ namespace Assets.Scripts
 
         private void OnClientDisconnected(NetworkMessage netMsg)
         {
+            if (_isLocalSinglePlayer)
+            {
+                return;
+            }
+
             if (netMsg.conn.connectionId == _hostConnectionId || netMsg.conn.connectionId == _guestConnectionId)
             {
                 SendToAll(CustomMessageTypes.GameEnd, new GameEndMessage {IsHostWinner = false, IsGuestWinner = false});
