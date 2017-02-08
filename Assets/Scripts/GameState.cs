@@ -549,6 +549,11 @@ namespace Assets.Scripts
                 }
                 else
                 {
+                    if (friendlyOccupiedNodes.Count() == 1 && availableAttackActionNodeIds.Any())
+                    {
+                        availableMoveActionNodeIds = new List<int>();
+                    }
+
                     _hostServer.SendToAll(CustomMessageTypes.AvailableMovesResponse, new AvailableMovesResponseMessage
                     {
                         ActionNumber = ActionNumber,
