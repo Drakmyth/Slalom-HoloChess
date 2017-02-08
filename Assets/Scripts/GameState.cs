@@ -524,15 +524,31 @@ namespace Assets.Scripts
 
                 SubActionNumber = 4;
 
-                _hostServer.SendToAll(CustomMessageTypes.AvailableMovesResponse, new AvailableMovesResponseMessage
+                if (friendlyOccupiedNodes.Count() <= 1 && !availableAttackActionNodeIds.Any() &&
+                    !availableMoveActionNodeIds.Any())
                 {
-                    ActionNumber = ActionNumber,
-                    SubActionNumber = SubActionNumber,
-                    AvailableAttackNodeIds = availableAttackActionNodeIds.ToArray(),
-                    AvailableMoveNodeIds = availableMoveActionNodeIds.ToArray(),
-                    Message = "Available actions",
-                    SelectedMonsterTypeId = SelectedMonster.MonsterTypeId
-                });
+                    SubActionNumber = 0;
+                    _hostServer.SendToAll(CustomMessageTypes.GameState, new GameStateMessage
+                    {
+                        ActionNumber = ActionNumber,
+                        SubActionNumber = SubActionNumber,
+                        Message = "No available moves.",
+                        HostMonsterState = JsonConvert.SerializeObject(HostMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id)),
+                        GuestMonsterState = JsonConvert.SerializeObject(GuestMonsters.Select(m => new { m.MonsterTypeId, m.CurrentNode.Id }).ToDictionary(k => k.MonsterTypeId, v => v.Id))
+                    });
+                }
+                else
+                {
+                    _hostServer.SendToAll(CustomMessageTypes.AvailableMovesResponse, new AvailableMovesResponseMessage
+                    {
+                        ActionNumber = ActionNumber,
+                        SubActionNumber = SubActionNumber,
+                        AvailableAttackNodeIds = availableAttackActionNodeIds.ToArray(),
+                        AvailableMoveNodeIds = availableMoveActionNodeIds.ToArray(),
+                        Message = "Available actions",
+                        SelectedMonsterTypeId = SelectedMonster.MonsterTypeId
+                    });
+                }
             }
 
         }
