@@ -37,8 +37,8 @@ namespace Assets.Scripts
 
 	            // Move this object to
 	            // where the raycast hit the Spatial Mapping mesh.
-	            float height = this.GetComponent<Renderer>().bounds.size.y;
-	            this.transform.position = hitInfo.point - new Vector3(0, height, 0); // TODO: account for this's size
+	            float height = GetComponent<Renderer>().bounds.size.y;
+	            transform.position = hitInfo.point + new Vector3(0, height, 0);
             }
         }
 

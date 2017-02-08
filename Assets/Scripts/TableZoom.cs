@@ -44,24 +44,24 @@ namespace Assets.Scripts
             _originalScale = transform.localScale;
 
 			// Do a raycast into the world that will only hit the Spatial Mapping mesh.
-			var headPosition = Camera.main.transform.position;
-			var gazeDirection = Vector3.down;
+			Vector3 headPosition = Camera.main.transform.position;
+			Vector3 gazeDirection = Vector3.down;
+			const float scaleFactor = 25f;
 
 			RaycastHit hitInfo;
 			float yDistance = transform.localPosition.y;
 			if (Physics.Raycast(headPosition, gazeDirection, out hitInfo, 30.0f, SpatialMapping.PhysicsRaycastMask))
 			{
-				// Move this object to
-				// where the raycast hit the Spatial Mapping mesh.
-				yDistance = hitInfo.point.y - headPosition.y; // TODO: account for this's size
+				const float tableOffset = 1.388474f;
+				yDistance = headPosition.y - hitInfo.point.y + tableOffset * scaleFactor;
 			}
 
-			transform.localScale = new Vector3(transform.localScale.x*25f, transform.localScale.y*25f, transform.localScale.z*25f);
+			transform.localScale *= scaleFactor;
 
-			var xDistance = selectedMonster.transform.localPosition.x - transform.localPosition.x;
-			var zDistance = selectedMonster.transform.localPosition.z - transform.localPosition.z;
+			float xDistance = selectedMonster.transform.localPosition.x - transform.localPosition.x;
+			float zDistance = selectedMonster.transform.localPosition.z - transform.localPosition.z;
 
-			transform.localPosition = new Vector3(xDistance, yDistance, zDistance);
+			transform.localPosition = new Vector3(xDistance, -yDistance, zDistance);
 
             _isZoomed = true;
         }
