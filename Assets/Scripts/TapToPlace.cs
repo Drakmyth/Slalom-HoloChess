@@ -29,17 +29,16 @@ namespace Assets.Scripts
             if (_placing)
             {
                 // Do a raycast into the world that will only hit the Spatial Mapping mesh.
-                var headPosition = Camera.main.transform.position;
-                var gazeDirection = Camera.main.transform.forward;
+                Vector3 headPosition = Camera.main.transform.position;
+                Vector3 gazeDirection = Camera.main.transform.forward;
 
                 RaycastHit hitInfo;
-                if (Physics.Raycast(headPosition, gazeDirection, out hitInfo,
-                    30.0f, SpatialMapping.PhysicsRaycastMask))
-                {
-                    // Move this object to
-                    // where the raycast hit the Spatial Mapping mesh.
-                    this.transform.position = hitInfo.point + new Vector3(0, .5f, 0); // TODO: account for this's size
-                }
+	            if (!Physics.Raycast(headPosition, gazeDirection, out hitInfo, 30.0f, SpatialMapping.PhysicsRaycastMask)) return;
+
+	            // Move this object to
+	            // where the raycast hit the Spatial Mapping mesh.
+	            float height = this.GetComponent<Renderer>().bounds.size.y;
+	            this.transform.position = hitInfo.point - new Vector3(0, height, 0); // TODO: account for this's size
             }
         }
 
