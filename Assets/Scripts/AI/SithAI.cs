@@ -120,12 +120,12 @@ namespace Assets.Scripts.AI
 
                 if (message.AvailableMoveNodeIds.Any())
                 {
-                    int randInt = _random.Next(0, message.AvailableMoveNodeIds.Length - 1);
+                    // pick the first movement node
                     NetClient.Send(CustomMessageTypes.SelectActionRequest, new SelectActionRequestMessage
                     {
                         ActionNumber = message.ActionNumber,
                         SubActionNumber = message.SubActionNumber,
-                        SelectedNodeId = message.AvailableMoveNodeIds[randInt]
+                        SelectedNodeId = message.AvailableMoveNodeIds[0]
                     });
                 }
                 else
