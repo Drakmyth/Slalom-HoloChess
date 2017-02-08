@@ -263,6 +263,16 @@ namespace Assets.Scripts
             }
         }
 
+        public int[] GetMonsterStats(int nodeId)
+        {
+            SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.CurrentNode.Id == nodeId);
+            if (SelectedMonster != null)
+            {
+                return new int[] { SelectedMonster.AttackRating, SelectedMonster.DefenseRating };
+            }
+            return null;
+        }
+
         public virtual void ConfirmSelectMonster(int selectedMonsterId, int actionNumber, int subActionNumber)
         {
             SelectedMonster = FriendlyMonsters.SingleOrDefault(m => m.MonsterTypeId == selectedMonsterId) ?? EnemyMonsters.Single(m => m.MonsterTypeId == selectedMonsterId);
