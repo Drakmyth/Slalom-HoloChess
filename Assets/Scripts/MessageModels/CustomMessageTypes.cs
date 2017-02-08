@@ -24,5 +24,6 @@
         public static readonly short StateAck = 118;
         public static readonly short GameEnd = 119;
         public static readonly short GameStateSync = 120;
+        public static readonly short PassAction = 121;
     }
 }
