@@ -61,7 +61,7 @@ namespace Assets.Scripts
 			float xDistance = selectedMonster.transform.localPosition.x - transform.localPosition.x;
 			float zDistance = selectedMonster.transform.localPosition.z - transform.localPosition.z;
 
-			transform.localPosition = new Vector3(xDistance, -yDistance, zDistance);
+			transform.localPosition = new Vector3(xDistance, -yDistance + 8, zDistance);
 
             _isZoomed = true;
         }
