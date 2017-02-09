@@ -22,9 +22,11 @@ namespace Assets.Scripts
             _recognizer.TappedEvent += (source, tapCount, ray) =>
             {
                 // Send an OnSelect message to the focused object and its ancestors.
-                if (FocusedObject != null)
+                if (FocusedObject != null && FocusedObject.name != "GameManager")
                 {
                     FocusedObject.SendMessage("OnSelected", gameObject);
+                    _recognizer.CancelGestures();
+                    _recognizer.StartCapturingGestures();
                 }
             };
             _recognizer.StartCapturingGestures();

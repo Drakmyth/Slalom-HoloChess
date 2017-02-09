@@ -41,6 +41,8 @@ namespace Assets.Scripts
 
         private string _ipAddress;
 
+        public int Difficulty = -1;
+
         void Start()
         {
 
@@ -174,10 +176,12 @@ namespace Assets.Scripts
         {
             try
             {
+                Difficulty = difficulty;
+
                 Server = gameObject.AddComponent<Server>();
                 Server.InitSinglePlayer();
 
-                if (difficulty == 0)
+                if (Difficulty == 0)
                 {
                     // easy has been selected, use dumb AI
                     GonkDroidAI gonkDroidAI = Server.gameObject.AddComponent<GonkDroidAI>();

@@ -36,7 +36,7 @@ namespace Assets.Scripts
         //6 : Select Push result (await user input)
         //7 : Listen for CounterPush result (await opponent input)
         public int _subActionNumber;
-        
+
         public bool _isAnimationRunning = false;
         public Monster SelectedMonster { get; set; }
         private Monster PreviewMonster { get; set; }
@@ -132,6 +132,11 @@ namespace Assets.Scripts
             DisplayMonsters(friendlyMonsters, enemyMonsters);
 
             Client.SendStateAck(GetAdjustedActionNumber(), _subActionNumber);
+
+            if (GameManager.Instance.Difficulty == 1)
+            {
+                GameObject.Find("selectionPreview").SetActive(false);
+            }
 
         }
 
@@ -666,25 +671,33 @@ namespace Assets.Scripts
 
         private void UpdateAttackResultPreview()
         {
-            IDictionary<AttackResult, decimal> attackResultPercentages = AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating, PreviewMonster.DefenseRating);
+            if (GameManager.Instance.Difficulty < 1)
+            {
+                IDictionary<AttackResult, decimal> attackResultPercentages =
+                    AttackResultPreview.GetAttackResultPercentages(SelectedMonster.AttackRating,
+                        PreviewMonster.DefenseRating);
 
-            KillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
-            PushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
-            CounterPushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
-            CounterKillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+                KillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+                PushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+                CounterPushResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+                CounterKillResultPreview.Instance.SendMessage("OnUpdate", attackResultPercentages);
+            }
         }
 
         private void ClearAttackResultPreview()
         {
-            KillResultPreview.Instance.SendMessage("OnClear");
-            PushResultPreview.Instance.SendMessage("OnClear");
-            CounterPushResultPreview.Instance.SendMessage("OnClear");
-            CounterKillResultPreview.Instance.SendMessage("OnClear");
+            if (GameManager.Instance.Difficulty < 1)
+            {
+                KillResultPreview.Instance.SendMessage("OnClear");
+                PushResultPreview.Instance.SendMessage("OnClear");
+                CounterPushResultPreview.Instance.SendMessage("OnClear");
+                CounterKillResultPreview.Instance.SendMessage("OnClear");
+            }
         }
 
         private void UpdatePreviewMenu()
         {
-            if (PreviewMonster != null)
+            if (PreviewMonster != null && GameManager.Instance.Difficulty < 1)
             {
                 GameObject.Find("PreviewName").SendMessage("OnUpdate", PreviewMonster.Name);
                 GameObject.Find("PreviewMovement").SendMessage("OnUpdate", PreviewMonster.MovementRating.ToString());
@@ -695,7 +708,7 @@ namespace Assets.Scripts
 
         private void UpdateSelectionMenu()
         {
-            if (SelectedMonster != null)
+            if (SelectedMonster != null && GameManager.Instance.Difficulty < 1)
             {
                 GameObject.Find("SelectionName").SendMessage("OnUpdate", SelectedMonster.Name);
                 GameObject.Find("SelectionMovement").SendMessage("OnUpdate", SelectedMonster.MovementRating.ToString());
@@ -706,10 +719,14 @@ namespace Assets.Scripts
 
         private void ClearSelectionMenu()
         {
-            GameObject.Find("SelectionName").SendMessage("OnClear");
-            GameObject.Find("SelectionMovement").SendMessage("OnClear");
-            GameObject.Find("SelectionAttack").SendMessage("OnClear");
-            GameObject.Find("SelectionDefense").SendMessage("OnClear");
+            if (GameManager.Instance.Difficulty < 1)
+            {
+
+                GameObject.Find("SelectionName").SendMessage("OnClear");
+                GameObject.Find("SelectionMovement").SendMessage("OnClear");
+                GameObject.Find("SelectionAttack").SendMessage("OnClear");
+                GameObject.Find("SelectionDefense").SendMessage("OnClear");
+            }
         }
 
         public virtual Monster GetSelectedMonsterPrefab()
