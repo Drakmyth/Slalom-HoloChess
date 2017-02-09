@@ -47,6 +47,7 @@ namespace Assets.Scripts
 			Vector3 headPosition = Camera.main.transform.position;
 			Vector3 gazeDirection = Vector3.down;
 			const float scaleFactor = 25f;
+            const float scaledTableOffset = 30f;
 
 			RaycastHit hitInfo;
 			float yDistance = transform.localPosition.y;
@@ -61,7 +62,7 @@ namespace Assets.Scripts
 			float xDistance = selectedMonster.transform.localPosition.x - transform.localPosition.x;
 			float zDistance = selectedMonster.transform.localPosition.z - transform.localPosition.z;
 
-			transform.localPosition = new Vector3(xDistance, -yDistance + 8, zDistance);
+			transform.localPosition = new Vector3(xDistance, -yDistance + scaledTableOffset, zDistance);
 
             _isZoomed = true;
         }
